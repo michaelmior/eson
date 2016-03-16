@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::str;
 
-use super::model::{Define, Field, Table};
+use super::model::{Define, Field, Literal, Table, TableOption};
 
 type -> String
   = ("float" / "int" / "text" / "timestamp" / "timeuuid" / "uuid") { match_str.to_string() }
@@ -24,17 +24,27 @@ nonquote -> String
 string -> String
   = quote constant:nonquote quote { constant }
 
-primitive
-  = integer { () } / float { () } / string { () }
+primitive -> Literal
+  = integer:integer { Literal::Int(integer) }
+  / float:float { Literal::Float(float) }
+  / string:string { Literal::Str(string) }
 
-json_pair -> (String, ())
+json_pair -> (String, Literal)
   = key:string space? ":" space? value:primitive { (key, value) }
 
-json -> Vec<(String, ())>
-  = "{" space? pairs:(json_pair ** (space? "," space?)) space? "}" { pairs }
+json -> Literal
+  = "{" space? pairs:(json_pair ** (space? "," space?)) space? "}" {
+      let mut json = HashMap::new();
+      for pair in pairs.into_iter() {
+        let (key, value) = pair;
+        json.insert(key, value);
+      }
 
-literal
-  = primitive / json { () }
+      Literal::Json(json)
+    }
+
+literal -> Literal
+  = primitive / json
 
 identifier -> String
   = ([A-z] / "_")+ { match_str.to_string() }
@@ -103,13 +113,14 @@ clustering_order -> Vec<(String, bool)>
   = "CLUSTERING ORDER BY" space?
     "(" space? field_orders:field_orders space? ")" { field_orders }
 
-parameter -> (String, ())
+parameter -> (String, Literal)
   = name:identifier space? "=" space? value:literal { (name, value) }
 
-option
-  = parameter { () } / clustering_order { () }
+option -> TableOption
+  = parameter:parameter { TableOption::Parameter(parameter) }
+  / clustering_order:clustering_order { TableOption::Order(clustering_order) }
 
-options -> Vec<()>
+options -> Vec<TableOption>
   = option ** (space "AND" space)
 
 #[pub]

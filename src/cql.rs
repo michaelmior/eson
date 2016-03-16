@@ -2,7 +2,7 @@
 #![allow(non_snake_case, unused)]
 use std::collections::HashMap;
 use std::str;
-use super::model::{Define, Field, Table};
+use super::model::{Define, Field, Literal, Table, TableOption};
 use self::RuleResult::{Matched, Failed};
 fn escape_default(s: &str) -> String {
     s.chars().flat_map(|c| c.escape_default()).collect()
@@ -353,7 +353,7 @@ fn parse_string<'input>(input: &'input str, state: &mut ParseState<'input>,
     }
 }
 fn parse_primitive<'input>(input: &'input str, state: &mut ParseState<'input>,
-                           pos: usize) -> RuleResult<()> {
+                           pos: usize) -> RuleResult<Literal> {
     {
         let choice_res =
             {
@@ -361,10 +361,10 @@ fn parse_primitive<'input>(input: &'input str, state: &mut ParseState<'input>,
                 {
                     let seq_res = parse_integer(input, state, pos);
                     match seq_res {
-                        Matched(pos, _) => {
+                        Matched(pos, integer) => {
                             {
                                 let match_str = &input[start_pos..pos];
-                                Matched(pos, { () })
+                                Matched(pos, { Literal::Int(integer) })
                             }
                         }
                         Failed => Failed,
@@ -380,11 +380,12 @@ fn parse_primitive<'input>(input: &'input str, state: &mut ParseState<'input>,
                         {
                             let seq_res = parse_float(input, state, pos);
                             match seq_res {
-                                Matched(pos, _) => {
+                                Matched(pos, float) => {
                                     {
                                         let match_str =
                                             &input[start_pos..pos];
-                                        Matched(pos, { () })
+                                        Matched(pos,
+                                                { Literal::Float(float) })
                                     }
                                 }
                                 Failed => Failed,
@@ -398,11 +399,11 @@ fn parse_primitive<'input>(input: &'input str, state: &mut ParseState<'input>,
                         {
                             let seq_res = parse_string(input, state, pos);
                             match seq_res {
-                                Matched(pos, _) => {
+                                Matched(pos, string) => {
                                     {
                                         let match_str =
                                             &input[start_pos..pos];
-                                        Matched(pos, { () })
+                                        Matched(pos, { Literal::Str(string) })
                                     }
                                 }
                                 Failed => Failed,
@@ -415,7 +416,7 @@ fn parse_primitive<'input>(input: &'input str, state: &mut ParseState<'input>,
     }
 }
 fn parse_json_pair<'input>(input: &'input str, state: &mut ParseState<'input>,
-                           pos: usize) -> RuleResult<(String, ())> {
+                           pos: usize) -> RuleResult<(String, Literal)> {
     {
         let start_pos = pos;
         {
@@ -495,7 +496,7 @@ fn parse_json_pair<'input>(input: &'input str, state: &mut ParseState<'input>,
     }
 }
 fn parse_json<'input>(input: &'input str, state: &mut ParseState<'input>,
-                      pos: usize) -> RuleResult<Vec<(String, ())>> {
+                      pos: usize) -> RuleResult<Literal> {
     {
         let start_pos = pos;
         {
@@ -643,7 +644,19 @@ fn parse_json<'input>(input: &'input str, state: &mut ParseState<'input>,
                                                                             &input[start_pos..pos];
                                                                         Matched(pos,
                                                                                 {
-                                                                                    pairs
+                                                                                    let mut json =
+                                                                                        HashMap::new();
+                                                                                    for pair
+                                                                                        in
+                                                                                        pairs.into_iter()
+                                                                                        {
+                                                                                        let (key,
+                                                                                             value) =
+                                                                                            pair;
+                                                                                        json.insert(key,
+                                                                                                    value);
+                                                                                    }
+                                                                                    Literal::Json(json)
                                                                                 })
                                                                     }
                                                                 }
@@ -670,26 +683,12 @@ fn parse_json<'input>(input: &'input str, state: &mut ParseState<'input>,
     }
 }
 fn parse_literal<'input>(input: &'input str, state: &mut ParseState<'input>,
-                         pos: usize) -> RuleResult<()> {
+                         pos: usize) -> RuleResult<Literal> {
     {
         let choice_res = parse_primitive(input, state, pos);
         match choice_res {
             Matched(pos, value) => Matched(pos, value),
-            Failed => {
-                let start_pos = pos;
-                {
-                    let seq_res = parse_json(input, state, pos);
-                    match seq_res {
-                        Matched(pos, _) => {
-                            {
-                                let match_str = &input[start_pos..pos];
-                                Matched(pos, { () })
-                            }
-                        }
-                        Failed => Failed,
-                    }
-                }
-            }
+            Failed => parse_json(input, state, pos),
         }
     }
 }
@@ -1478,7 +1477,7 @@ fn parse_clustering_order<'input>(input: &'input str,
     }
 }
 fn parse_parameter<'input>(input: &'input str, state: &mut ParseState<'input>,
-                           pos: usize) -> RuleResult<(String, ())> {
+                           pos: usize) -> RuleResult<(String, Literal)> {
     {
         let start_pos = pos;
         {
@@ -1558,7 +1557,7 @@ fn parse_parameter<'input>(input: &'input str, state: &mut ParseState<'input>,
     }
 }
 fn parse_option<'input>(input: &'input str, state: &mut ParseState<'input>,
-                        pos: usize) -> RuleResult<()> {
+                        pos: usize) -> RuleResult<TableOption> {
     {
         let choice_res =
             {
@@ -1566,10 +1565,11 @@ fn parse_option<'input>(input: &'input str, state: &mut ParseState<'input>,
                 {
                     let seq_res = parse_parameter(input, state, pos);
                     match seq_res {
-                        Matched(pos, _) => {
+                        Matched(pos, parameter) => {
                             {
                                 let match_str = &input[start_pos..pos];
-                                Matched(pos, { () })
+                                Matched(pos,
+                                        { TableOption::Parameter(parameter) })
                             }
                         }
                         Failed => Failed,
@@ -1583,10 +1583,13 @@ fn parse_option<'input>(input: &'input str, state: &mut ParseState<'input>,
                 {
                     let seq_res = parse_clustering_order(input, state, pos);
                     match seq_res {
-                        Matched(pos, _) => {
+                        Matched(pos, clustering_order) => {
                             {
                                 let match_str = &input[start_pos..pos];
-                                Matched(pos, { () })
+                                Matched(pos,
+                                        {
+                                            TableOption::Order(clustering_order)
+                                        })
                             }
                         }
                         Failed => Failed,
@@ -1597,7 +1600,7 @@ fn parse_option<'input>(input: &'input str, state: &mut ParseState<'input>,
     }
 }
 fn parse_options<'input>(input: &'input str, state: &mut ParseState<'input>,
-                         pos: usize) -> RuleResult<Vec<()>> {
+                         pos: usize) -> RuleResult<Vec<TableOption>> {
     {
         let mut repeat_pos = pos;
         let mut repeat_value = vec!();
