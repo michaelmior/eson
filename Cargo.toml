@@ -1,0 +1,7 @@
+[package]
+authors = ["Michael Mior <mmior@uwaterloo.ca>"]
+name = "otto"
+version = "0.1.0"
+
+[dependencies]
+peg = "0.3.10"

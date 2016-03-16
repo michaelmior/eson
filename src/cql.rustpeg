@@ -1,0 +1,126 @@
+use std::collections::HashMap;
+use std::str;
+
+use super::model::{Define, Field, Table};
+
+type -> String
+  = ("float" / "int" / "text" / "timestamp" / "timeuuid" / "uuid") { match_str.to_string() }
+
+space
+  = [ \t\r\n]+
+
+integer -> i64
+  = [0-9]+ { match_str.parse().unwrap() }
+
+float -> f64
+  = integer "." integer { match_str.parse().unwrap() }
+
+quote
+  = "\""
+
+nonquote -> String
+  = [^"] { match_str.to_string() }
+
+string -> String
+  = quote constant:nonquote quote { constant }
+
+primitive
+  = integer { () } / float { () } / string { () }
+
+json_pair -> (String, ())
+  = key:string space? ":" space? value:primitive { (key, value) }
+
+json -> Vec<(String, ())>
+  = "{" space? pairs:(json_pair ** (space? "," space?)) space? "}" { pairs }
+
+literal
+  = primitive / json { () }
+
+identifier -> String
+  = ([A-z] / "_")+ { match_str.to_string() }
+
+identifiers -> Vec<String>
+  = identifier ++ (space? "," space?)
+
+table -> String
+  = table:identifier { table }
+
+field_define -> Field
+  = name:identifier space field_type:type key:(space "PRIMARY KEY")? {
+      let is_key = match key { Some(_) => true, None => false };
+
+      Field { name: name, field_type: field_type, key: is_key }
+    }
+
+primary_key -> Vec<String>
+  = "PRIMARY KEY" space? "(" space? keys:identifiers space? ")" {
+      keys
+    }
+
+define -> Vec<Define>
+  = field:field_define { vec![Define::Field(field)] } / keys:primary_key {
+      keys.iter().map(|k|
+        Define::Key(k.to_owned())
+      ).collect()
+    }
+
+nested_defines -> Vec<Vec<Define>>
+  = define ++ (space? "," space?)
+
+defines -> Vec<Field>
+  = nested_defines:nested_defines {
+      let mut all_defines = Vec::new();
+      let mut keys = Vec::new();
+      for defines in nested_defines {
+        for define in defines {
+          match define {
+            Define::Field(field) => { all_defines.push(field); },
+            Define::Key(key) => { keys.push(key); }
+          }
+        }
+      }
+
+      // Set the key value on necessary fields
+      for define in all_defines.iter_mut() {
+        if keys.contains(&define.name) {
+          define.key = true;
+        }
+      }
+
+      all_defines
+    }
+
+order -> bool
+  = "ASC" { true } / "DESC" { false }
+
+field_order -> (String, bool)
+  = field:identifier space order:order { (field.to_string(), order) }
+
+field_orders -> Vec<(String, bool)>
+  = field_order ++ (space? "," space?)
+
+clustering_order -> Vec<(String, bool)>
+  = "CLUSTERING ORDER BY" space?
+    "(" space? field_orders:field_orders space? ")" { field_orders }
+
+parameter -> (String, ())
+  = name:identifier space? "=" space? value:literal { (name, value) }
+
+option
+  = parameter { () } / clustering_order { () }
+
+options -> Vec<()>
+  = option ** (space "AND" space)
+
+#[pub]
+create -> Table
+  = "CREATE" space ("TABLE" / "COLUMNFAMILY") space table:table space?
+    "(" space? fields:defines space? ")"
+    options:(space "WITH" space options)? ";"? {
+      let mut field_map = HashMap::new();
+      for field in fields.into_iter() {
+        field_map.insert(field.name.clone(), field);
+      }
+
+      Table { name: table, fields: field_map }
+    }
