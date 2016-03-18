@@ -2,6 +2,7 @@
 #![plugin(peg_syntax_ext)]
 
 mod cql;
+mod dependencies;
 mod model;
 
 fn main() {
