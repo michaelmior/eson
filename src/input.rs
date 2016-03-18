@@ -1999,7 +1999,7 @@ fn parse_create<'input>(input: &'input str, state: &mut ParseState<'input>,
 }
 fn parse_func_dep<'input>(input: &'input str, state: &mut ParseState<'input>,
                           pos: usize)
- -> RuleResult<(Vec<String>, Vec<String>)> {
+ -> RuleResult<(String, Vec<String>, Vec<String>)> {
     {
         let start_pos = pos;
         {
@@ -2012,9 +2012,9 @@ fn parse_func_dep<'input>(input: &'input str, state: &mut ParseState<'input>,
                             Matched(pos, _) => {
                                 {
                                     let seq_res =
-                                        parse_identifiers(input, state, pos);
+                                        parse_identifier(input, state, pos);
                                     match seq_res {
-                                        Matched(pos, lhs) => {
+                                        Matched(pos, table) => {
                                             {
                                                 let seq_res =
                                                     parse_space(input, state,
@@ -2023,14 +2023,13 @@ fn parse_func_dep<'input>(input: &'input str, state: &mut ParseState<'input>,
                                                     Matched(pos, _) => {
                                                         {
                                                             let seq_res =
-                                                                slice_eq(input,
-                                                                         state,
-                                                                         pos,
-                                                                         "->");
+                                                                parse_identifiers(input,
+                                                                                  state,
+                                                                                  pos);
                                                             match seq_res {
                                                                 Matched(pos,
-                                                                        _) =>
-                                                                {
+                                                                        lhs)
+                                                                => {
                                                                     {
                                                                         let seq_res =
                                                                             parse_space(input,
@@ -2044,23 +2043,59 @@ fn parse_func_dep<'input>(input: &'input str, state: &mut ParseState<'input>,
                                                                             {
                                                                                 {
                                                                                     let seq_res =
-                                                                                        parse_identifiers(input,
-                                                                                                          state,
-                                                                                                          pos);
+                                                                                        slice_eq(input,
+                                                                                                 state,
+                                                                                                 pos,
+                                                                                                 "->");
                                                                                     match seq_res
                                                                                         {
                                                                                         Matched(pos,
-                                                                                                rhs)
+                                                                                                _)
                                                                                         =>
                                                                                         {
                                                                                             {
-                                                                                                let match_str =
-                                                                                                    &input[start_pos..pos];
-                                                                                                Matched(pos,
+                                                                                                let seq_res =
+                                                                                                    parse_space(input,
+                                                                                                                state,
+                                                                                                                pos);
+                                                                                                match seq_res
+                                                                                                    {
+                                                                                                    Matched(pos,
+                                                                                                            _)
+                                                                                                    =>
+                                                                                                    {
                                                                                                         {
-                                                                                                            (lhs,
-                                                                                                             rhs)
-                                                                                                        })
+                                                                                                            let seq_res =
+                                                                                                                parse_identifiers(input,
+                                                                                                                                  state,
+                                                                                                                                  pos);
+                                                                                                            match seq_res
+                                                                                                                {
+                                                                                                                Matched(pos,
+                                                                                                                        rhs)
+                                                                                                                =>
+                                                                                                                {
+                                                                                                                    {
+                                                                                                                        let match_str =
+                                                                                                                            &input[start_pos..pos];
+                                                                                                                        Matched(pos,
+                                                                                                                                {
+                                                                                                                                    (table,
+                                                                                                                                     lhs,
+                                                                                                                                     rhs)
+                                                                                                                                })
+                                                                                                                    }
+                                                                                                                }
+                                                                                                                Failed
+                                                                                                                =>
+                                                                                                                Failed,
+                                                                                                            }
+                                                                                                        }
+                                                                                                    }
+                                                                                                    Failed
+                                                                                                    =>
+                                                                                                    Failed,
+                                                                                                }
                                                                                             }
                                                                                         }
                                                                                         Failed
@@ -2107,37 +2142,34 @@ fn parse_inc_dep<'input>(input: &'input str, state: &mut ParseState<'input>,
             match seq_res {
                 Matched(pos, _) => {
                     {
-                        let seq_res = parse_identifier(input, state, pos);
+                        let seq_res = parse_space(input, state, pos);
                         match seq_res {
-                            Matched(pos, left_table) => {
+                            Matched(pos, _) => {
                                 {
                                     let seq_res =
-                                        parse_space(input, state, pos);
+                                        parse_identifier(input, state, pos);
                                     match seq_res {
-                                        Matched(pos, _) => {
+                                        Matched(pos, left_table) => {
                                             {
                                                 let seq_res =
-                                                    parse_identifiers(input,
-                                                                      state,
-                                                                      pos);
+                                                    parse_space(input, state,
+                                                                pos);
                                                 match seq_res {
-                                                    Matched(pos, left_fields)
-                                                    => {
+                                                    Matched(pos, _) => {
                                                         {
                                                             let seq_res =
-                                                                parse_space(input,
-                                                                            state,
-                                                                            pos);
+                                                                parse_identifiers(input,
+                                                                                  state,
+                                                                                  pos);
                                                             match seq_res {
                                                                 Matched(pos,
-                                                                        _) =>
-                                                                {
+                                                                        left_fields)
+                                                                => {
                                                                     {
                                                                         let seq_res =
-                                                                            slice_eq(input,
-                                                                                     state,
-                                                                                     pos,
-                                                                                     "<=");
+                                                                            parse_space(input,
+                                                                                        state,
+                                                                                        pos);
                                                                         match seq_res
                                                                             {
                                                                             Matched(pos,
@@ -2146,9 +2178,10 @@ fn parse_inc_dep<'input>(input: &'input str, state: &mut ParseState<'input>,
                                                                             {
                                                                                 {
                                                                                     let seq_res =
-                                                                                        parse_space(input,
-                                                                                                    state,
-                                                                                                    pos);
+                                                                                        slice_eq(input,
+                                                                                                 state,
+                                                                                                 pos,
+                                                                                                 "<=");
                                                                                     match seq_res
                                                                                         {
                                                                                         Matched(pos,
@@ -2157,36 +2190,70 @@ fn parse_inc_dep<'input>(input: &'input str, state: &mut ParseState<'input>,
                                                                                         {
                                                                                             {
                                                                                                 let seq_res =
-                                                                                                    parse_identifier(input,
-                                                                                                                     state,
-                                                                                                                     pos);
+                                                                                                    parse_space(input,
+                                                                                                                state,
+                                                                                                                pos);
                                                                                                 match seq_res
                                                                                                     {
                                                                                                     Matched(pos,
-                                                                                                            right_table)
+                                                                                                            _)
                                                                                                     =>
                                                                                                     {
                                                                                                         {
                                                                                                             let seq_res =
-                                                                                                                parse_identifiers(input,
-                                                                                                                                  state,
-                                                                                                                                  pos);
+                                                                                                                parse_identifier(input,
+                                                                                                                                 state,
+                                                                                                                                 pos);
                                                                                                             match seq_res
                                                                                                                 {
                                                                                                                 Matched(pos,
-                                                                                                                        right_fields)
+                                                                                                                        right_table)
                                                                                                                 =>
                                                                                                                 {
                                                                                                                     {
-                                                                                                                        let match_str =
-                                                                                                                            &input[start_pos..pos];
-                                                                                                                        Matched(pos,
+                                                                                                                        let seq_res =
+                                                                                                                            parse_space(input,
+                                                                                                                                        state,
+                                                                                                                                        pos);
+                                                                                                                        match seq_res
+                                                                                                                            {
+                                                                                                                            Matched(pos,
+                                                                                                                                    _)
+                                                                                                                            =>
+                                                                                                                            {
                                                                                                                                 {
-                                                                                                                                    (left_table,
-                                                                                                                                     left_fields,
-                                                                                                                                     right_table,
-                                                                                                                                     right_fields)
-                                                                                                                                })
+                                                                                                                                    let seq_res =
+                                                                                                                                        parse_identifiers(input,
+                                                                                                                                                          state,
+                                                                                                                                                          pos);
+                                                                                                                                    match seq_res
+                                                                                                                                        {
+                                                                                                                                        Matched(pos,
+                                                                                                                                                right_fields)
+                                                                                                                                        =>
+                                                                                                                                        {
+                                                                                                                                            {
+                                                                                                                                                let match_str =
+                                                                                                                                                    &input[start_pos..pos];
+                                                                                                                                                Matched(pos,
+                                                                                                                                                        {
+                                                                                                                                                            (left_table,
+                                                                                                                                                             left_fields,
+                                                                                                                                                             right_table,
+                                                                                                                                                             right_fields)
+                                                                                                                                                        })
+                                                                                                                                            }
+                                                                                                                                        }
+                                                                                                                                        Failed
+                                                                                                                                        =>
+                                                                                                                                        Failed,
+                                                                                                                                    }
+                                                                                                                                }
+                                                                                                                            }
+                                                                                                                            Failed
+                                                                                                                            =>
+                                                                                                                            Failed,
+                                                                                                                        }
                                                                                                                     }
                                                                                                                 }
                                                                                                                 Failed
@@ -2238,7 +2305,7 @@ fn parse_inc_dep<'input>(input: &'input str, state: &mut ParseState<'input>,
 fn parse_input<'input>(input: &'input str, state: &mut ParseState<'input>,
                        pos: usize)
  ->
-     RuleResult<(Vec<Table>, Vec<(Vec<String>, Vec<String>)>,
+     RuleResult<(Vec<Table>, Vec<(String, Vec<String>, Vec<String>)>,
                  Vec<(String, Vec<String>, String, Vec<String>)>)> {
     {
         let start_pos = pos;
@@ -2430,14 +2497,61 @@ fn parse_input<'input>(input: &'input str, state: &mut ParseState<'input>,
                                                                         inc_deps)
                                                                 => {
                                                                     {
-                                                                        let match_str =
-                                                                            &input[start_pos..pos];
-                                                                        Matched(pos,
+                                                                        let seq_res =
+                                                                            {
+                                                                                let mut repeat_pos =
+                                                                                    pos;
+                                                                                loop 
+                                                                                     {
+                                                                                    let pos =
+                                                                                        repeat_pos;
+                                                                                    let step_res =
+                                                                                        slice_eq(input,
+                                                                                                 state,
+                                                                                                 pos,
+                                                                                                 "\n");
+                                                                                    match step_res
+                                                                                        {
+                                                                                        Matched(newpos,
+                                                                                                value)
+                                                                                        =>
+                                                                                        {
+                                                                                            repeat_pos
+                                                                                                =
+                                                                                                newpos;
+                                                                                        }
+                                                                                        Failed
+                                                                                        =>
+                                                                                        {
+                                                                                            break
+                                                                                                ;
+                                                                                        }
+                                                                                    }
+                                                                                }
+                                                                                Matched(repeat_pos,
+                                                                                        ())
+                                                                            };
+                                                                        match seq_res
+                                                                            {
+                                                                            Matched(pos,
+                                                                                    _)
+                                                                            =>
+                                                                            {
                                                                                 {
-                                                                                    (tables,
-                                                                                     func_deps,
-                                                                                     inc_deps)
-                                                                                })
+                                                                                    let match_str =
+                                                                                        &input[start_pos..pos];
+                                                                                    Matched(pos,
+                                                                                            {
+                                                                                                (tables,
+                                                                                                 func_deps,
+                                                                                                 inc_deps)
+                                                                                            })
+                                                                                }
+                                                                            }
+                                                                            Failed
+                                                                            =>
+                                                                            Failed,
+                                                                        }
                                                                     }
                                                                 }
                                                                 Failed =>
@@ -2464,7 +2578,7 @@ fn parse_input<'input>(input: &'input str, state: &mut ParseState<'input>,
 }
 pub fn input<'input>(input: &'input str)
  ->
-     ParseResult<(Vec<Table>, Vec<(Vec<String>, Vec<String>)>,
+     ParseResult<(Vec<Table>, Vec<(String, Vec<String>, Vec<String>)>,
                   Vec<(String, Vec<String>, String, Vec<String>)>)> {
     let mut state = ParseState::new();
     match parse_input(input, &mut state, 0) {
