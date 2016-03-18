@@ -1,11 +1,11 @@
 use model::{Field, Table};
 
-struct FD<'a> {
+pub struct FD<'a> {
   lhs: Vec<&'a Field>,
   rhs: Vec<&'a Field>,
 }
 
-struct IND<'a> {
+pub struct IND<'a> {
   left_table: &'a Table,
   left_fields: Vec<&'a Field>,
   right_table: &'a Table,
