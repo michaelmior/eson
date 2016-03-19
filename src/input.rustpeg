@@ -132,7 +132,7 @@ create -> Table
         field_map.insert(field.name.clone(), field);
       }
 
-      Table { name: table, fields: field_map }
+      Table { name: table, fields: field_map, ..Default::default() }
     }
 
 func_dep -> (String, Vec<String>, Vec<String>)

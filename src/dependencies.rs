@@ -1,15 +1,15 @@
 use model::{Field, Table};
 
-pub struct FD<'a> {
-  lhs: Vec<&'a Field>,
-  rhs: Vec<&'a Field>,
+pub struct FD {
+  pub lhs: Vec<String>,
+  pub rhs: Vec<String>,
 }
 
 pub struct IND<'a> {
-  left_table: &'a Table,
-  left_fields: Vec<&'a Field>,
-  right_table: &'a Table,
-  right_fields: Vec<&'a Field>,
+  pub left_table: &'a Table,
+  pub left_fields: Vec<String>,
+  pub right_table: &'a Table,
+  pub right_fields: Vec<String>,
 }
 
 impl<'a> IND<'a> {

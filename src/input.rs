@@ -1923,7 +1923,8 @@ fn parse_create<'input>(input: &'input str, state: &mut ParseState<'input>,
                                                                                                                                                                                     Table{name:
                                                                                                                                                                                               table,
                                                                                                                                                                                           fields:
-                                                                                                                                                                                              field_map,}
+                                                                                                                                                                                              field_map,
+                                                                                                                                                                                                           ..Default::default()}
                                                                                                                                                                                 })
                                                                                                                                                                     }
                                                                                                                                                                 }
