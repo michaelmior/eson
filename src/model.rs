@@ -12,14 +12,24 @@ pub struct Field {
 pub struct Table {
   pub name: String,
   pub fields: HashMap<String, Field>,
-  pub fds: HashSet<FD>,
+  pub fds: HashMap<Vec<String>, FD>,
 }
 
 impl Table {
   pub fn add_fd(&mut self, mut lhs: Vec<String>, mut rhs: Vec<String>) {
     lhs.sort();
+    lhs.dedup();
+
+    // Merge this FD with others having the same LHS
+    if self.fds.contains_key(&lhs) {
+      let mut old_fd = self.fds.remove(&lhs).unwrap();
+      rhs.append(&mut old_fd.rhs);
+    }
+
     rhs.sort();
-    self.fds.insert(FD { lhs: lhs, rhs: rhs });
+    rhs.dedup();
+
+    self.fds.insert(lhs.clone(), FD { lhs: lhs, rhs: rhs });
   }
 }
 
