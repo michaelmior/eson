@@ -33,7 +33,7 @@ fn main() {
     // Add the FDs to each table
     for fd in fd_vec.into_iter() {
       let mut table = tables.get_mut(&fd.0).unwrap();
-      table.fds.push(dependencies::FD { lhs: fd.1, rhs: fd.2 });
+      table.add_fd(fd.1, fd.2);
     }
 
     // Create a vector of INDs from the parsed data

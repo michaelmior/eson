@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use dependencies::{FD};
 
@@ -12,7 +12,15 @@ pub struct Field {
 pub struct Table {
   pub name: String,
   pub fields: HashMap<String, Field>,
-  pub fds: Vec<FD>,
+  pub fds: HashSet<FD>,
+}
+
+impl Table {
+  pub fn add_fd(&mut self, mut lhs: Vec<String>, mut rhs: Vec<String>) {
+    lhs.sort();
+    rhs.sort();
+    self.fds.insert(FD { lhs: lhs, rhs: rhs });
+  }
 }
 
 pub enum Literal {

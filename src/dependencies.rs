@@ -1,5 +1,6 @@
-use model::{Field, Table};
+use model::{Table};
 
+#[derive(PartialEq, Eq, Hash)]
 pub struct FD {
   pub lhs: Vec<String>,
   pub rhs: Vec<String>,
