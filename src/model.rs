@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use dependencies::{FD};
+use dependencies::{FD, Closure};
 
 pub struct Field {
   pub name: String,
@@ -22,14 +22,16 @@ impl Table {
 
     // Merge this FD with others having the same LHS
     if self.fds.contains_key(&lhs) {
-      let mut old_fd = self.fds.remove(&lhs).unwrap();
-      rhs.append(&mut old_fd.rhs);
+      let old_fd = self.fds.remove(&lhs).unwrap();
+      rhs.extend(old_fd.rhs.into_iter());
     }
 
-    rhs.sort();
-    rhs.dedup();
+    let lhs_copy = lhs.clone();
+    let left_set = lhs.into_iter().collect::<HashSet<_>>();
+    let right_set = rhs.into_iter().collect::<HashSet<_>>();
 
-    self.fds.insert(lhs.clone(), FD { lhs: lhs, rhs: rhs });
+    self.fds.insert(lhs_copy, FD { lhs: left_set, rhs: right_set });
+    self.fds.closure();
   }
 }
 
