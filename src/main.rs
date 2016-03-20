@@ -36,17 +36,25 @@ fn main() {
       table.add_fd(fd.1, fd.2);
     }
 
-    // Create a vector of INDs from the parsed data
-    let mut inds = Vec::new();
+    // Create a HashMap of INDs from the parsed data
+    let mut inds: HashMap<_, Vec<dependencies::IND>> = HashMap::new();
     for ind in ind_vec.into_iter() {
       let left_table = tables.get(&ind.0).unwrap();
       let right_table = tables.get(&ind.2).unwrap();
 
-      inds.push(dependencies::IND {
+      let new_ind = dependencies::IND {
         left_table: left_table,
         left_fields: ind.1,
         right_table: right_table,
         right_fields: ind.3
-      })
+      };
+
+      let ind_key = (ind.0.clone(), ind.2.clone());
+      if inds.contains_key(&ind_key) {
+        let ind_list = inds.get_mut(&ind_key).unwrap();
+        ind_list.push(new_ind);
+      } else {
+        inds.insert(ind_key, vec![new_ind]);
+      }
     }
 }

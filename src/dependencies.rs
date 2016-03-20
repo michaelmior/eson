@@ -68,3 +68,13 @@ impl<'a> IND<'a> {
           right_table: self.left_table, right_fields: self.left_fields.clone() }
   }
 }
+
+impl<'a> Closure for HashMap<(String, String), Vec<IND<'a>>> {
+  fn closure(&mut self) -> () {
+    let mut changed = true;
+
+    while changed {
+      changed = false;
+    }
+  }
+}
