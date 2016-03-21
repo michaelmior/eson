@@ -76,7 +76,7 @@ impl IND {
 
 impl<'a> Closure for HashMap<(String, String), Vec<IND>> {
   fn closure(&mut self, tables: Option<&mut HashMap<String, Table>>) -> () {
-    let mut table_map = tables.unwrap();
+    let table_map = tables.unwrap();
     let mut changed = true;
 
     while changed {
