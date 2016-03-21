@@ -35,7 +35,7 @@ impl Table {
     let right_set = rhs.into_iter().collect::<HashSet<_>>();
 
     self.fds.insert(lhs_copy, FD { lhs: left_set, rhs: right_set });
-    self.fds.closure();
+    self.fds.closure(None);
   }
 }
 

@@ -5,7 +5,7 @@ use std::collections::{HashMap, HashSet};
 extern crate group_by;
 
 pub trait Closure {
-  fn closure(&mut self) -> ();
+  fn closure(&mut self, tables: Option<&mut HashMap<String, Table>>) -> ();
 }
 
 #[derive(PartialEq, Eq)]
@@ -15,7 +15,7 @@ pub struct FD {
 }
 
 impl Closure for HashMap<Vec<String>, FD> {
-  fn closure(&mut self) -> () {
+  fn closure(&mut self, tables: Option<&mut HashMap<String, Table>>) -> () {
     let mut changed = true;
 
     while changed {
@@ -58,22 +58,25 @@ impl Closure for HashMap<Vec<String>, FD> {
 }
 
 #[derive(PartialEq)]
-pub struct IND<'a> {
-  pub left_table: &'a Table,
+pub struct IND {
+  pub left_table: String,
   pub left_fields: Vec<String>,
-  pub right_table: &'a Table,
+  pub right_table: String,
   pub right_fields: Vec<String>,
 }
 
-impl<'a> IND<'a> {
+impl IND {
   fn reverse(&self) -> IND {
-    IND { left_table: self.right_table, left_fields: self.right_fields.clone(),
-          right_table: self.left_table, right_fields: self.left_fields.clone() }
+    IND { left_table: self.right_table.clone(),
+          left_fields: self.right_fields.clone(),
+          right_table: self.left_table.clone(),
+          right_fields: self.left_fields.clone() }
   }
 }
 
-impl<'a> Closure for HashMap<(String, String), Vec<IND<'a>>> {
-  fn closure(&mut self) -> () {
+impl<'a> Closure for HashMap<(String, String), Vec<IND>> {
+  fn closure(&mut self, tables: Option<&mut HashMap<String, Table>>) -> () {
+    let mut table_map = tables.unwrap();
     let mut changed = true;
 
     while changed {
@@ -86,7 +89,8 @@ impl<'a> Closure for HashMap<(String, String), Vec<IND<'a>>> {
         for (i, ind1) in inds.iter().enumerate() {
           // Find all fields which can be inferred from the current FDs
           let mut all_fields = ind1.left_fields.clone().into_iter().collect::<HashSet<String>>();
-          for fd in ind1.left_table.fds.values() {
+          let left_table = table_map.get(&ind1.left_table).unwrap();
+          for fd in left_table.fds.values() {
             if fd.lhs.clone().into_iter().collect::<HashSet<String>>().is_subset(&all_fields) {
               all_fields.extend(fd.rhs.clone());
             }
@@ -114,8 +118,8 @@ impl<'a> Closure for HashMap<(String, String), Vec<IND<'a>>> {
                                 left_fields: new_left,
                                 right_table: ind1.right_table.clone(),
                                 right_fields: new_right };
-            let ind_key = (ind1.left_table.name.clone(),
-                           ind1.right_table.name.clone());
+            let ind_key = (ind1.left_table.clone(),
+                           ind1.right_table.clone());
 
             // If the IND doesn't already exist add it and delete old ones
             if !self.get(&ind_key).unwrap().contains(&new_ind) {
@@ -138,11 +142,11 @@ impl<'a> Closure for HashMap<(String, String), Vec<IND<'a>>> {
         // Group INDs by table and fields
         let ind_vec: Vec<&IND> = self.values().flat_map(|inds| inds.clone()).collect();
         let grouped_inds = group_by::group_by(ind_vec.iter(),
-          |ind| (ind.left_table.name.clone(), ind.left_fields.clone()));
+          |ind| (ind.left_table.clone(), ind.left_fields.clone()));
 
         for ind1 in ind_vec.iter() {
           // Check for a matching the RHS (implies a new IND via transitivity)
-          let ind_key = &(ind1.right_table.name.clone(), ind1.right_fields.clone());
+          let ind_key = &(ind1.right_table.clone(), ind1.right_fields.clone());
           if let Some(other_inds) = grouped_inds.get(&ind_key) {
             for ind2 in other_inds.iter() {
               // Add a new IND for each transitive relation
@@ -151,8 +155,8 @@ impl<'a> Closure for HashMap<(String, String), Vec<IND<'a>>> {
                                   right_table: ind2.right_table.clone(),
                                   right_fields: ind2.right_fields.clone() };
 
-              let table_key = (new_ind.left_table.name.clone(),
-                               new_ind.right_table.name.clone());
+              let table_key = (new_ind.left_table.clone(),
+                               new_ind.right_table.clone());
               if !self.get(&table_key).unwrap().contains(&new_ind) {
                 new_inds.push(new_ind);
               }
@@ -166,8 +170,8 @@ impl<'a> Closure for HashMap<(String, String), Vec<IND<'a>>> {
 
         // Add new INDs
         for new_ind in new_inds.into_iter() {
-          let ind_key = (new_ind.left_table.name.clone(),
-                         new_ind.right_table.name.clone());
+          let ind_key = (new_ind.left_table.clone(),
+                         new_ind.right_table.clone());
           if self.contains_key(&ind_key) {
             self.get_mut(&ind_key).unwrap().push(new_ind);
           } else {
