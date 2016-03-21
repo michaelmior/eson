@@ -4,4 +4,5 @@ name = "otto"
 version = "0.1.0"
 
 [dependencies]
+group-by = "1.0.0"
 peg = "0.3.10"

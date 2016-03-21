@@ -15,6 +15,10 @@ pub struct Table {
   pub fds: HashMap<Vec<String>, FD>,
 }
 
+impl PartialEq for Table {
+  fn eq(&self, other: &Self) -> bool { self.name == other.name }
+}
+
 impl Table {
   pub fn add_fd(&mut self, mut lhs: Vec<String>, mut rhs: Vec<String>) {
     lhs.sort();
