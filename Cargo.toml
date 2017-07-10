@@ -5,4 +5,5 @@ version = "0.1.0"
 
 [dependencies]
 group-by = "1.0.0"
-peg = "0.3.10"
+peg = "0.5.4"
+peg-syntax-ext = "0.5.0"
