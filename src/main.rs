@@ -100,4 +100,8 @@ fn main() {
     copy_fds(&mut inds, &mut tables);
     inds.closure(Some(&mut tables));
   }
+
+  for table in tables.values() {
+    println!("{}", table)
+  }
 }

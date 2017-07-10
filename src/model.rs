@@ -1,4 +1,5 @@
 use std::collections::{HashMap, HashSet};
+use std::fmt;
 
 use dependencies::{FD, Closure};
 
@@ -17,6 +18,14 @@ pub struct Table {
 
 impl PartialEq for Table {
   fn eq(&self, other: &Self) -> bool { self.name == other.name }
+}
+
+impl fmt::Display for Table {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    let field_names: Vec<String> = self.fields.keys().map(|key| key.to_string()).collect();
+    let fields = field_names.join(", ");
+    write!(f, "{}({})", &self.name, &fields)
+  }
 }
 
 impl Table {
