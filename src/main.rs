@@ -13,6 +13,7 @@ use std::fs::File;
 peg_file! input("input.rustpeg");
 mod dependencies;
 mod model;
+mod normalize;
 
 use dependencies::{Closure};
 
