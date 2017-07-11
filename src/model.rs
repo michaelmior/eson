@@ -101,32 +101,23 @@ mod tests {
 
   #[test]
   fn table_format_string() {
-      fields! { field!("foo", "String") };
-      let t = Table {
-        name: "foo".to_string(),
-        fields: fields! {
-          field! {"foo"}
-        },
-        ..Default::default()
-      };
-      assert_eq!(format!("{}", t), "foo(foo)")
+    let t = Table {
+      name: "foo".to_string(),
+      fields: fields! {
+        field! {"foo"}
+      },
+      ..Default::default()
+    };
+    assert_eq!(format!("{}", t), "foo(foo)")
   }
 
   #[test]
   fn table_is_bcnf_yes() {
     let mut t = Table {
       name: "foo".to_string(),
-      fields: map! {
-        "foo".to_string() => Field {
-          name: "foo".to_string(),
-          field_type: "String".to_string(),
-          key: true
-        },
-        "bar".to_string() => Field {
-          name: "bar".to_string(),
-          field_type: "String".to_string(),
-          key: false
-        }
+      fields: fields! {
+        field!("foo", "String", true),
+        field!("bar")
       },
       ..Default::default()
     };
@@ -138,22 +129,10 @@ mod tests {
   fn table_is_bcnf_no() {
     let mut t = Table {
       name: "foo".to_string(),
-      fields: map! {
-        "foo".to_string() => Field {
-          name: "foo".to_string(),
-          field_type: "String".to_string(),
-          key: true
-        },
-        "bar".to_string() => Field {
-          name: "bar".to_string(),
-          field_type: "String".to_string(),
-          key: false
-        },
-        "baz".to_string() => Field {
-          name: "baz".to_string(),
-          field_type: "String".to_string(),
-          key: false
-        }
+      fields: fields! {
+        field!("foo", "String", true),
+        field!("bar"),
+        field!("baz")
       },
       ..Default::default()
     };
