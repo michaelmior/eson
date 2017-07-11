@@ -1,6 +1,6 @@
+#![feature(plugin)]
 #![feature(slice_patterns)]
 
-#![feature(plugin)]
 #![plugin(peg_syntax_ext)]
 
 use std::collections::{HashMap, HashSet};
