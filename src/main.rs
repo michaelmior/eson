@@ -100,7 +100,7 @@ fn main() {
   while changed {
     changed = false;
     copy_fds(&mut inds, &mut tables);
-    inds.closure(Some(&mut tables));
+    changed = changed || inds.closure(Some(&mut tables));
   }
 
   for table in tables.values() {

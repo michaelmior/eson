@@ -5,7 +5,7 @@ use std::collections::{HashMap, HashSet};
 extern crate group_by;
 
 pub trait Closure {
-  fn closure(&mut self, tables: Option<&mut HashMap<String, Table>>) -> ();
+  fn closure(&mut self, tables: Option<&mut HashMap<String, Table>>) -> bool;
 }
 
 #[derive(PartialEq, Eq)]
@@ -15,7 +15,8 @@ pub struct FD {
 }
 
 impl Closure for HashMap<Vec<String>, FD> {
-  fn closure(&mut self, _: Option<&mut HashMap<String, Table>>) -> () {
+  fn closure(&mut self, _: Option<&mut HashMap<String, Table>>) -> bool {
+    let mut any_changed = false;
     let mut changed = true;
 
     while changed {
@@ -53,7 +54,13 @@ impl Closure for HashMap<Vec<String>, FD> {
           self.insert(lhs_copy, new_fd);
         }
       }
+
+      if changed {
+        any_changed = true;
+      }
     }
+
+    any_changed
   }
 }
 
@@ -75,8 +82,9 @@ impl IND {
 }
 
 impl<'a> Closure for HashMap<(String, String), Vec<IND>> {
-  fn closure(&mut self, tables: Option<&mut HashMap<String, Table>>) -> () {
+  fn closure(&mut self, tables: Option<&mut HashMap<String, Table>>) -> bool {
     let table_map = tables.unwrap();
+    let mut any_changed = false;
     let mut changed = true;
 
     while changed {
@@ -188,6 +196,12 @@ impl<'a> Closure for HashMap<(String, String), Vec<IND>> {
           }
         }
       }
+
+      if changed {
+        any_changed = true;
+      }
     }
+
+    any_changed
   }
 }
