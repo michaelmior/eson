@@ -3,13 +3,14 @@ use std::fmt;
 
 use dependencies::{FD, Closure};
 
+#[derive(Debug)]
 pub struct Field {
   pub name: String,
   pub field_type: String,
   pub key: bool
 }
 
-#[derive(Default)]
+#[derive(Debug, Default)]
 pub struct Table {
   pub name: String,
   pub fields: HashMap<String, Field>,
@@ -63,4 +64,32 @@ pub enum Define {
 pub enum TableOption {
   Parameter((String, Literal)),
   Order(Vec<(String, bool)>)
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn tables_equal_by_name() {
+      let t1 = Table { name: "foo".to_string(), ..Default::default() };
+      let t2 = Table { name: "foo".to_string(), ..Default::default() };
+      assert_eq!(t1, t2)
+  }
+
+  #[test]
+  fn table_format_string() {
+      let t = Table {
+        name: "foo".to_string(),
+        fields: map! {
+          "foo".to_string() => Field {
+            name: "foo".to_string(),
+            field_type: "String".to_string(),
+            key: false
+          }
+        },
+        ..Default::default()
+      };
+      assert_eq!(format!("{}", t), "foo(foo)")
+  }
 }

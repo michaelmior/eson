@@ -9,6 +9,7 @@ use std::io;
 use std::io::prelude::*;
 use std::fs::File;
 
+#[macro_use] mod macros;
 mod input;
 mod dependencies;
 mod model;

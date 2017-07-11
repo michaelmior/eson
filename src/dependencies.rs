@@ -8,7 +8,7 @@ pub trait Closure {
   fn closure(&mut self, tables: Option<&mut HashMap<String, Table>>) -> bool;
 }
 
-#[derive(PartialEq, Eq)]
+#[derive(Debug, PartialEq, Eq)]
 pub struct FD {
   pub lhs: HashSet<String>,
   pub rhs: HashSet<String>,
