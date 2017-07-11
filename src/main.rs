@@ -10,7 +10,7 @@ use std::io::prelude::*;
 use std::fs::File;
 
 #[macro_use] mod macros;
-mod input;
+peg_file! input("input.rustpeg");
 mod dependencies;
 mod model;
 
