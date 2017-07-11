@@ -15,7 +15,7 @@ pub struct FD {
 }
 
 impl Closure for HashMap<Vec<String>, FD> {
-  fn closure(&mut self, tables: Option<&mut HashMap<String, Table>>) -> () {
+  fn closure(&mut self, _: Option<&mut HashMap<String, Table>>) -> () {
     let mut changed = true;
 
     while changed {
