@@ -4,6 +4,7 @@
 #![plugin(peg_syntax_ext)]
 
 use std::collections::{HashMap, HashSet};
+use std::env;
 use std::io;
 use std::io::prelude::*;
 use std::fs::File;
@@ -60,7 +61,8 @@ fn copy_fds(inds: &mut HashMap<(String, String), Vec<dependencies::IND>>, tables
 }
 
 fn main() {
-  let input_string = read_file("examples/one_to_one.txt").unwrap();
+  let filename = format!("examples/{}.txt", env::args().nth(1).unwrap());
+  let input_string = read_file(&filename).unwrap();
   let (table_vec, fd_vec, ind_vec) = input::input(&input_string).unwrap();
 
   // Build a HashMap of parsed Tables
