@@ -101,41 +101,27 @@ mod tests {
 
   #[test]
   fn table_format_string() {
-    let t = Table {
-      name: "foo".to_string(),
-      fields: fields! {
-        field! {"foo"}
-      },
-      ..Default::default()
-    };
+    let t = table!("foo", fields! { field!("foo") } );
     assert_eq!(format!("{}", t), "foo(foo)")
   }
 
   #[test]
   fn table_is_bcnf_yes() {
-    let mut t = Table {
-      name: "foo".to_string(),
-      fields: fields! {
-        field!("foo", "String", true),
-        field!("bar")
-      },
-      ..Default::default()
-    };
+    let mut t = table!("foo", fields! {
+      field!("foo", "String", true),
+      field!("bar")
+    });
     t.add_fd(vec!["foo"], vec!["bar"]);
     assert!(t.is_bcnf())
   }
 
   #[test]
   fn table_is_bcnf_no() {
-    let mut t = Table {
-      name: "foo".to_string(),
-      fields: fields! {
-        field!("foo", "String", true),
-        field!("bar"),
-        field!("baz")
-      },
-      ..Default::default()
-    };
+    let mut t = table!("foo", fields! {
+      field!("foo", "String", true),
+      field!("bar"),
+      field!("baz")
+    });
     t.add_fd(vec!["foo"], vec!["bar"]);
     t.add_fd(vec!["bar"], vec!["baz"]);
     assert!(!t.is_bcnf())
