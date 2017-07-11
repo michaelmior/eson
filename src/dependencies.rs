@@ -14,6 +14,12 @@ pub struct FD<'a> {
   pub rhs: HashSet<&'a str>,
 }
 
+impl<'a> FD<'a> {
+  pub fn is_trivial(&self) -> bool {
+    self.rhs.is_subset(&self.lhs)
+  }
+}
+
 impl<'a> Closure for HashMap<Vec<&'a str>, FD<'a>> {
   fn closure(&mut self, _: Option<&mut HashMap<String, Table>>) -> bool {
     let mut any_changed = false;
