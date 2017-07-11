@@ -99,6 +99,9 @@ fn main() {
   let mut changed = true;
   while changed {
     changed = false;
+    for table in tables.values_mut() {
+      changed = changed || table.fds.closure(None);
+    }
     copy_fds(&mut inds, &mut tables);
     changed = changed || inds.closure(Some(&mut tables));
   }
