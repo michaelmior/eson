@@ -101,14 +101,11 @@ mod tests {
 
   #[test]
   fn table_format_string() {
+      fields! { field!("foo", "String") };
       let t = Table {
         name: "foo".to_string(),
-        fields: map! {
-          "foo".to_string() => Field {
-            name: "foo".to_string(),
-            field_type: "String".to_string(),
-            key: false
-          }
+        fields: fields! {
+          field! {"foo"}
         },
         ..Default::default()
       };
