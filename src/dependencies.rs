@@ -28,7 +28,7 @@ impl Closure for HashMap<Vec<String>, FD> {
           // Check if a new FD can be inferred via transitivity
           if fd1 == fd2 || !fd1.rhs.is_subset(&fd2.lhs) { continue; }
 
-          let mut lhs_copy = fd1.lhs.clone().into_iter().collect::<Vec<String>>();
+          let mut lhs_copy = fd1.lhs.clone().into_iter().collect::<Vec<_>>();
           lhs_copy.sort();
 
           let new_fd;
@@ -47,7 +47,7 @@ impl Closure for HashMap<Vec<String>, FD> {
       // Add any new FDs which were discovered
       if new_fds.len() > 0 {
         for new_fd in new_fds.into_iter() {
-          let mut lhs_copy = new_fd.lhs.clone().into_iter().collect::<Vec<String>>();
+          let mut lhs_copy = new_fd.lhs.clone().into_iter().collect::<Vec<_>>();
           lhs_copy.sort();
 
           changed = true;
@@ -96,10 +96,10 @@ impl<'a> Closure for HashMap<(String, String), Vec<IND>> {
       for inds in self.values() {
         for (i, ind1) in inds.iter().enumerate() {
           // Find all fields which can be inferred from the current FDs
-          let mut all_fields = ind1.left_fields.clone().into_iter().collect::<HashSet<String>>();
+          let mut all_fields = ind1.left_fields.clone().into_iter().collect::<HashSet<_>>();
           let left_table = table_map.get(&ind1.left_table).unwrap();
           for fd in left_table.fds.values() {
-            if fd.lhs.clone().into_iter().collect::<HashSet<String>>().is_subset(&all_fields) {
+            if fd.lhs.clone().into_iter().collect::<HashSet<_>>().is_subset(&all_fields) {
               all_fields.extend(fd.rhs.clone());
             }
           }
@@ -112,7 +112,7 @@ impl<'a> Closure for HashMap<(String, String), Vec<IND>> {
             added_fields.retain(|f| !new_left.contains(&f));
             new_left.extend(added_fields);
 
-            if new_left.clone().into_iter().collect::<HashSet<String>>().is_subset(&all_fields) {
+            if new_left.clone().into_iter().collect::<HashSet<_>>().is_subset(&all_fields) {
               continue;
             }
 

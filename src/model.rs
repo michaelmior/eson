@@ -23,7 +23,7 @@ impl PartialEq for Table {
 
 impl fmt::Display for Table {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-    let field_names: Vec<String> = self.fields.keys().map(|key| key.to_string()).collect();
+    let field_names: Vec<_> = self.fields.keys().map(|key| key.to_string()).collect();
     let fields = field_names.join(", ");
     write!(f, "{}({})", &self.name, &fields)
   }
