@@ -1,4 +1,4 @@
-use model::{Table};
+use model::Table;
 
 use std::fmt;
 use std::collections::{HashMap, HashSet};
@@ -78,7 +78,7 @@ impl<'a> Closure for HashMap<Vec<&'a str>, FD<'a>> {
   }
 }
 
-#[derive(PartialEq)]
+#[derive(Debug, PartialEq)]
 pub struct IND<'a> {
   pub left_table: &'a str,
   pub left_fields: Vec<&'a str>,
@@ -98,6 +98,7 @@ impl<'a> fmt::Display for IND<'a> {
 }
 
 impl<'a> IND<'a> {
+  #[cfg(test)]
   fn reverse(&self) -> IND {
     IND { left_table: self.right_table.clone(),
           left_fields: self.right_fields.clone(),
@@ -227,5 +228,24 @@ impl<'a> Closure for HashMap<(&'a str, &'a str), Vec<IND<'a>>> {
     }
 
     any_changed
+  }
+}
+
+#[cfg(test)]
+mod tests {
+  use super::*;
+
+  #[test]
+  fn ind_reverse() {
+    let ind = IND {
+      left_table: "foo", left_fields: vec!["bar"],
+      right_table: "baz", right_fields: vec!["quux"]
+    };
+    let rev = IND {
+      left_table: "baz", left_fields: vec!["quux"],
+      right_table: "foo", right_fields: vec!["bar"]
+    };
+
+    assert_eq!(ind.reverse(), rev)
   }
 }
