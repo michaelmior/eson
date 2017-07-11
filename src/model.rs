@@ -11,17 +11,17 @@ pub struct Field {
 }
 
 #[derive(Debug, Default)]
-pub struct Table {
+pub struct Table<'a> {
   pub name: String,
   pub fields: HashMap<String, Field>,
-  pub fds: HashMap<Vec<String>, FD>,
+  pub fds: HashMap<Vec<&'a str>, FD<'a>>,
 }
 
-impl PartialEq for Table {
+impl<'a> PartialEq for Table<'a> {
   fn eq(&self, other: &Self) -> bool { self.name == other.name }
 }
 
-impl fmt::Display for Table {
+impl<'a> fmt::Display for Table<'a> {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     let field_names: Vec<_> = self.fields.keys().map(|key| key.to_string()).collect();
     let fields = field_names.join(", ");
@@ -29,8 +29,8 @@ impl fmt::Display for Table {
   }
 }
 
-impl Table {
-  pub fn add_fd(&mut self, mut lhs: Vec<String>, mut rhs: Vec<String>) {
+impl<'a> Table<'a> {
+  pub fn add_fd(&mut self, mut lhs: Vec<&'a str>, mut rhs: Vec<&'a str>) {
     lhs.sort();
     lhs.dedup();
 

@@ -31,8 +31,8 @@ fn copy_fds(inds: &mut HashMap<(&str, &str), Vec<dependencies::IND>>, tables: &m
   // Loop over all FDs
   for ind_vec in inds.values() {
     for ind in ind_vec.iter() {
-      let left_fields = tables.get(ind.left_table).unwrap().fields.keys().map(|k| k.clone()).into_iter().collect::<HashSet<_>>();
-      let left_key = tables.get(ind.left_table).unwrap().fields.values().filter(|f| f.key).map(|f| f.name.clone()).into_iter().collect::<HashSet<_>>();
+      let left_fields = tables.get(ind.left_table).unwrap().fields.keys().map(|k| k.as_str()).into_iter().collect::<HashSet<_>>();
+      let left_key = tables.get(ind.left_table).unwrap().fields.values().filter(|f| f.key).map(|f| f.name.as_str()).into_iter().collect::<HashSet<_>>();
 
       new_fds.extend(tables.get(ind.right_table).unwrap().fds.values().map(|fd| {
         let fd_lhs = fd.lhs.clone().into_iter().collect::<HashSet<_>>();
@@ -73,9 +73,12 @@ fn main() {
   }
 
   // Add the FDs to each table
-  for fd in fd_vec.into_iter() {
+  for fd in fd_vec.iter() {
     let mut table = tables.get_mut(&fd.0).unwrap();
-    table.add_fd(fd.1, fd.2);
+    table.add_fd(
+      fd.1.iter().map(|s| s.as_str()).collect::<Vec<_>>(),
+      fd.2.iter().map(|s| s.as_str()).collect::<Vec<_>>()
+    );
   }
 
   // Create a HashMap of INDs from the parsed data

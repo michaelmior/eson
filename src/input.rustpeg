@@ -123,7 +123,7 @@ option -> TableOption
 options -> Vec<TableOption>
   = option ** (space "AND" space)
 
-create -> Table
+create -> Table<'input>
   = "CREATE" space ("TABLE" / "COLUMNFAMILY") space table:table space?
     "(" space? fields:defines space? ")"
     options:(space "WITH" space options)? ";"? {
@@ -146,7 +146,7 @@ inc_dep -> (String, Vec<String>, String, Vec<String>)
       (left_table, left_fields, right_table, right_fields)
     }
 
-pub input -> (Vec<Table>, Vec<(String, Vec<String>, Vec<String>)>,
+pub input -> (Vec<Table<'input>>, Vec<(String, Vec<String>, Vec<String>)>,
           Vec<(String, Vec<String>, String, Vec<String>)>)
   = tables:(create ++ "\n") "\n"*
     func_deps:(func_dep ** "\n") "\n"*

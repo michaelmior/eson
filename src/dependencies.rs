@@ -9,12 +9,12 @@ pub trait Closure {
 }
 
 #[derive(Debug, PartialEq, Eq)]
-pub struct FD {
-  pub lhs: HashSet<String>,
-  pub rhs: HashSet<String>,
+pub struct FD<'a> {
+  pub lhs: HashSet<&'a str>,
+  pub rhs: HashSet<&'a str>,
 }
 
-impl Closure for HashMap<Vec<String>, FD> {
+impl<'a> Closure for HashMap<Vec<&'a str>, FD<'a>> {
   fn closure(&mut self, _: Option<&mut HashMap<String, Table>>) -> bool {
     let mut any_changed = false;
     let mut changed = true;
@@ -96,7 +96,7 @@ impl<'a> Closure for HashMap<(&'a str, &'a str), Vec<IND<'a>>> {
       for inds in self.values() {
         for (i, ind1) in inds.iter().enumerate() {
           // Find all fields which can be inferred from the current FDs
-          let mut all_fields = ind1.left_fields.clone().into_iter().map(|s| s.to_string()).collect::<HashSet<_>>();
+          let mut all_fields = ind1.left_fields.clone().into_iter().collect::<HashSet<_>>();
           let left_table = table_map.get(ind1.left_table).unwrap();
           for fd in left_table.fds.values() {
             if fd.lhs.clone().into_iter().collect::<HashSet<_>>().is_subset(&all_fields) {
@@ -112,7 +112,7 @@ impl<'a> Closure for HashMap<(&'a str, &'a str), Vec<IND<'a>>> {
             added_fields.retain(|f| !new_left.contains(&f));
             new_left.extend(added_fields);
 
-            if new_left.clone().into_iter().collect::<HashSet<_>>().is_subset(&all_fields.iter().map(|s| s.as_str()).collect::<HashSet<_>>()) {
+            if new_left.iter().collect::<HashSet<_>>().is_subset(&all_fields.iter().collect::<HashSet<_>>()) {
               continue;
             }
 
