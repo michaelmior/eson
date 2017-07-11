@@ -53,6 +53,7 @@ impl<'a> Normalizable for HashMap<String, Table<'a>> {
         // Decompose the tables and update the map
         any_changed = true;
         let (t1, t2) = decomposed_tables(self, table_name.clone());
+        debug!("Decomposing {} into {} and {}", table_name, t1, t2);
 
         self.remove(&table_name);
         self.insert(t1.name.clone(), t1);

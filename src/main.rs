@@ -3,6 +3,9 @@
 
 #![plugin(peg_syntax_ext)]
 
+#[macro_use] extern crate log;
+extern crate env_logger;
+
 use std::collections::{HashMap, HashSet};
 use std::env;
 use std::io;
@@ -114,6 +117,16 @@ fn main() {
   }
 
   for table in tables.values() {
-    println!("{}", table)
+    println!("{}", table);
+    for fd in table.fds.values() {
+      println!("  {}", fd);
+    }
+    println!();
+  }
+
+  for ind_group in inds.values() {
+    for ind in ind_group {
+      println!("{}", ind);
+    }
   }
 }

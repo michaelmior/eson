@@ -1,5 +1,6 @@
 use model::{Table};
 
+use std::fmt;
 use std::collections::{HashMap, HashSet};
 
 extern crate group_by;
@@ -12,6 +13,12 @@ pub trait Closure {
 pub struct FD<'a> {
   pub lhs: HashSet<&'a str>,
   pub rhs: HashSet<&'a str>,
+}
+
+impl<'a> fmt::Display for FD<'a> {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    write!(f, "{:?} -> {:?}", self.lhs, self.rhs)
+  }
 }
 
 impl<'a> FD<'a> {
@@ -46,6 +53,7 @@ impl<'a> Closure for HashMap<Vec<&'a str>, FD<'a>> {
             new_fd = FD { lhs: fd1.lhs.clone(), rhs: fd2.rhs.clone() };
           }
 
+          println!("Inferred {} via transitivity", new_fd);
           new_fds.push(new_fd);
         }
       }
@@ -76,6 +84,17 @@ pub struct IND<'a> {
   pub left_fields: Vec<&'a str>,
   pub right_table: &'a str,
   pub right_fields: Vec<&'a str>,
+}
+
+impl<'a> fmt::Display for IND<'a> {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    let right_fields = if self.left_fields == self.right_fields {
+      "...".to_string()
+    } else {
+      format!("{:?}", self.right_fields)
+    };
+    write!(f, "{}({:?}) <= {}({})", self.left_table, self.left_fields, self.right_table, right_fields)
+  }
 }
 
 impl<'a> IND<'a> {
@@ -133,6 +152,7 @@ impl<'a> Closure for HashMap<(&'a str, &'a str), Vec<IND<'a>>> {
                                 right_table: ind1.right_table.clone(),
                                 right_fields: new_right };
             let ind_key = (ind1.left_table, ind1.right_table);
+            debug!("Inferred {} via inference using FDs", new_ind);
 
             // If the IND doesn't already exist add it and delete old ones
             if !self.get(&ind_key).unwrap().contains(&new_ind) {
@@ -167,6 +187,7 @@ impl<'a> Closure for HashMap<(&'a str, &'a str), Vec<IND<'a>>> {
                                   left_fields: ind1.left_fields.clone(),
                                   right_table: ind2.right_table.clone(),
                                   right_fields: ind2.right_fields.clone() };
+              debug!("Inferred {} via transitivity", new_ind);
 
               let table_key = (new_ind.left_table, new_ind.right_table);
               if !self.get(&table_key).unwrap_or(&vec![]).contains(&new_ind) {

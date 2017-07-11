@@ -4,6 +4,8 @@ name = "otto"
 version = "0.1.0"
 
 [dependencies]
+env_logger = "0.3"
 group-by = "1.0.0"
+log = "0.3"
 peg = "0.5.4"
 peg-syntax-ext = "0.5.0"
