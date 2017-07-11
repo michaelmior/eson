@@ -1,3 +1,4 @@
+#[cfg(test)]
 macro_rules! map(
   { $($key:expr => $value:expr),+ } => {
     {
@@ -8,12 +9,14 @@ macro_rules! map(
   };
 );
 
+#[cfg(test)]
 macro_rules! fields(
   { $($field:expr),+ } => {
     map! { $($field.name => $field),+ }
   };
 );
 
+#[cfg(test)]
 macro_rules! field(
   ($name:expr) => {
     Field { name: $name.to_string(), field_type: "".to_string(), key: false }
@@ -26,6 +29,7 @@ macro_rules! field(
   }
 );
 
+#[cfg(test)]
 macro_rules! table(
   { $name:expr } => {
     Table { name: $name.to_string(), ..Default::default() }
