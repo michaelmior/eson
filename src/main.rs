@@ -25,16 +25,16 @@ fn read_file(name: &str) -> Result<String, io::Error> {
 }
 
 // Copy FDs between tables based on inclusion dependencies
-fn copy_fds(inds: &mut HashMap<(String, String), Vec<dependencies::IND>>, tables: &mut HashMap<String, model::Table>) -> () {
+fn copy_fds(inds: &mut HashMap<(&str, &str), Vec<dependencies::IND>>, tables: &mut HashMap<String, model::Table>) -> () {
   let mut new_fds = Vec::new();
 
   // Loop over all FDs
   for ind_vec in inds.values() {
     for ind in ind_vec.iter() {
-      let left_fields = tables.get(&ind.left_table).unwrap().fields.keys().map(|k| k.clone()).into_iter().collect::<HashSet<_>>();
-      let left_key = tables.get(&ind.left_table).unwrap().fields.values().filter(|f| f.key).map(|f| f.name.clone()).into_iter().collect::<HashSet<_>>();
+      let left_fields = tables.get(ind.left_table).unwrap().fields.keys().map(|k| k.clone()).into_iter().collect::<HashSet<_>>();
+      let left_key = tables.get(ind.left_table).unwrap().fields.values().filter(|f| f.key).map(|f| f.name.clone()).into_iter().collect::<HashSet<_>>();
 
-      new_fds.extend(tables.get(&ind.right_table).unwrap().fds.values().map(|fd| {
+      new_fds.extend(tables.get(ind.right_table).unwrap().fds.values().map(|fd| {
         let fd_lhs = fd.lhs.clone().into_iter().collect::<HashSet<_>>();
         let fd_rhs = fd.rhs.clone().into_iter().collect::<HashSet<_>>();
 
@@ -57,7 +57,7 @@ fn copy_fds(inds: &mut HashMap<(String, String), Vec<dependencies::IND>>, tables
 
   // Add any new FDs which were found
   for fd in new_fds {
-    tables.get_mut(&fd.0).unwrap().add_fd(fd.1, fd.2);
+    tables.get_mut(fd.0).unwrap().add_fd(fd.1, fd.2);
   }
 }
 
@@ -79,16 +79,16 @@ fn main() {
   }
 
   // Create a HashMap of INDs from the parsed data
-  let mut inds: HashMap<_, Vec<dependencies::IND>> = HashMap::new();
-  for ind in ind_vec.into_iter() {
+  let mut inds: HashMap<(&str, &str), Vec<dependencies::IND>> = HashMap::new();
+  for ind in ind_vec.iter() {
     let new_ind = dependencies::IND {
-      left_table: ind.0.clone(),
-      left_fields: ind.1,
-      right_table: ind.2.clone(),
-      right_fields: ind.3
+      left_table: &ind.0,
+      left_fields: ind.1.clone(),
+      right_table: &ind.2,
+      right_fields: ind.3.clone()
     };
 
-    let ind_key = (ind.0, ind.2);
+    let ind_key = (ind.0.as_str(), ind.2.as_str());
     if inds.contains_key(&ind_key) {
       let ind_list = inds.get_mut(&ind_key).unwrap();
       ind_list.push(new_ind);
