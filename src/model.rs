@@ -3,7 +3,7 @@ use std::fmt;
 
 use dependencies::{FD, Closure};
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct Field {
   pub name: String,
   pub field_type: String,
@@ -64,6 +64,10 @@ impl<'a> Table<'a> {
     }
 
     true
+  }
+
+  pub fn violating_fd(&self) -> &FD {
+    self.fds.values().find(|fd| !fd.is_trivial() && self.is_superkey(&fd.lhs)).unwrap()
   }
 }
 

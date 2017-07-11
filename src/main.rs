@@ -15,7 +15,8 @@ mod dependencies;
 mod model;
 mod normalize;
 
-use dependencies::{Closure};
+use dependencies::Closure;
+use normalize::Normalizable;
 
 fn read_file(name: &str) -> Result<String, io::Error> {
   let mut input_file = try!(File::open(name));
@@ -109,6 +110,7 @@ fn main() {
     }
     copy_fds(&mut inds, &mut tables);
     changed = changed || inds.closure(Some(&mut tables));
+    changed = changed || tables.normalize();
   }
 
   for table in tables.values() {
