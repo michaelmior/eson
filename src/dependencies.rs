@@ -157,7 +157,7 @@ impl<'a> Closure for HashMap<(String, String), Vec<IND>> {
 
               let table_key = (new_ind.left_table.clone(),
                                new_ind.right_table.clone());
-              if !self.contains_key(&table_key) || !self.get(&table_key).unwrap().contains(&new_ind) {
+              if !self.get(&table_key).unwrap_or(&vec![]).contains(&new_ind) {
                 new_inds.push(new_ind);
               }
             }
