@@ -83,9 +83,9 @@ fn main() {
   for ind in ind_vec.iter() {
     let new_ind = dependencies::IND {
       left_table: &ind.0,
-      left_fields: ind.1.clone(),
+      left_fields: ind.1.iter().map(|s| s.as_str()).collect::<Vec<_>>(),
       right_table: &ind.2,
-      right_fields: ind.3.clone()
+      right_fields: ind.3.iter().map(|s| s.as_str()).collect::<Vec<_>>()
     };
 
     let ind_key = (ind.0.as_str(), ind.2.as_str());
