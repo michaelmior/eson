@@ -48,15 +48,18 @@ impl<'a> Table<'a> {
     self.fds.closure(None);
   }
 
+  pub fn key_fields(&self) -> HashSet<&str> {
+    self.fields.values().filter(|f| f.key).map(|f| f.name.as_str()).collect::<HashSet<_>>()
+  }
+
+  pub fn is_superkey(&self, fields: &HashSet<&str>) -> bool {
+    fields.is_subset(&self.key_fields())
+  }
+
   pub fn is_bcnf(&self) -> bool {
     for fd in self.fds.values() {
-      if fd.is_trivial() {
-        continue;
-      }
-
-      let keys = self.fields.values().filter(|f| f.key).map(|f| f.name.as_str()).collect::<HashSet<_>>();
-      if !fd.lhs.is_subset(&keys) {
-        return false
+      if !fd.is_trivial() && !self.is_superkey(&fd.lhs) {
+        return false;
       }
     }
 
