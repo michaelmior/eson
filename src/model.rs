@@ -72,8 +72,8 @@ mod tests {
 
   #[test]
   fn tables_equal_by_name() {
-      let t1 = Table { name: "foo".to_string(), ..Default::default() };
-      let t2 = Table { name: "foo".to_string(), ..Default::default() };
+      let t1 = table!("foo");
+      let t2 = table!("foo");
       assert_eq!(t1, t2)
   }
 

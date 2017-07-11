@@ -7,3 +7,9 @@ macro_rules! map(
     }
   };
 );
+
+macro_rules! table(
+  { $name:expr } => {
+    Table { name: $name.to_string(), ..Default::default() }
+  };
+);
