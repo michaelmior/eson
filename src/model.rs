@@ -47,6 +47,19 @@ impl<'a> Table<'a> {
     self.fds.insert(lhs_copy, FD { lhs: left_set, rhs: right_set });
     self.fds.closure(None);
   }
+
+  pub fn is_bcnf(&self) -> bool {
+    for fd in self.fds.values() {
+      if !fd.rhs.is_subset(&fd.lhs) {
+        let keys = self.fields.values().filter(|f| f.key).map(|f| f.name.as_str()).collect::<HashSet<_>>();
+        if !fd.lhs.is_subset(&keys) {
+          return false
+        }
+      }
+    }
+
+    true
+  }
 }
 
 pub enum Literal {
@@ -91,5 +104,55 @@ mod tests {
         ..Default::default()
       };
       assert_eq!(format!("{}", t), "foo(foo)")
+  }
+
+  #[test]
+  fn table_is_bcnf_yes() {
+    let mut t = Table {
+      name: "foo".to_string(),
+      fields: map! {
+        "foo".to_string() => Field {
+          name: "foo".to_string(),
+          field_type: "String".to_string(),
+          key: true
+        },
+        "bar".to_string() => Field {
+          name: "bar".to_string(),
+          field_type: "String".to_string(),
+          key: false
+        }
+      },
+      ..Default::default()
+    };
+    t.add_fd(vec!["foo"], vec!["bar"]);
+    assert!(t.is_bcnf())
+  }
+
+  #[test]
+  fn table_is_bcnf_no() {
+    let mut t = Table {
+      name: "foo".to_string(),
+      fields: map! {
+        "foo".to_string() => Field {
+          name: "foo".to_string(),
+          field_type: "String".to_string(),
+          key: true
+        },
+        "bar".to_string() => Field {
+          name: "bar".to_string(),
+          field_type: "String".to_string(),
+          key: false
+        },
+        "baz".to_string() => Field {
+          name: "baz".to_string(),
+          field_type: "String".to_string(),
+          key: false
+        }
+      },
+      ..Default::default()
+    };
+    t.add_fd(vec!["foo"], vec!["bar"]);
+    t.add_fd(vec!["bar"], vec!["baz"]);
+    assert!(!t.is_bcnf())
   }
 }
