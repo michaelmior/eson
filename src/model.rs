@@ -53,7 +53,7 @@ impl<'a> Table<'a> {
   }
 
   pub fn is_superkey(&self, fields: &HashSet<&str>) -> bool {
-    fields.is_subset(&self.key_fields())
+    self.key_fields().is_subset(fields)
   }
 
   pub fn is_bcnf(&self) -> bool {
@@ -125,5 +125,39 @@ mod tests {
     t.add_fd(vec!["foo"], vec!["bar"]);
     t.add_fd(vec!["bar"], vec!["baz"]);
     assert!(!t.is_bcnf())
+  }
+
+  #[test]
+  fn table_key_fields() {
+    let t = table!("foo", fields! {
+      field!("foo", "String", true),
+      field!("bar")
+    });
+    let key_fields = t.key_fields();
+    assert!(key_fields.contains("foo"));
+    assert!(!key_fields.contains("bar"));
+  }
+
+  #[test]
+  fn table_is_superkey_yes() {
+    let t = table!("foo", fields! {
+      field!("foo", "String", true),
+      field!("bar")
+    });
+    let mut key = HashSet::new();
+    key.insert("foo");
+    key.insert("bar");
+    assert!(t.is_superkey(&key))
+  }
+
+  #[test]
+  fn table_is_superkey_no() {
+    let t = table!("foo", fields! {
+      field!("foo", "String", true),
+      field!("bar")
+    });
+    let mut key = HashSet::new();
+    key.insert("bar");
+    assert!(!t.is_superkey(&key))
   }
 }
