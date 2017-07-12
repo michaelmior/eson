@@ -138,6 +138,16 @@ mod tests {
   }
 
   #[test]
+  fn table_no_violating_fd() {
+    let mut t = table!("foo", fields! {
+      field!("foo", "String", true),
+      field!("bar")
+    });
+    t.add_fd(vec!["foo"], vec!["bar"]);
+    assert!(t.violating_fd().is_none())
+  }
+
+  #[test]
   fn table_is_bcnf_no() {
     let mut t = table!("foo", fields! {
       field!("foo", "String", true),
