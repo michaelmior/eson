@@ -75,7 +75,7 @@ impl<'a> Table<'a> {
   }
 
   pub fn violating_fd(&self) -> Option<&FD> {
-    self.fds.values().find(|fd| !fd.is_trivial() && self.is_superkey(&fd.lhs))
+    self.fds.values().find(|fd| !fd.is_trivial() && !self.is_superkey(&fd.lhs))
   }
 }
 
@@ -132,7 +132,7 @@ mod tests {
       field!("foo", "String", true),
       field!("bar")
     });
-    t.add_fd(vec!["foo"], vec!["bar"]);
+    t.add_fd(vec!["bar"], vec!["foo"]);
     let fd = t.fds.values().next().unwrap();
     assert_eq!(t.violating_fd().unwrap(), fd)
   }
