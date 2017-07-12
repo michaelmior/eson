@@ -66,8 +66,8 @@ impl<'a> Table<'a> {
     true
   }
 
-  pub fn violating_fd(&self) -> &FD {
-    self.fds.values().find(|fd| !fd.is_trivial() && self.is_superkey(&fd.lhs)).unwrap()
+  pub fn violating_fd(&self) -> Option<&FD> {
+    self.fds.values().find(|fd| !fd.is_trivial() && self.is_superkey(&fd.lhs))
   }
 }
 
@@ -113,6 +113,17 @@ mod tests {
     });
     t.add_fd(vec!["foo"], vec!["bar"]);
     assert!(t.is_bcnf())
+  }
+
+  #[test]
+  fn table_violating_fd() {
+    let mut t = table!("foo", fields! {
+      field!("foo", "String", true),
+      field!("bar")
+    });
+    t.add_fd(vec!["foo"], vec!["bar"]);
+    let fd = t.fds.values().next().unwrap();
+    assert_eq!(t.violating_fd().unwrap(), fd)
   }
 
   #[test]

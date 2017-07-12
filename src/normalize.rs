@@ -10,7 +10,7 @@ fn decomposed_tables<'a, 'b>(tables: &mut HashMap<String, Table<'a>>, table_name
   let t = tables.get(&table_name).unwrap();
 
   // Find a violating FD
-  let vfd = t.violating_fd();
+  let vfd = t.violating_fd().unwrap();
 
   // Construct t1 with only fields from the FD
   let t1_fields = t.fields.clone().into_iter().filter(|&(ref k, _)|
