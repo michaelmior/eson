@@ -23,7 +23,15 @@ impl<'a> PartialEq for Table<'a> {
 
 impl<'a> fmt::Display for Table<'a> {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-    let field_names: Vec<_> = self.fields.keys().map(|key| key.to_string()).collect();
+    let mut field_names: Vec<_> = self.fields.values().map(|f|
+      if f.key {
+        let mut key_name = "*".to_owned();
+        key_name.push_str(f.name.as_str());
+        key_name
+      } else {
+        f.name.to_string()
+      }).collect();
+    field_names.sort();
     let fields = field_names.join(", ");
     write!(f, "{}({})", &self.name, &fields)
   }
@@ -101,8 +109,11 @@ mod tests {
 
   #[test]
   fn table_format_string() {
-    let t = table!("foo", fields! { field!("foo") } );
-    assert_eq!(format!("{}", t), "foo(foo)")
+    let t = table!("foo", fields! {
+      field!("bar", "String", true),
+      field!("baz")
+    });
+    assert_eq!(format!("{}", t), "foo(*bar, baz)")
   }
 
   #[test]
