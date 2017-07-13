@@ -20,6 +20,53 @@ impl Schema {
       self.inds.insert(ind_key, vec![ind]);
     }
   }
+
+  pub fn copy_inds(&mut self, src: &TableName, dst: &TableName) {
+    let mut new_inds = Vec::new();
+    {
+      let dst_table = self.tables.get(dst).unwrap();
+      for ind_group in self.inds.values() {
+        for ind in ind_group {
+          if ind.left_table == *src {
+            let mut new_lhs = ind.left_fields.clone();
+            new_lhs.retain(|f| dst_table.fields.contains_key(f));
+
+            if new_lhs.len() > 0 {
+              let new_ind = IND {
+                left_table: src.clone(),
+                left_fields: new_lhs,
+                right_table: ind.right_table.clone(),
+                right_fields: ind.right_fields.clone()
+              };
+              new_inds.push(new_ind);
+            }
+          }
+
+          if ind.right_table == *src {
+            let mut new_rhs = ind.right_fields.clone();
+            new_rhs.retain(|f| dst_table.fields.contains_key(f));
+
+            if new_rhs.len() > 0 {
+              let new_ind = IND {
+                left_table: ind.left_table.clone(),
+                left_fields: ind.left_fields.clone(),
+                right_table: src.clone(),
+                right_fields: new_rhs
+              };
+              new_inds.push(new_ind);
+            }
+          }
+        }
+      }
+    }
+
+    for new_ind in new_inds {
+      self.add_ind(new_ind);
+    }
+  }
+
+  pub fn prune_inds(&mut self) {
+  }
 }
 
 #[derive(Clone, Debug)]

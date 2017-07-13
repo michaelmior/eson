@@ -58,9 +58,14 @@ impl Normalizable for Schema {
         let (t1, t2) = decomposed_tables(&mut self.tables, table_name.clone());
         debug!("Decomposing {} into {} and {}", table_name, t1, t2);
 
+        self.copy_inds(&table_name, &t1.name);
+        self.copy_inds(&table_name, &t2.name);
+
         self.tables.remove(&table_name);
         self.tables.insert(t1.name.clone(), t1);
         self.tables.insert(t2.name.clone(), t2);
+
+        self.prune_inds();
       }
     }
 
