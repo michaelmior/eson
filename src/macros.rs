@@ -27,3 +27,13 @@ macro_rules! table(
     Table { name: $name.parse().unwrap(), fields: $fields, ..Default::default() }
   };
 );
+
+#[cfg(test)]
+macro_rules! add_fd(
+  ($table:expr, $lhs:expr, $rhs:expr) => {
+    $table.add_fd(
+      $lhs.iter().map(|f| f.parse().unwrap()).collect::<Vec<_>>(),
+      $rhs.iter().map(|f| f.parse().unwrap()).collect::<Vec<_>>()
+    );
+  };
+);

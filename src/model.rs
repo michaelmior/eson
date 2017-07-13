@@ -203,7 +203,7 @@ mod tests {
       field!("foo", "String", true),
       field!("bar")
     });
-    t.add_fd(vec!["foo".parse().unwrap()], vec!["bar".parse().unwrap()]);
+    add_fd!(t, vec!["foo"], vec!["bar"]);
     assert!(t.is_bcnf())
   }
 
@@ -213,7 +213,7 @@ mod tests {
       field!("foo", "String", true),
       field!("bar")
     });
-    t.add_fd(vec!["bar".parse().unwrap()], vec!["foo".parse().unwrap()]);
+    add_fd!(t, vec!["bar"], vec!["foo"]);
     let fd = t.fds.values().next().unwrap();
     assert_eq!(t.violating_fd().unwrap(), fd)
   }
@@ -224,7 +224,7 @@ mod tests {
       field!("foo", "String", true),
       field!("bar")
     });
-    t.add_fd(vec!["foo".parse().unwrap()], vec!["bar".parse().unwrap()]);
+    add_fd!(t, vec!["foo"], vec!["bar"]);
     assert!(t.violating_fd().is_none())
   }
 
@@ -235,8 +235,8 @@ mod tests {
       field!("bar"),
       field!("baz")
     });
-    t.add_fd(vec!["foo".parse().unwrap()], vec!["bar".parse().unwrap()]);
-    t.add_fd(vec!["bar".parse().unwrap()], vec!["baz".parse().unwrap()]);
+    add_fd!(t, vec!["foo"], vec!["bar"]);
+    add_fd!(t, vec!["bar"], vec!["baz"]);
     assert!(!t.is_bcnf())
   }
 
@@ -285,8 +285,8 @@ mod tests {
       field!("foo", "String", true),
       field!("bar")
     });
-    t1.add_fd(vec!["foo".parse().unwrap()], vec!["bar".parse().unwrap()]);
-    t1.add_fd(vec!["foo".parse().unwrap()], vec!["baz".parse().unwrap()]);
+    add_fd!(t1, vec!["foo"], vec!["bar"]);
+    add_fd!(t1, vec!["foo"], vec!["baz"]);
     t2.copy_fds(&t1);
 
     let copied_fd = FD {
