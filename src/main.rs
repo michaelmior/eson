@@ -83,15 +83,15 @@ fn main() {
   let input_string = read_file(&filename).unwrap();
   let (table_vec, fd_vec, ind_vec) = input::input(&input_string).unwrap();
 
+  let mut schema = Schema { ..Default::default() };
   // Build a HashMap of parsed Tables
-  let mut tables = HashMap::with_capacity(table_vec.len());
   for table in table_vec.into_iter() {
-    tables.insert(table.name.clone(), table);
+    schema.tables.insert(table.name.clone(), table);
   }
 
   // Add the FDs to each table
   for fd in fd_vec.iter() {
-    let mut table = tables.get_mut(&fd.0).unwrap();
+    let mut table = schema.tables.get_mut(&fd.0).unwrap();
     table.add_fd(
       fd.1.iter().map(|s| s.parse().unwrap()).collect::<Vec<_>>(),
       fd.2.iter().map(|s| s.parse().unwrap()).collect::<Vec<_>>()
@@ -99,7 +99,6 @@ fn main() {
   }
 
   // Create a HashMap of INDs from the parsed data
-  let mut inds: HashMap<(TableName, TableName), Vec<dependencies::IND>> = HashMap::new();
   for ind in ind_vec.iter() {
     let new_ind = dependencies::IND {
       left_table: ind.0.parse().unwrap(),
@@ -107,17 +106,8 @@ fn main() {
       right_table: ind.2.parse().unwrap(),
       right_fields: ind.3.iter().map(|s| s.parse().unwrap()).collect::<Vec<_>>()
     };
-
-    let ind_key = (ind.0.parse().unwrap(), ind.2.parse().unwrap());
-    if inds.contains_key(&ind_key) {
-      let ind_list = inds.get_mut(&ind_key).unwrap();
-      ind_list.push(new_ind);
-    } else {
-      inds.insert(ind_key, vec![new_ind]);
-    }
+    schema.add_ind(new_ind);
   }
-
-  let mut schema = Schema { tables: tables, inds: inds };
 
   let mut changed = true;
   while changed {

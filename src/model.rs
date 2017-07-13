@@ -4,9 +4,22 @@ use std::fmt;
 use dependencies::{FD, FDClosure, IND};
 use symbols::{FieldName, TableName};
 
+#[derive(Default)]
 pub struct Schema {
   pub tables: HashMap<TableName, Table>,
   pub inds: HashMap<(TableName, TableName), Vec<IND>>
+}
+
+impl Schema {
+  pub fn add_ind(&mut self, ind: IND) {
+    let ind_key = (ind.left_table.clone(), ind.right_table.clone());
+    if self.inds.contains_key(&ind_key) {
+      let ind_list = self.inds.get_mut(&ind_key).unwrap();
+      ind_list.push(ind);
+    } else {
+      self.inds.insert(ind_key, vec![ind]);
+    }
+  }
 }
 
 #[derive(Clone, Debug)]
@@ -227,7 +240,7 @@ mod tests {
     });
     t1.add_fd(vec!["foo".parse().unwrap()], vec!["bar".parse().unwrap()]);
     t1.add_fd(vec!["foo".parse().unwrap()], vec!["baz".parse().unwrap()]);
-    t2.copy_fds(t1);
+    t2.copy_fds(&t1);
 
     let copied_fd = FD {
       lhs: collect! [ "foo".parse().unwrap() ],
