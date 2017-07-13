@@ -23,6 +23,7 @@ mod normalize;
 mod symbols;
 
 use dependencies::Closure;
+use model::Schema;
 use normalize::Normalizable;
 use symbols::TableName;
 
@@ -116,18 +117,20 @@ fn main() {
     }
   }
 
+  let mut schema = Schema { tables: tables, inds: inds };
+
   let mut changed = true;
   while changed {
     changed = false;
-    for table in tables.values_mut() {
+    for table in schema.tables.values_mut() {
       changed = changed || table.fds.closure(None);
     }
-    copy_fds(&mut inds, &mut tables);
-    changed = changed || inds.closure(Some(&mut tables));
-    changed = changed || tables.normalize();
+    copy_fds(&mut schema.inds, &mut schema.tables);
+    changed = changed || schema.inds.closure(Some(&mut schema.tables));
+    changed = changed || schema.normalize();
   }
 
-  for table in tables.values() {
+  for table in schema.tables.values() {
     println!("{}", table);
     for fd in table.fds.values() {
       println!("  {}", fd);
@@ -135,7 +138,7 @@ fn main() {
     println!();
   }
 
-  for ind_group in inds.values() {
+  for ind_group in schema.inds.values() {
     for ind in ind_group {
       println!("{}", ind);
     }

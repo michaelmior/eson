@@ -1,8 +1,13 @@
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 
-use dependencies::{FD, Closure};
+use dependencies::{FD, Closure, IND};
 use symbols::{FieldName, TableName};
+
+pub struct Schema {
+  pub tables: HashMap<TableName, Table>,
+  pub inds: HashMap<(TableName, TableName), Vec<IND>>
+}
 
 #[derive(Clone, Debug)]
 pub struct Field {

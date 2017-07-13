@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use model::{Field, Table};
+use model::{Field, Schema, Table};
 use symbols::{FieldName, TableName};
 
 pub trait Normalizable {
@@ -28,7 +28,7 @@ fn decomposed_tables(tables: &mut HashMap<TableName, Table>, table_name: TableNa
   (t1, t2)
 }
 
-impl<'a> Normalizable for HashMap<TableName, Table> {
+impl Normalizable for Schema {
   fn normalize(&mut self) -> bool {
     let mut any_changed = false;
     let mut changed = true;
@@ -38,14 +38,14 @@ impl<'a> Normalizable for HashMap<TableName, Table> {
 
       // Get a copy of all table names
       let mut table_names = Vec::new();
-      for key in self.keys() {
+      for key in self.tables.keys() {
         table_names.push(key.clone());
       }
 
       for table_name in table_names {
         // Skip tables already in BCNF
         {
-          let t = self.get(&table_name).unwrap();
+          let t = self.tables.get(&table_name).unwrap();
           if t.is_bcnf() {
             continue;
           }
@@ -53,12 +53,12 @@ impl<'a> Normalizable for HashMap<TableName, Table> {
 
         // Decompose the tables and update the map
         any_changed = true;
-        let (t1, t2) = decomposed_tables(self, table_name.clone());
+        let (t1, t2) = decomposed_tables(&mut self.tables, table_name.clone());
         debug!("Decomposing {} into {} and {}", table_name, t1, t2);
 
-        self.remove(&table_name);
-        self.insert(t1.name.clone(), t1);
-        self.insert(t2.name.clone(), t2);
+        self.tables.remove(&table_name);
+        self.tables.insert(t1.name.clone(), t1);
+        self.tables.insert(t2.name.clone(), t2);
       }
     }
 
