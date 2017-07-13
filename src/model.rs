@@ -63,6 +63,18 @@ impl Table {
     self.fds.closure(None);
   }
 
+  pub fn copy_fds(&mut self, other: Table) {
+    for fd in other.fds.values() {
+      let new_lhs = fd.lhs.iter().map(|f| f.to_string().parse().unwrap())
+          .filter(|f| self.fields.contains_key(f)).collect::<Vec<_>>();
+      let new_rhs = fd.rhs.iter().map(|f| f.to_string().parse().unwrap())
+          .filter(|f| self.fields.contains_key(f)).collect::<Vec<_>>();
+      if new_lhs.len() > 0 && new_rhs.len() > 0 {
+        self.add_fd(new_lhs, new_rhs);
+      }
+    }
+  }
+
   pub fn key_fields(&self) -> HashSet<&str> {
     self.fields.values().filter(|f| f.key).map(|f| f.name.as_ref()).collect::<HashSet<_>>()
   }
@@ -195,5 +207,28 @@ mod tests {
     let mut key = HashSet::new();
     key.insert("bar");
     assert!(!t.is_superkey(&key))
+  }
+
+  #[test]
+  fn table_copy_fds() {
+    let mut t1 = table!("foo", fields! {
+      field!("foo", "String", true),
+      field!("bar"),
+      field!("baz")
+    });
+    let mut t2 = table!("foo", fields! {
+      field!("foo", "String", true),
+      field!("bar")
+    });
+    t1.add_fd(vec!["foo".parse().unwrap()], vec!["bar".parse().unwrap()]);
+    t1.add_fd(vec!["foo".parse().unwrap()], vec!["baz".parse().unwrap()]);
+    t2.copy_fds(t1);
+
+    let copied_fd = FD {
+      lhs: collect! [ "foo".parse().unwrap() ],
+      rhs: collect! [ "bar".parse().unwrap() ]
+    };
+    let copied_fds = t2.fds.values().collect::<Vec<_>>();
+    assert_eq!(vec![&copied_fd], copied_fds)
   }
 }

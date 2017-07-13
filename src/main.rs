@@ -3,6 +3,8 @@
 
 #![plugin(peg_syntax_ext)]
 
+#[cfg(test)]
+#[macro_use] extern crate collect_mac;
 #[macro_use] extern crate log;
 extern crate env_logger;
 extern crate string_intern;

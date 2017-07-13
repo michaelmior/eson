@@ -1,18 +1,7 @@
 #[cfg(test)]
-macro_rules! map(
-  { $($key:expr => $value:expr),+ } => {
-    {
-      let mut m = ::std::collections::HashMap::new();
-      $(m.insert($key, $value);)+
-      m
-    }
-  };
-);
-
-#[cfg(test)]
 macro_rules! fields(
   { $($field:expr),+ } => {
-    map! { $($field.name => $field),+ }
+    collect! [ $($field.name => $field),+ ]
   };
 );
 
