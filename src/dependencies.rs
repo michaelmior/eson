@@ -10,24 +10,24 @@ pub trait Closure {
 }
 
 #[derive(Debug, PartialEq, Eq)]
-pub struct FD<'a> {
-  pub lhs: HashSet<&'a str>,
-  pub rhs: HashSet<&'a str>,
+pub struct FD {
+  pub lhs: HashSet<String>,
+  pub rhs: HashSet<String>,
 }
 
-impl<'a> fmt::Display for FD<'a> {
+impl fmt::Display for FD {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     write!(f, "{:?} -> {:?}", self.lhs, self.rhs)
   }
 }
 
-impl<'a> FD<'a> {
+impl FD {
   pub fn is_trivial(&self) -> bool {
     self.rhs.is_subset(&self.lhs)
   }
 }
 
-impl<'a> Closure for HashMap<Vec<&'a str>, FD<'a>> {
+impl Closure for HashMap<Vec<String>, FD> {
   fn closure(&mut self, _: Option<&mut HashMap<String, Table>>) -> bool {
     let mut any_changed = false;
     let mut changed = true;
@@ -79,14 +79,14 @@ impl<'a> Closure for HashMap<Vec<&'a str>, FD<'a>> {
 }
 
 #[derive(Debug, PartialEq)]
-pub struct IND<'a> {
-  pub left_table: &'a str,
-  pub left_fields: Vec<&'a str>,
-  pub right_table: &'a str,
-  pub right_fields: Vec<&'a str>,
+pub struct IND {
+  pub left_table: String,
+  pub left_fields: Vec<String>,
+  pub right_table: String,
+  pub right_fields: Vec<String>,
 }
 
-impl<'a> fmt::Display for IND<'a> {
+impl fmt::Display for IND {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     let right_fields = if self.left_fields == self.right_fields {
       "...".to_string()
@@ -97,7 +97,7 @@ impl<'a> fmt::Display for IND<'a> {
   }
 }
 
-impl<'a> IND<'a> {
+impl IND {
   #[cfg(test)]
   fn reverse(&self) -> IND {
     IND { left_table: self.right_table.clone(),
@@ -107,7 +107,7 @@ impl<'a> IND<'a> {
   }
 }
 
-impl<'a> Closure for HashMap<(&'a str, &'a str), Vec<IND<'a>>> {
+impl Closure for HashMap<(String, String), Vec<IND>> {
   fn closure(&mut self, tables: Option<&mut HashMap<String, Table>>) -> bool {
     let table_map = tables.unwrap();
     let mut any_changed = false;
@@ -116,14 +116,14 @@ impl<'a> Closure for HashMap<(&'a str, &'a str), Vec<IND<'a>>> {
     while changed {
       changed = false;
       let mut new_inds = Vec::new();
-      let mut delete_inds: HashMap<_, Vec<usize>> = HashMap::new();
+      let mut delete_inds: HashMap<_, Vec<_>> = HashMap::new();
 
       // Perform inference based on FDs
       for inds in self.values() {
         for (i, ind1) in inds.iter().enumerate() {
           // Find all fields which can be inferred from the current FDs
           let mut all_fields = ind1.left_fields.clone().into_iter().collect::<HashSet<_>>();
-          let left_table = table_map.get(ind1.left_table).unwrap();
+          let left_table = table_map.get(ind1.left_table.as_str()).unwrap();
           for fd in left_table.fds.values() {
             if fd.lhs.clone().into_iter().collect::<HashSet<_>>().is_subset(&all_fields) {
               all_fields.extend(fd.rhs.clone());
@@ -152,7 +152,7 @@ impl<'a> Closure for HashMap<(&'a str, &'a str), Vec<IND<'a>>> {
                                 left_fields: new_left,
                                 right_table: ind1.right_table.clone(),
                                 right_fields: new_right };
-            let ind_key = (ind1.left_table, ind1.right_table);
+            let ind_key = (ind1.left_table.clone(), ind1.right_table.clone());
             debug!("Inferred {} via inference using FDs", new_ind);
 
             // If the IND doesn't already exist add it and delete old ones
@@ -190,7 +190,7 @@ impl<'a> Closure for HashMap<(&'a str, &'a str), Vec<IND<'a>>> {
                                   right_fields: ind2.right_fields.clone() };
               debug!("Inferred {} via transitivity", new_ind);
 
-              let table_key = (new_ind.left_table, new_ind.right_table);
+              let table_key = (new_ind.left_table.clone(), new_ind.right_table.clone());
               if !self.get(&table_key).unwrap_or(&vec![]).contains(&new_ind) {
                 new_inds.push(new_ind);
               }
@@ -204,7 +204,7 @@ impl<'a> Closure for HashMap<(&'a str, &'a str), Vec<IND<'a>>> {
 
         // Add new INDs
         for new_ind in new_inds.into_iter() {
-          let ind_key = (new_ind.left_table, new_ind.right_table);
+          let ind_key = (new_ind.left_table.clone(), new_ind.right_table.clone());
           if self.contains_key(&ind_key) {
             self.get_mut(&ind_key).unwrap().push(new_ind);
           } else {
@@ -238,12 +238,12 @@ mod tests {
   #[test]
   fn ind_reverse() {
     let ind = IND {
-      left_table: "foo", left_fields: vec!["bar"],
-      right_table: "baz", right_fields: vec!["quux"]
+      left_table: "foo".to_string(), left_fields: vec!["bar".to_string()],
+      right_table: "baz".to_string(), right_fields: vec!["quux".to_string()]
     };
     let rev = IND {
-      left_table: "baz", left_fields: vec!["quux"],
-      right_table: "foo", right_fields: vec!["bar"]
+      left_table: "baz".to_string(), left_fields: vec!["quux".to_string()],
+      right_table: "foo".to_string(), right_fields: vec!["bar".to_string()]
     };
 
     assert_eq!(ind.reverse(), rev)

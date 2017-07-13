@@ -11,17 +11,17 @@ pub struct Field {
 }
 
 #[derive(Debug, Default)]
-pub struct Table<'a> {
+pub struct Table {
   pub name: String,
   pub fields: HashMap<String, Field>,
-  pub fds: HashMap<Vec<&'a str>, FD<'a>>,
+  pub fds: HashMap<Vec<String>, FD>,
 }
 
-impl<'a> PartialEq for Table<'a> {
+impl PartialEq for Table {
   fn eq(&self, other: &Self) -> bool { self.name == other.name }
 }
 
-impl<'a> fmt::Display for Table<'a> {
+impl fmt::Display for Table {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
     let mut field_names: Vec<_> = self.fields.values().map(|f|
       if f.key {
@@ -37,22 +37,22 @@ impl<'a> fmt::Display for Table<'a> {
   }
 }
 
-impl<'a> Table<'a> {
-  pub fn add_fd(&mut self, mut lhs: Vec<&'a str>, mut rhs: Vec<&'a str>) {
+impl Table {
+  pub fn add_fd(&mut self, mut lhs: Vec<String>, mut rhs: Vec<String>) {
     lhs.sort();
     lhs.dedup();
 
     // Merge this FD with others having the same LHS
-    if self.fds.contains_key(&lhs) {
-      let old_fd = self.fds.remove(&lhs).unwrap();
+    let key = &lhs.iter().map(|f| f.clone()).collect::<Vec<_>>();
+    if self.fds.contains_key(key) {
+      let old_fd = self.fds.remove(key).unwrap();
       rhs.extend(old_fd.rhs.into_iter());
     }
 
-    let lhs_copy = lhs.clone();
     let left_set = lhs.into_iter().collect::<HashSet<_>>();
     let right_set = rhs.into_iter().collect::<HashSet<_>>();
 
-    self.fds.insert(lhs_copy, FD { lhs: left_set, rhs: right_set });
+    self.fds.insert(key.clone(), FD { lhs: left_set, rhs: right_set });
     self.fds.closure(None);
   }
 
@@ -65,17 +65,14 @@ impl<'a> Table<'a> {
   }
 
   pub fn is_bcnf(&self) -> bool {
-    for fd in self.fds.values() {
-      if !fd.is_trivial() && !self.is_superkey(&fd.lhs) {
-        return false;
-      }
-    }
-
-    true
+    self.violating_fd().is_none()
   }
 
   pub fn violating_fd(&self) -> Option<&FD> {
-    self.fds.values().find(|fd| !fd.is_trivial() && !self.is_superkey(&fd.lhs))
+    self.fds.values().find(|fd|
+      !fd.is_trivial() &&
+      !self.is_superkey(&fd.lhs.iter().map(|f| f.as_str()).collect::<HashSet<_>>())
+    )
   }
 }
 
@@ -122,7 +119,7 @@ mod tests {
       field!("foo", "String", true),
       field!("bar")
     });
-    t.add_fd(vec!["foo"], vec!["bar"]);
+    t.add_fd(vec!["foo".to_string()], vec!["bar".to_string()]);
     assert!(t.is_bcnf())
   }
 
@@ -132,7 +129,7 @@ mod tests {
       field!("foo", "String", true),
       field!("bar")
     });
-    t.add_fd(vec!["bar"], vec!["foo"]);
+    t.add_fd(vec!["bar".to_string()], vec!["foo".to_string()]);
     let fd = t.fds.values().next().unwrap();
     assert_eq!(t.violating_fd().unwrap(), fd)
   }
@@ -143,7 +140,7 @@ mod tests {
       field!("foo", "String", true),
       field!("bar")
     });
-    t.add_fd(vec!["foo"], vec!["bar"]);
+    t.add_fd(vec!["foo".to_string()], vec!["bar".to_string()]);
     assert!(t.violating_fd().is_none())
   }
 
@@ -154,8 +151,8 @@ mod tests {
       field!("bar"),
       field!("baz")
     });
-    t.add_fd(vec!["foo"], vec!["bar"]);
-    t.add_fd(vec!["bar"], vec!["baz"]);
+    t.add_fd(vec!["foo".to_string()], vec!["bar".to_string()]);
+    t.add_fd(vec!["bar".to_string()], vec!["baz".to_string()]);
     assert!(!t.is_bcnf())
   }
 

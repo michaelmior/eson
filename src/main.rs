@@ -30,16 +30,22 @@ fn read_file(name: &str) -> Result<String, io::Error> {
 }
 
 // Copy FDs between tables based on inclusion dependencies
-fn copy_fds(inds: &mut HashMap<(&str, &str), Vec<dependencies::IND>>, tables: &mut HashMap<String, model::Table>) -> () {
+fn copy_fds(inds: &mut HashMap<(String, String), Vec<dependencies::IND>>, tables: &mut HashMap<String, model::Table>) -> () {
   let mut new_fds = Vec::new();
 
   // Loop over all FDs
   for ind_vec in inds.values() {
     for ind in ind_vec.iter() {
-      let left_fields = tables.get(ind.left_table).unwrap().fields.keys().map(|k| k.as_str()).into_iter().collect::<HashSet<_>>();
-      let left_key = tables.get(ind.left_table).unwrap().fields.values().filter(|f| f.key).map(|f| f.name.as_str()).into_iter().collect::<HashSet<_>>();
+      let mut left_fields = <HashSet<_>>::new();
+      for field in tables.get(&ind.left_table).unwrap().fields.keys() {
+        left_fields.insert(field.clone());
+      }
+      // let left_fields = tables.get(&ind.left_table).unwrap()
+      //     .fields.keys().map(|f| *f).into_iter().collect::<HashSet<_>>();
+      let left_key = tables.get(&ind.left_table).unwrap()
+          .fields.values().filter(|f| f.key).map(|f| f.name.to_string()).into_iter().collect::<HashSet<_>>();
 
-      new_fds.extend(tables.get(ind.right_table).unwrap().fds.values().map(|fd| {
+      new_fds.extend(tables.get(&ind.right_table).unwrap().fds.values().map(|fd| {
         let fd_lhs = fd.lhs.clone().into_iter().collect::<HashSet<_>>();
         let fd_rhs = fd.rhs.clone().into_iter().collect::<HashSet<_>>();
 
@@ -62,7 +68,7 @@ fn copy_fds(inds: &mut HashMap<(&str, &str), Vec<dependencies::IND>>, tables: &m
 
   // Add any new FDs which were found
   for fd in new_fds {
-    tables.get_mut(fd.0).unwrap().add_fd(fd.1, fd.2);
+    tables.get_mut(&fd.0).unwrap().add_fd(fd.1, fd.2);
   }
 }
 
@@ -81,22 +87,22 @@ fn main() {
   for fd in fd_vec.iter() {
     let mut table = tables.get_mut(&fd.0).unwrap();
     table.add_fd(
-      fd.1.iter().map(|s| s.as_str()).collect::<Vec<_>>(),
-      fd.2.iter().map(|s| s.as_str()).collect::<Vec<_>>()
+      fd.1.iter().map(|s| s.clone()).collect::<Vec<_>>(),
+      fd.2.iter().map(|s| s.clone()).collect::<Vec<_>>()
     );
   }
 
   // Create a HashMap of INDs from the parsed data
-  let mut inds: HashMap<(&str, &str), Vec<dependencies::IND>> = HashMap::new();
+  let mut inds: HashMap<(String, String), Vec<dependencies::IND>> = HashMap::new();
   for ind in ind_vec.iter() {
     let new_ind = dependencies::IND {
-      left_table: &ind.0,
-      left_fields: ind.1.iter().map(|s| s.as_str()).collect::<Vec<_>>(),
-      right_table: &ind.2,
-      right_fields: ind.3.iter().map(|s| s.as_str()).collect::<Vec<_>>()
+      left_table: ind.0.clone(),
+      left_fields: ind.1.iter().map(|s| s.clone()).collect::<Vec<_>>(),
+      right_table: ind.2.clone(),
+      right_fields: ind.3.iter().map(|s| s.clone()).collect::<Vec<_>>()
     };
 
-    let ind_key = (ind.0.as_str(), ind.2.as_str());
+    let ind_key = (ind.0.clone(), ind.2.clone());
     if inds.contains_key(&ind_key) {
       let ind_list = inds.get_mut(&ind_key).unwrap();
       ind_list.push(new_ind);
