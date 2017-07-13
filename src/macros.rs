@@ -37,3 +37,25 @@ macro_rules! add_fd(
     );
   };
 );
+
+#[cfg(test)]
+macro_rules! add_ind(
+  ($schema:expr, $left_table:expr, $left_fields:expr, $right_table:expr, $right_fields:expr) => {
+    $schema.add_ind(IND {
+      left_table: $left_table.parse().unwrap(),
+      left_fields: $left_fields.iter().map(|f| f.parse().unwrap()).collect::<Vec<_>>(),
+      right_table: $right_table.parse().unwrap(),
+      right_fields: $right_fields.iter().map(|f| f.parse().unwrap()).collect::<Vec<_>>()
+    });
+  };
+);
+
+#[cfg(test)]
+macro_rules! schema(
+  ($($table:expr),+) => {
+    Schema {
+      tables: collect![$($table.name.to_string().parse().unwrap() => $table),+],
+      ..Default::default()
+    }
+  };
+);

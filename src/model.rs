@@ -66,6 +66,10 @@ impl Schema {
   }
 
   pub fn prune_inds(&mut self) {
+    let tables = self.tables.keys().collect::<HashSet<&TableName>>();
+    self.inds.retain(|key, _|
+      tables.contains(&key.0) && tables.contains(&key.1)
+    )
   }
 }
 
@@ -295,5 +299,30 @@ mod tests {
     };
     let copied_fds = t2.fds.values().collect::<Vec<_>>();
     assert_eq!(vec![&copied_fd], copied_fds)
+  }
+
+  #[test]
+  fn schema_prune_inds_yes() {
+    let t = table!("foo", fields! {
+      field!("bar", "String", true)
+    });
+    let mut schema = schema! {t};
+    add_ind!(schema, "foo", vec!["bar"], "baz", vec!["quux"]);
+    schema.prune_inds();
+    assert_eq!(schema.inds.len(), 0)
+  }
+
+  #[test]
+  fn schema_prune_inds_no() {
+    let t1 = table!("foo", fields! {
+      field!("bar", "String", true)
+    });
+    let t2 = table!("baz", fields! {
+      field!("quux", "String", true)
+    });
+    let mut schema = schema! {t1, t2};
+    add_ind!(schema, "foo", vec!["bar"], "baz", vec!["quux"]);
+    schema.prune_inds();
+    assert_eq!(schema.inds.len(), 1)
   }
 }
