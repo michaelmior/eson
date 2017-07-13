@@ -68,7 +68,7 @@ impl Table {
     self.fds.closure();
   }
 
-  pub fn copy_fds(&mut self, other: Table) {
+  pub fn copy_fds(&mut self, other: &Table) {
     for fd in other.fds.values() {
       let new_lhs = fd.lhs.iter().map(|f| f.to_string().parse().unwrap())
           .filter(|f| self.fields.contains_key(f)).collect::<Vec<_>>();

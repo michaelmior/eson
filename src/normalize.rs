@@ -17,13 +17,15 @@ fn decomposed_tables(tables: &mut HashMap<TableName, Table>, table_name: TableNa
   let t1_fields = t.fields.clone().into_iter().filter(|&(ref k, _)|
     vfd.lhs.contains(k) || vfd.rhs.contains(k)
   ).collect::<HashMap<FieldName, Field>>();
-  let t1 = Table { name: (t.name.to_string().clone() + "_base").parse().unwrap(), fields: t1_fields, ..Default::default() };
+  let mut t1 = Table { name: (t.name.to_string().clone() + "_base").parse().unwrap(), fields: t1_fields, ..Default::default() };
+  t1.copy_fds(t);
 
   // Construct t2 excluding fields which are only on the RHS of the FD
   let t2_fields = t.fields.clone().into_iter().filter(|&(ref k, _)|
     !vfd.rhs.contains(k) || vfd.lhs.contains(k)
   ).collect::<HashMap<FieldName, Field>>();
-  let t2 = Table { name: (t.name.to_string().clone() + "_ext").parse().unwrap(), fields: t2_fields, ..Default::default() };
+  let mut t2 = Table { name: (t.name.to_string().clone() + "_ext").parse().unwrap(), fields: t2_fields, ..Default::default() };
+  t2.copy_fds(t);
 
   (t1, t2)
 }
