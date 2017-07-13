@@ -54,7 +54,7 @@ impl FDClosure for HashMap<Vec<FieldName>, FD> {
             new_fd = FD { lhs: fd1.lhs.clone(), rhs: fd2.rhs.clone() };
           }
 
-          println!("Inferred {} via transitivity", new_fd);
+          debug!("Inferred {} via transitivity", new_fd);
           new_fds.push(new_fd);
         }
       }
