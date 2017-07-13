@@ -208,12 +208,7 @@ impl INDClosure for Schema {
 
         // Add new INDs
         for new_ind in new_inds.into_iter() {
-          let ind_key = (new_ind.left_table.clone(), new_ind.right_table.clone());
-          if self.inds.contains_key(&ind_key) {
-            self.inds.get_mut(&ind_key).unwrap().push(new_ind);
-          } else {
-            self.inds.insert(ind_key, vec![new_ind]);
-          }
+          self.add_ind(new_ind);
         }
 
         // Delete old INDs
