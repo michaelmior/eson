@@ -1,9 +1,10 @@
-use model::Table;
-
 use std::fmt;
 use std::collections::{HashMap, HashSet};
 
 extern crate group_by;
+
+use model::Table;
+use symbols::FieldName;
 
 pub trait Closure {
   fn closure(&mut self, tables: Option<&mut HashMap<String, Table>>) -> bool;
@@ -11,8 +12,8 @@ pub trait Closure {
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct FD {
-  pub lhs: HashSet<String>,
-  pub rhs: HashSet<String>,
+  pub lhs: HashSet<FieldName>,
+  pub rhs: HashSet<FieldName>,
 }
 
 impl fmt::Display for FD {
@@ -27,7 +28,7 @@ impl FD {
   }
 }
 
-impl Closure for HashMap<Vec<String>, FD> {
+impl Closure for HashMap<Vec<FieldName>, FD> {
   fn closure(&mut self, _: Option<&mut HashMap<String, Table>>) -> bool {
     let mut any_changed = false;
     let mut changed = true;
@@ -81,9 +82,9 @@ impl Closure for HashMap<Vec<String>, FD> {
 #[derive(Debug, PartialEq)]
 pub struct IND {
   pub left_table: String,
-  pub left_fields: Vec<String>,
+  pub left_fields: Vec<FieldName>,
   pub right_table: String,
-  pub right_fields: Vec<String>,
+  pub right_fields: Vec<FieldName>,
 }
 
 impl fmt::Display for IND {
@@ -238,12 +239,12 @@ mod tests {
   #[test]
   fn ind_reverse() {
     let ind = IND {
-      left_table: "foo".to_string(), left_fields: vec!["bar".to_string()],
-      right_table: "baz".to_string(), right_fields: vec!["quux".to_string()]
+      left_table: "foo".to_string(), left_fields: vec!["bar".parse().unwrap()],
+      right_table: "baz".to_string(), right_fields: vec!["quux".parse().unwrap()]
     };
     let rev = IND {
-      left_table: "baz".to_string(), left_fields: vec!["quux".to_string()],
-      right_table: "foo".to_string(), right_fields: vec!["bar".to_string()]
+      left_table: "baz".to_string(), left_fields: vec!["quux".parse().unwrap()],
+      right_table: "foo".to_string(), right_fields: vec!["bar".parse().unwrap()]
     };
 
     assert_eq!(ind.reverse(), rev)

@@ -2,10 +2,11 @@ use std::collections::{HashMap, HashSet};
 use std::fmt;
 
 use dependencies::{FD, Closure};
+use symbols::FieldName;
 
 #[derive(Clone, Debug)]
 pub struct Field {
-  pub name: String,
+  pub name: FieldName,
   pub field_type: String,
   pub key: bool
 }
@@ -13,8 +14,8 @@ pub struct Field {
 #[derive(Debug, Default)]
 pub struct Table {
   pub name: String,
-  pub fields: HashMap<String, Field>,
-  pub fds: HashMap<Vec<String>, FD>,
+  pub fields: HashMap<FieldName, Field>,
+  pub fds: HashMap<Vec<FieldName>, FD>,
 }
 
 impl PartialEq for Table {
@@ -26,7 +27,7 @@ impl fmt::Display for Table {
     let mut field_names: Vec<_> = self.fields.values().map(|f|
       if f.key {
         let mut key_name = "*".to_owned();
-        key_name.push_str(f.name.as_str());
+        key_name.push_str(f.name.as_ref());
         key_name
       } else {
         f.name.to_string()
@@ -38,7 +39,7 @@ impl fmt::Display for Table {
 }
 
 impl Table {
-  pub fn add_fd(&mut self, mut lhs: Vec<String>, mut rhs: Vec<String>) {
+  pub fn add_fd(&mut self, mut lhs: Vec<FieldName>, mut rhs: Vec<FieldName>) {
     lhs.sort();
     lhs.dedup();
 
@@ -57,7 +58,7 @@ impl Table {
   }
 
   pub fn key_fields(&self) -> HashSet<&str> {
-    self.fields.values().filter(|f| f.key).map(|f| f.name.as_str()).collect::<HashSet<_>>()
+    self.fields.values().filter(|f| f.key).map(|f| f.name.as_ref()).collect::<HashSet<_>>()
   }
 
   pub fn is_superkey(&self, fields: &HashSet<&str>) -> bool {
@@ -71,7 +72,7 @@ impl Table {
   pub fn violating_fd(&self) -> Option<&FD> {
     self.fds.values().find(|fd|
       !fd.is_trivial() &&
-      !self.is_superkey(&fd.lhs.iter().map(|f| f.as_str()).collect::<HashSet<_>>())
+      !self.is_superkey(&fd.lhs.iter().map(|f| f.as_ref()).collect::<HashSet<_>>())
     )
   }
 }
@@ -85,7 +86,7 @@ pub enum Literal {
 
 pub enum Define {
   Field(Field),
-  Key(String)
+  Key(FieldName)
 }
 
 pub enum TableOption {
@@ -119,7 +120,7 @@ mod tests {
       field!("foo", "String", true),
       field!("bar")
     });
-    t.add_fd(vec!["foo".to_string()], vec!["bar".to_string()]);
+    t.add_fd(vec!["foo".parse().unwrap()], vec!["bar".parse().unwrap()]);
     assert!(t.is_bcnf())
   }
 
@@ -129,7 +130,7 @@ mod tests {
       field!("foo", "String", true),
       field!("bar")
     });
-    t.add_fd(vec!["bar".to_string()], vec!["foo".to_string()]);
+    t.add_fd(vec!["bar".parse().unwrap()], vec!["foo".parse().unwrap()]);
     let fd = t.fds.values().next().unwrap();
     assert_eq!(t.violating_fd().unwrap(), fd)
   }
@@ -140,7 +141,7 @@ mod tests {
       field!("foo", "String", true),
       field!("bar")
     });
-    t.add_fd(vec!["foo".to_string()], vec!["bar".to_string()]);
+    t.add_fd(vec!["foo".parse().unwrap()], vec!["bar".parse().unwrap()]);
     assert!(t.violating_fd().is_none())
   }
 
@@ -151,8 +152,8 @@ mod tests {
       field!("bar"),
       field!("baz")
     });
-    t.add_fd(vec!["foo".to_string()], vec!["bar".to_string()]);
-    t.add_fd(vec!["bar".to_string()], vec!["baz".to_string()]);
+    t.add_fd(vec!["foo".parse().unwrap()], vec!["bar".parse().unwrap()]);
+    t.add_fd(vec!["bar".parse().unwrap()], vec!["baz".parse().unwrap()]);
     assert!(!t.is_bcnf())
   }
 

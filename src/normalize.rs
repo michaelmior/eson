@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use model::{Field, Table};
+use symbols::FieldName;
 
 pub trait Normalizable {
   fn normalize(&mut self) -> bool;
@@ -15,13 +16,13 @@ fn decomposed_tables(tables: &mut HashMap<String, Table>, table_name: String) ->
   // Construct t1 with only fields from the FD
   let t1_fields = t.fields.clone().into_iter().filter(|&(ref k, _)|
     vfd.lhs.contains(k) || vfd.rhs.contains(k)
-  ).collect::<HashMap<String, Field>>();
+  ).collect::<HashMap<FieldName, Field>>();
   let t1 = Table { name: t.name.clone() + "_base", fields: t1_fields, ..Default::default() };
 
   // Construct t2 excluding fields which are only on the RHS of the FD
   let t2_fields = t.fields.clone().into_iter().filter(|&(ref k, _)|
     !vfd.rhs.contains(k) || vfd.lhs.contains(k)
-  ).collect::<HashMap<String, Field>>();
+  ).collect::<HashMap<FieldName, Field>>();
   let t2 = Table { name: t.name.clone() + "_ext", fields: t2_fields, ..Default::default() };
 
   (t1, t2)

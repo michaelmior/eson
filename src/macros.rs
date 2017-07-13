@@ -19,13 +19,13 @@ macro_rules! fields(
 #[cfg(test)]
 macro_rules! field(
   ($name:expr) => {
-    Field { name: $name.to_string(), field_type: "".to_string(), key: false }
+    Field { name: $name.parse().unwrap(), field_type: "".to_string(), key: false }
   };
   ($name:expr, $field_type:expr) => {
-    Field { name: $name.to_string(), field_type: $field_type.to_string(), key: false }
+    Field { name: $name.parse().unwrap(), field_type: $field_type.to_string(), key: false }
   };
   ($name:expr, $field_type:expr, $key:expr) => {
-    Field { name: $name.to_string(), field_type: $field_type.to_string(), key: $key }
+    Field { name: $name.parse().unwrap(), field_type: $field_type.to_string(), key: $key }
   }
 );
 

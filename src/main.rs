@@ -5,6 +5,7 @@
 
 #[macro_use] extern crate log;
 extern crate env_logger;
+extern crate string_intern;
 
 use std::collections::{HashMap, HashSet};
 use std::env;
@@ -17,6 +18,7 @@ peg_file! input("input.rustpeg");
 mod dependencies;
 mod model;
 mod normalize;
+mod symbols;
 
 use dependencies::Closure;
 use normalize::Normalizable;
@@ -43,7 +45,7 @@ fn copy_fds(inds: &mut HashMap<(String, String), Vec<dependencies::IND>>, tables
       // let left_fields = tables.get(&ind.left_table).unwrap()
       //     .fields.keys().map(|f| *f).into_iter().collect::<HashSet<_>>();
       let left_key = tables.get(&ind.left_table).unwrap()
-          .fields.values().filter(|f| f.key).map(|f| f.name.to_string()).into_iter().collect::<HashSet<_>>();
+          .fields.values().filter(|f| f.key).map(|f| f.name.clone()).into_iter().collect::<HashSet<_>>();
 
       new_fds.extend(tables.get(&ind.right_table).unwrap().fds.values().map(|fd| {
         let fd_lhs = fd.lhs.clone().into_iter().collect::<HashSet<_>>();
@@ -87,8 +89,8 @@ fn main() {
   for fd in fd_vec.iter() {
     let mut table = tables.get_mut(&fd.0).unwrap();
     table.add_fd(
-      fd.1.iter().map(|s| s.clone()).collect::<Vec<_>>(),
-      fd.2.iter().map(|s| s.clone()).collect::<Vec<_>>()
+      fd.1.iter().map(|s| s.parse().unwrap()).collect::<Vec<_>>(),
+      fd.2.iter().map(|s| s.parse().unwrap()).collect::<Vec<_>>()
     );
   }
 
@@ -97,9 +99,9 @@ fn main() {
   for ind in ind_vec.iter() {
     let new_ind = dependencies::IND {
       left_table: ind.0.clone(),
-      left_fields: ind.1.iter().map(|s| s.clone()).collect::<Vec<_>>(),
+      left_fields: ind.1.iter().map(|s| s.parse().unwrap()).collect::<Vec<_>>(),
       right_table: ind.2.clone(),
-      right_fields: ind.3.iter().map(|s| s.clone()).collect::<Vec<_>>()
+      right_fields: ind.3.iter().map(|s| s.parse().unwrap()).collect::<Vec<_>>()
     };
 
     let ind_key = (ind.0.clone(), ind.2.clone());
