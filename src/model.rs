@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 
-use dependencies::{FD, Closure, IND};
+use dependencies::{FD, FDClosure, IND};
 use symbols::{FieldName, TableName};
 
 pub struct Schema {
@@ -65,7 +65,7 @@ impl Table {
     let right_set = rhs.into_iter().collect::<HashSet<_>>();
 
     self.fds.insert(key.clone(), FD { lhs: left_set, rhs: right_set });
-    self.fds.closure(None);
+    self.fds.closure();
   }
 
   pub fn copy_fds(&mut self, other: Table) {

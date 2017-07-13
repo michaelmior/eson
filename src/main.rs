@@ -22,7 +22,7 @@ mod model;
 mod normalize;
 mod symbols;
 
-use dependencies::Closure;
+use dependencies::{FDClosure, INDClosure};
 use model::Schema;
 use normalize::Normalizable;
 use symbols::TableName;
@@ -123,10 +123,10 @@ fn main() {
   while changed {
     changed = false;
     for table in schema.tables.values_mut() {
-      changed = changed || table.fds.closure(None);
+      changed = changed || table.fds.closure();
     }
     copy_fds(&mut schema.inds, &mut schema.tables);
-    changed = changed || schema.inds.closure(Some(&mut schema.tables));
+    changed = changed || schema.ind_closure();
     changed = changed || schema.normalize();
   }
 

@@ -3,12 +3,8 @@ use std::collections::{HashMap, HashSet};
 
 extern crate group_by;
 
-use model::Table;
+use model::Schema;
 use symbols::{TableName, FieldName};
-
-pub trait Closure {
-  fn closure(&mut self, tables: Option<&mut HashMap<TableName, Table>>) -> bool;
-}
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct FD {
@@ -28,8 +24,12 @@ impl FD {
   }
 }
 
-impl Closure for HashMap<Vec<FieldName>, FD> {
-  fn closure(&mut self, _: Option<&mut HashMap<TableName, Table>>) -> bool {
+pub trait FDClosure {
+  fn closure(&mut self) -> bool;
+}
+
+impl FDClosure for HashMap<Vec<FieldName>, FD> {
+  fn closure(&mut self) -> bool {
     let mut any_changed = false;
     let mut changed = true;
 
@@ -108,9 +108,12 @@ impl IND {
   }
 }
 
-impl Closure for HashMap<(TableName, TableName), Vec<IND>> {
-  fn closure(&mut self, tables: Option<&mut HashMap<TableName, Table>>) -> bool {
-    let table_map = tables.unwrap();
+pub trait INDClosure {
+  fn ind_closure(&mut self) -> bool;
+}
+
+impl INDClosure for Schema {
+  fn ind_closure(&mut self) -> bool {
     let mut any_changed = false;
     let mut changed = true;
 
@@ -120,11 +123,11 @@ impl Closure for HashMap<(TableName, TableName), Vec<IND>> {
       let mut delete_inds: HashMap<_, Vec<_>> = HashMap::new();
 
       // Perform inference based on FDs
-      for inds in self.values() {
+      for inds in self.inds.values() {
         for (i, ind1) in inds.iter().enumerate() {
           // Find all fields which can be inferred from the current FDs
           let mut all_fields = ind1.left_fields.clone().into_iter().collect::<HashSet<_>>();
-          let left_table = table_map.get(&ind1.left_table).unwrap();
+          let left_table = self.tables.get(&ind1.left_table).unwrap();
           for fd in left_table.fds.values() {
             if fd.lhs.clone().into_iter().collect::<HashSet<_>>().is_subset(&all_fields) {
               all_fields.extend(fd.rhs.clone());
@@ -157,7 +160,7 @@ impl Closure for HashMap<(TableName, TableName), Vec<IND>> {
             debug!("Inferred {} via inference using FDs", new_ind);
 
             // If the IND doesn't already exist add it and delete old ones
-            if !self.get(&ind_key).unwrap().contains(&new_ind) {
+            if !self.inds.get(&ind_key).unwrap().contains(&new_ind) {
               new_inds.push(new_ind);
 
               if delete_inds.contains_key(&ind_key) {
@@ -175,7 +178,7 @@ impl Closure for HashMap<(TableName, TableName), Vec<IND>> {
       // Infer new FDs by transitivity
       {
         // Group INDs by table and fields
-        let ind_vec: Vec<&IND> = self.values().flat_map(|inds| inds.clone()).collect();
+        let ind_vec: Vec<&IND> = self.inds.values().flat_map(|inds| inds.clone()).collect();
         let grouped_inds = group_by::group_by(ind_vec.iter(),
           |ind| (ind.left_table.clone(), ind.left_fields.clone()));
 
@@ -192,7 +195,7 @@ impl Closure for HashMap<(TableName, TableName), Vec<IND>> {
               debug!("Inferred {} via transitivity", new_ind);
 
               let table_key = (new_ind.left_table.clone(), new_ind.right_table.clone());
-              if !self.get(&table_key).unwrap_or(&vec![]).contains(&new_ind) {
+              if !self.inds.get(&table_key).unwrap_or(&vec![]).contains(&new_ind) {
                 new_inds.push(new_ind);
               }
             }
@@ -206,16 +209,16 @@ impl Closure for HashMap<(TableName, TableName), Vec<IND>> {
         // Add new INDs
         for new_ind in new_inds.into_iter() {
           let ind_key = (new_ind.left_table.clone(), new_ind.right_table.clone());
-          if self.contains_key(&ind_key) {
-            self.get_mut(&ind_key).unwrap().push(new_ind);
+          if self.inds.contains_key(&ind_key) {
+            self.inds.get_mut(&ind_key).unwrap().push(new_ind);
           } else {
-            self.insert(ind_key, vec![new_ind]);
+            self.inds.insert(ind_key, vec![new_ind]);
           }
         }
 
         // Delete old INDs
         for (tables, delete_indices) in delete_inds.iter_mut() {
-          let mut inds = self.get_mut(&tables).unwrap();
+          let mut inds = self.inds.get_mut(&tables).unwrap();
           delete_indices.sort_by(|a, b| a.cmp(b).reverse());
           for delete_index in delete_indices.iter() {
             inds.remove(*delete_index);
