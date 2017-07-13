@@ -22,6 +22,7 @@ mod symbols;
 
 use dependencies::Closure;
 use normalize::Normalizable;
+use symbols::TableName;
 
 fn read_file(name: &str) -> Result<String, io::Error> {
   let mut input_file = try!(File::open(name));
@@ -32,7 +33,7 @@ fn read_file(name: &str) -> Result<String, io::Error> {
 }
 
 // Copy FDs between tables based on inclusion dependencies
-fn copy_fds(inds: &mut HashMap<(String, String), Vec<dependencies::IND>>, tables: &mut HashMap<String, model::Table>) -> () {
+fn copy_fds(inds: &mut HashMap<(TableName, TableName), Vec<dependencies::IND>>, tables: &mut HashMap<TableName, model::Table>) -> () {
   let mut new_fds = Vec::new();
 
   // Loop over all FDs
@@ -95,16 +96,16 @@ fn main() {
   }
 
   // Create a HashMap of INDs from the parsed data
-  let mut inds: HashMap<(String, String), Vec<dependencies::IND>> = HashMap::new();
+  let mut inds: HashMap<(TableName, TableName), Vec<dependencies::IND>> = HashMap::new();
   for ind in ind_vec.iter() {
     let new_ind = dependencies::IND {
-      left_table: ind.0.clone(),
+      left_table: ind.0.parse().unwrap(),
       left_fields: ind.1.iter().map(|s| s.parse().unwrap()).collect::<Vec<_>>(),
-      right_table: ind.2.clone(),
+      right_table: ind.2.parse().unwrap(),
       right_fields: ind.3.iter().map(|s| s.parse().unwrap()).collect::<Vec<_>>()
     };
 
-    let ind_key = (ind.0.clone(), ind.2.clone());
+    let ind_key = (ind.0.parse().unwrap(), ind.2.parse().unwrap());
     if inds.contains_key(&ind_key) {
       let ind_list = inds.get_mut(&ind_key).unwrap();
       ind_list.push(new_ind);

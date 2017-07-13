@@ -32,9 +32,9 @@ macro_rules! field(
 #[cfg(test)]
 macro_rules! table(
   ($name:expr) => {
-    Table { name: $name.to_string(), ..Default::default() }
+    Table { name: $name.parse().unwrap(), ..Default::default() }
   };
   ($name:expr, $fields:expr) => {
-    Table { name: $name.to_string(), fields: $fields, ..Default::default() }
+    Table { name: $name.parse().unwrap(), fields: $fields, ..Default::default() }
   };
 );

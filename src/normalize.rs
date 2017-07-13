@@ -1,13 +1,13 @@
 use std::collections::HashMap;
 
 use model::{Field, Table};
-use symbols::FieldName;
+use symbols::{FieldName, TableName};
 
 pub trait Normalizable {
   fn normalize(&mut self) -> bool;
 }
 
-fn decomposed_tables(tables: &mut HashMap<String, Table>, table_name: String) -> (Table, Table) {
+fn decomposed_tables(tables: &mut HashMap<TableName, Table>, table_name: TableName) -> (Table, Table) {
   let t = tables.get(&table_name).unwrap();
 
   // Find a violating FD
@@ -17,18 +17,18 @@ fn decomposed_tables(tables: &mut HashMap<String, Table>, table_name: String) ->
   let t1_fields = t.fields.clone().into_iter().filter(|&(ref k, _)|
     vfd.lhs.contains(k) || vfd.rhs.contains(k)
   ).collect::<HashMap<FieldName, Field>>();
-  let t1 = Table { name: t.name.clone() + "_base", fields: t1_fields, ..Default::default() };
+  let t1 = Table { name: (t.name.to_string().clone() + "_base").parse().unwrap(), fields: t1_fields, ..Default::default() };
 
   // Construct t2 excluding fields which are only on the RHS of the FD
   let t2_fields = t.fields.clone().into_iter().filter(|&(ref k, _)|
     !vfd.rhs.contains(k) || vfd.lhs.contains(k)
   ).collect::<HashMap<FieldName, Field>>();
-  let t2 = Table { name: t.name.clone() + "_ext", fields: t2_fields, ..Default::default() };
+  let t2 = Table { name: (t.name.to_string().clone() + "_ext").parse().unwrap(), fields: t2_fields, ..Default::default() };
 
   (t1, t2)
 }
 
-impl<'a> Normalizable for HashMap<String, Table> {
+impl<'a> Normalizable for HashMap<TableName, Table> {
   fn normalize(&mut self) -> bool {
     let mut any_changed = false;
     let mut changed = true;

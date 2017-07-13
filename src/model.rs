@@ -2,7 +2,7 @@ use std::collections::{HashMap, HashSet};
 use std::fmt;
 
 use dependencies::{FD, Closure};
-use symbols::FieldName;
+use symbols::{FieldName, TableName};
 
 #[derive(Clone, Debug)]
 pub struct Field {
@@ -11,11 +11,17 @@ pub struct Field {
   pub key: bool
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug)]
 pub struct Table {
-  pub name: String,
+  pub name: TableName,
   pub fields: HashMap<FieldName, Field>,
   pub fds: HashMap<Vec<FieldName>, FD>,
+}
+
+impl Default for Table {
+  fn default() -> Table {
+    Table { name: TableName::from(""), fields: HashMap::new(), fds: HashMap::new() }
+  }
 }
 
 impl PartialEq for Table {

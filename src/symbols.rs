@@ -10,3 +10,14 @@ impl Validator for FieldNameSymbol {
 }
 
 pub type FieldName = Symbol<FieldNameSymbol>;
+
+pub struct TableNameSymbol;
+
+impl Validator for TableNameSymbol {
+  type Err = ::std::string::ParseError;
+  fn validate_symbol(_: &str) -> Result<(), Self::Err> {
+    Ok(())
+  }
+}
+
+pub type TableName = Symbol<TableNameSymbol>;

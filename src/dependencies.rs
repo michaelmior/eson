@@ -4,10 +4,10 @@ use std::collections::{HashMap, HashSet};
 extern crate group_by;
 
 use model::Table;
-use symbols::FieldName;
+use symbols::{TableName, FieldName};
 
 pub trait Closure {
-  fn closure(&mut self, tables: Option<&mut HashMap<String, Table>>) -> bool;
+  fn closure(&mut self, tables: Option<&mut HashMap<TableName, Table>>) -> bool;
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -29,7 +29,7 @@ impl FD {
 }
 
 impl Closure for HashMap<Vec<FieldName>, FD> {
-  fn closure(&mut self, _: Option<&mut HashMap<String, Table>>) -> bool {
+  fn closure(&mut self, _: Option<&mut HashMap<TableName, Table>>) -> bool {
     let mut any_changed = false;
     let mut changed = true;
 
@@ -81,9 +81,9 @@ impl Closure for HashMap<Vec<FieldName>, FD> {
 
 #[derive(Debug, PartialEq)]
 pub struct IND {
-  pub left_table: String,
+  pub left_table: TableName,
   pub left_fields: Vec<FieldName>,
-  pub right_table: String,
+  pub right_table: TableName,
   pub right_fields: Vec<FieldName>,
 }
 
@@ -108,8 +108,8 @@ impl IND {
   }
 }
 
-impl Closure for HashMap<(String, String), Vec<IND>> {
-  fn closure(&mut self, tables: Option<&mut HashMap<String, Table>>) -> bool {
+impl Closure for HashMap<(TableName, TableName), Vec<IND>> {
+  fn closure(&mut self, tables: Option<&mut HashMap<TableName, Table>>) -> bool {
     let table_map = tables.unwrap();
     let mut any_changed = false;
     let mut changed = true;
@@ -124,7 +124,7 @@ impl Closure for HashMap<(String, String), Vec<IND>> {
         for (i, ind1) in inds.iter().enumerate() {
           // Find all fields which can be inferred from the current FDs
           let mut all_fields = ind1.left_fields.clone().into_iter().collect::<HashSet<_>>();
-          let left_table = table_map.get(ind1.left_table.as_str()).unwrap();
+          let left_table = table_map.get(&ind1.left_table).unwrap();
           for fd in left_table.fds.values() {
             if fd.lhs.clone().into_iter().collect::<HashSet<_>>().is_subset(&all_fields) {
               all_fields.extend(fd.rhs.clone());
@@ -239,12 +239,12 @@ mod tests {
   #[test]
   fn ind_reverse() {
     let ind = IND {
-      left_table: "foo".to_string(), left_fields: vec!["bar".parse().unwrap()],
-      right_table: "baz".to_string(), right_fields: vec!["quux".parse().unwrap()]
+      left_table: "foo".parse().unwrap(), left_fields: vec!["bar".parse().unwrap()],
+      right_table: "baz".parse().unwrap(), right_fields: vec!["quux".parse().unwrap()]
     };
     let rev = IND {
-      left_table: "baz".to_string(), left_fields: vec!["quux".parse().unwrap()],
-      right_table: "foo".to_string(), right_fields: vec!["bar".parse().unwrap()]
+      left_table: "baz".parse().unwrap(), left_fields: vec!["quux".parse().unwrap()],
+      right_table: "foo".parse().unwrap(), right_fields: vec!["bar".parse().unwrap()]
     };
 
     assert_eq!(ind.reverse(), rev)
