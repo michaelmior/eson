@@ -54,6 +54,7 @@ impl Normalizable for Schema {
         }
 
         // Decompose the tables and update the map
+        changed = true;
         any_changed = true;
         let (t1, t2) = decomposed_tables(&mut self.tables, table_name.clone());
         debug!("Decomposing {} into {} and {}", table_name, t1, t2);
