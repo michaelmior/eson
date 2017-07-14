@@ -58,17 +58,45 @@ impl Normalizable for Schema {
         let (t1, t2) = decomposed_tables(&mut self.tables, table_name.clone());
         debug!("Decomposing {} into {} and {}", table_name, t1, t2);
 
-        self.copy_inds(&table_name, &t1.name);
-        self.copy_inds(&table_name, &t2.name);
+        let t1_name = t1.name.clone();
+        let t2_name = t2.name.clone();
 
-        self.tables.remove(&table_name);
         self.tables.insert(t1.name.clone(), t1);
         self.tables.insert(t2.name.clone(), t2);
+
+        self.copy_inds(&table_name, &t1_name);
+        self.copy_inds(&table_name, &t2_name);
+
+        self.tables.remove(&table_name);
 
         self.prune_inds();
       }
     }
 
     any_changed
+  }
+}
+
+#[cfg(test)]
+mod test {
+  use super::*;
+
+  #[test]
+  fn test_normalize() {
+    let mut t = table!("foo", fields! {
+      field!("foo", "String", true),
+      field!("bar"),
+      field!("baz")
+    });
+    add_fd!(t, vec!["foo"], vec!["bar"]);
+    add_fd!(t, vec!["bar"], vec!["baz"]);
+    let mut schema = schema! {t};
+
+    schema.normalize();
+
+    let t1 = schema.tables.get(&TableName::from("foo_base")).unwrap();
+    assert_has_fields!(t1, field_names!["bar", "baz"]);
+    let t2 = schema.tables.get(&TableName::from("foo_ext")).unwrap();
+    assert_has_fields!(t2, field_names!["foo", "bar"]);
   }
 }

@@ -1,4 +1,21 @@
 #[cfg(test)]
+macro_rules! field_names(
+  { $($field:expr),+ } => {
+    vec! [ $(FieldName::from($field)),+ ]
+  };
+);
+
+#[cfg(test)]
+macro_rules! assert_has_fields(
+  ($table:expr, $field_names:expr) => {{
+    for field_name in $field_names {
+      assert!($table.fields.contains_key(&field_name),
+        format!("{} missing from {}", field_name, $table.name));
+    }
+  }};
+);
+
+#[cfg(test)]
 macro_rules! fields(
   { $($field:expr),+ } => {
     collect! [ $($field.name => $field),+ ]
