@@ -174,11 +174,11 @@ impl Table {
     }
   }
 
-  pub fn key_fields(&self) -> HashSet<&str> {
-    self.fields.values().filter(|f| f.key).map(|f| f.name.as_ref()).collect::<HashSet<_>>()
+  pub fn key_fields(&self) -> HashSet<FieldName> {
+    self.fields.values().filter(|f| f.key).map(|f| f.name.clone()).collect::<HashSet<_>>()
   }
 
-  pub fn is_superkey(&self, fields: &HashSet<&str>) -> bool {
+  pub fn is_superkey(&self, fields: &HashSet<FieldName>) -> bool {
     self.key_fields().is_subset(fields)
   }
 
@@ -189,7 +189,7 @@ impl Table {
   pub fn violating_fd(&self) -> Option<&FD> {
     self.fds.values().find(|fd|
       !fd.is_trivial() &&
-      !self.is_superkey(&fd.lhs.iter().map(|f| f.as_ref()).collect::<HashSet<_>>())
+      !self.is_superkey(&fd.lhs)
     )
   }
 }
@@ -291,9 +291,7 @@ mod tests {
       field!("foo", "String", true),
       field!("bar")
     });
-    let mut key = HashSet::new();
-    key.insert("foo");
-    key.insert("bar");
+    let key = collect![as HashSet<_>: FieldName::from("foo"), FieldName::from("bar")];
     assert!(t.is_superkey(&key))
   }
 
@@ -303,8 +301,7 @@ mod tests {
       field!("foo", "String", true),
       field!("bar")
     });
-    let mut key = HashSet::new();
-    key.insert("bar");
+    let key = collect![as HashSet<_>: FieldName::from("bar")];
     assert!(!t.is_superkey(&key))
   }
 
