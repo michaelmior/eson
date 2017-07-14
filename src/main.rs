@@ -120,17 +120,5 @@ fn main() {
     changed = changed || schema.normalize();
   }
 
-  for table in schema.tables.values() {
-    println!("{}", table);
-    for fd in table.fds.values() {
-      println!("  {}", fd);
-    }
-    println!();
-  }
-
-  for ind_group in schema.inds.values() {
-    for ind in ind_group {
-      println!("{}", ind);
-    }
-  }
+  println!("{}", schema);
 }

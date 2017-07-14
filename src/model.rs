@@ -10,6 +10,26 @@ pub struct Schema {
   pub inds: HashMap<(TableName, TableName), Vec<IND>>
 }
 
+impl fmt::Display for Schema {
+  fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+    for table in self.tables.values() {
+      writeln!(f, "{}", table)?;
+      for fd in table.fds.values() {
+        writeln!(f, "  {}", fd)?;
+      }
+      writeln!(f)?;
+    }
+
+    for ind_group in self.inds.values() {
+      for ind in ind_group {
+        writeln!(f, "{}", ind)?;
+      }
+    }
+
+    Ok(())
+  }
+}
+
 impl Schema {
   pub fn add_ind(&mut self, ind: IND) {
     let ind_key = (ind.left_table.clone(), ind.right_table.clone());
