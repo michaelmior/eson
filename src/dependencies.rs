@@ -3,6 +3,7 @@ use std::collections::{HashMap, HashSet};
 
 extern crate group_by;
 
+#[cfg(test)] use model::{Field, Table};
 use model::Schema;
 use symbols::{TableName, FieldName};
 
@@ -246,5 +247,63 @@ mod tests {
     };
 
     assert_eq!(ind.reverse(), rev)
+  }
+
+  #[test]
+  fn ind_closure_transitive() {
+    let t1 = table!("foo", fields! {
+      field!("bar", "String", true)
+    });
+    let t2 = table!("baz", fields! {
+      field!("quux", "String", true)
+    });
+    let t3 = table!("qux", fields! {
+      field!("quuz", "String", true)
+    });
+    let mut schema = schema! {t1, t2, t3};
+    add_ind!(schema, "qux", vec!["quuz"], "baz", vec!["quux"]);
+    add_ind!(schema, "baz", vec!["quux"], "foo", vec!["bar"]);
+    schema.ind_closure();
+    assert!(schema.inds.get(&(TableName::from("qux"), TableName::from("foo"))).is_some());
+  }
+
+  #[test]
+  fn ind_closure_transitive_reverse() {
+    let t1 = table!("foo", fields! {
+      field!("bar", "String", true)
+    });
+    let t2 = table!("baz", fields! {
+      field!("quux", "String", true)
+    });
+    let t3 = table!("qux", fields! {
+      field!("quuz", "String", true)
+    });
+    let mut schema = schema! {t1, t2, t3};
+    add_ind!(schema, "qux", vec!["quuz"], "baz", vec!["quux"]);
+    add_ind!(schema, "foo", vec!["bar"], "baz", vec!["quux"]);
+    schema.ind_closure();
+    assert!(schema.inds.get(&(TableName::from("qux"), TableName::from("foo"))).is_none());
+  }
+
+  #[test]
+  fn ind_closure_fd() {
+    let mut t1 = table!("foo", fields! {
+      field!("bar", "String", true),
+      field!("baz")
+    });
+    add_fd!(t1, vec!["bar"], vec!["baz"]);
+    let t2 = table!("quux", fields! {
+      field!("qux", "String", true),
+      field!("corge")
+    });
+    let mut schema = schema! {t1, t2};
+    add_ind!(schema, "foo", vec!["bar"], "quux", vec!["qux"]);
+    add_ind!(schema, "foo", vec!["baz"], "quux", vec!["corge"]);
+    schema.ind_closure();
+
+    let inds = schema.inds.get(&(TableName::from("foo"), TableName::from("quux")));
+    assert!(inds.is_some());
+    assert!(inds.unwrap().len() == 1);
+    assert!(inds.unwrap()[0].left_fields.len() == 2);
   }
 }
