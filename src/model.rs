@@ -21,6 +21,15 @@ impl Schema {
     }
   }
 
+  pub fn delete_ind(&mut self, ind: IND) {
+    for (_, inds) in self.inds.iter_mut() {
+      let index = inds.iter().position(|i| i == &ind);
+      if index.is_some() {
+        inds.remove(index.unwrap());
+      }
+    }
+  }
+
   pub fn copy_inds(&mut self, src: &TableName, dst: &TableName) {
     let mut new_inds = Vec::new();
     {
