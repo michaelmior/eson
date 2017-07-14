@@ -21,9 +21,10 @@ impl Schema {
     }
   }
 
-  pub fn delete_ind(&mut self, ind: IND) {
+  #[allow(dead_code)]
+  pub fn delete_ind(&mut self, ind: &IND) {
     for (_, inds) in self.inds.iter_mut() {
-      let index = inds.iter().position(|i| i == &ind);
+      let index = inds.iter().position(|i| i == ind);
       if index.is_some() {
         inds.remove(index.unwrap());
       }
