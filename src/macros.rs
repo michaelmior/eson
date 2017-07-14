@@ -1,4 +1,17 @@
 #[cfg(test)]
+macro_rules! assert_has_key(
+  ($table:expr, $field_names:expr) => {{
+    let key_fields = $table.key_fields();
+    for field_name in $field_names {
+      assert!(key_fields.contains(&field_name),
+        format!("key {} missing from {}", field_name, $table.name));
+    }
+    assert!(key_fields.len() == $field_names.len(),
+      format!("{} has additional keys", $table.name));
+  }};
+);
+
+#[cfg(test)]
 macro_rules! field_names(
   { $($field:expr),+ } => {
     vec! [ $(FieldName::from($field)),+ ]

@@ -15,14 +15,26 @@ fn decomposed_tables(tables: &mut HashMap<TableName, Table>, table_name: TableNa
 
   // Construct t1 with only fields from the FD
   let t1_fields = t.fields.clone().into_iter().filter(|&(ref k, _)|
-    vfd.lhs.contains(k) || vfd.rhs.contains(k)
+    !vfd.rhs.contains(k)
+  ).map(|(k, v)|
+    (k, if v.key && vfd.rhs.contains(&v.name) {
+      Field { name: v.name, field_type: v.field_type, key: false }
+    } else {
+      v
+    })
   ).collect::<HashMap<FieldName, Field>>();
   let mut t1 = Table { name: (t.name.to_string().clone() + "_base").parse().unwrap(), fields: t1_fields, ..Default::default() };
   t1.copy_fds(t);
 
   // Construct t2 excluding fields which are only on the RHS of the FD
   let t2_fields = t.fields.clone().into_iter().filter(|&(ref k, _)|
-    !vfd.rhs.contains(k) || vfd.lhs.contains(k)
+    vfd.lhs.contains(k) || vfd.rhs.contains(k)
+  ).map(|(k, v)|
+    (k, if !v.key && vfd.lhs.contains(&v.name) {
+      Field { name: v.name, field_type: v.field_type, key: true }
+    } else {
+      v
+    })
   ).collect::<HashMap<FieldName, Field>>();
   let mut t2 = Table { name: (t.name.to_string().clone() + "_ext").parse().unwrap(), fields: t2_fields, ..Default::default() };
   t2.copy_fds(t);
@@ -96,8 +108,11 @@ mod test {
     schema.normalize();
 
     let t1 = schema.tables.get(&TableName::from("foo_base")).unwrap();
-    assert_has_fields!(t1, field_names!["bar", "baz"]);
+    assert_has_key!(t1, field_names!["foo"]);
+    assert_has_fields!(t1, field_names!["foo", "bar"]);
+
     let t2 = schema.tables.get(&TableName::from("foo_ext")).unwrap();
-    assert_has_fields!(t2, field_names!["foo", "bar"]);
+    assert_has_key!(t2, field_names!["bar"]);
+    assert_has_fields!(t2, field_names!["bar", "baz"]);
   }
 }
