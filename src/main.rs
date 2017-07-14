@@ -79,7 +79,10 @@ fn copy_fds(inds: &mut HashMap<(TableName, TableName), Vec<dependencies::IND>>, 
 }
 
 fn main() {
+  env_logger::init().unwrap();
+
   let filename = format!("examples/{}.txt", env::args().nth(1).unwrap());
+  info!("Loading schema {}", filename);
   let input_string = read_file(&filename).unwrap();
   let (table_vec, fd_vec, ind_vec) = input::input(&input_string).unwrap();
 
@@ -90,6 +93,7 @@ fn main() {
   }
 
   // Add the FDs to each table
+  info!("Adding FDs");
   for fd in fd_vec.iter() {
     let mut table = schema.tables.get_mut(&fd.0).unwrap();
     table.add_fd(
@@ -99,6 +103,7 @@ fn main() {
   }
 
   // Create a HashMap of INDs from the parsed data
+  info!("Adding INDs");
   for ind in ind_vec.iter() {
     let new_ind = dependencies::IND {
       left_table: ind.0.parse().unwrap(),
@@ -111,6 +116,7 @@ fn main() {
 
   let mut changed = true;
   while changed {
+    debug!("Looping");
     changed = false;
     for table in schema.tables.values_mut() {
       changed = changed || table.fds.closure();
