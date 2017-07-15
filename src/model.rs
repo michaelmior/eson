@@ -106,7 +106,6 @@ impl Schema {
 #[derive(Clone, Debug)]
 pub struct Field {
   pub name: FieldName,
-  pub field_type: String,
   pub key: bool
 }
 
@@ -225,7 +224,7 @@ mod tests {
   #[test]
   fn table_format_string() {
     let t = table!("foo", fields! {
-      field!("bar", "String", true),
+      field!("bar", true),
       field!("baz")
     });
     assert_eq!(format!("{}", t), "foo(*bar, baz)")
@@ -234,7 +233,7 @@ mod tests {
   #[test]
   fn table_is_bcnf_yes() {
     let mut t = table!("foo", fields! {
-      field!("foo", "String", true),
+      field!("foo", true),
       field!("bar")
     });
     add_fd!(t, vec!["foo"], vec!["bar"]);
@@ -244,7 +243,7 @@ mod tests {
   #[test]
   fn table_violating_fd() {
     let mut t = table!("foo", fields! {
-      field!("foo", "String", true),
+      field!("foo", true),
       field!("bar")
     });
     add_fd!(t, vec!["bar"], vec!["foo"]);
@@ -255,7 +254,7 @@ mod tests {
   #[test]
   fn table_no_violating_fd() {
     let mut t = table!("foo", fields! {
-      field!("foo", "String", true),
+      field!("foo", true),
       field!("bar")
     });
     add_fd!(t, vec!["foo"], vec!["bar"]);
@@ -265,7 +264,7 @@ mod tests {
   #[test]
   fn table_is_bcnf_no() {
     let mut t = table!("foo", fields! {
-      field!("foo", "String", true),
+      field!("foo", true),
       field!("bar"),
       field!("baz")
     });
@@ -277,7 +276,7 @@ mod tests {
   #[test]
   fn table_key_fields() {
     let t = table!("foo", fields! {
-      field!("foo", "String", true),
+      field!("foo", true),
       field!("bar")
     });
     let key_fields = t.key_fields();
@@ -288,7 +287,7 @@ mod tests {
   #[test]
   fn table_is_superkey_yes() {
     let t = table!("foo", fields! {
-      field!("foo", "String", true),
+      field!("foo", true),
       field!("bar")
     });
     let key = collect![as HashSet<_>: FieldName::from("foo"), FieldName::from("bar")];
@@ -298,7 +297,7 @@ mod tests {
   #[test]
   fn table_is_superkey_no() {
     let t = table!("foo", fields! {
-      field!("foo", "String", true),
+      field!("foo", true),
       field!("bar")
     });
     let key = collect![as HashSet<_>: FieldName::from("bar")];
@@ -308,12 +307,12 @@ mod tests {
   #[test]
   fn table_copy_fds() {
     let mut t1 = table!("foo", fields! {
-      field!("foo", "String", true),
+      field!("foo", true),
       field!("bar"),
       field!("baz")
     });
     let mut t2 = table!("foo", fields! {
-      field!("foo", "String", true),
+      field!("foo", true),
       field!("bar")
     });
     add_fd!(t1, vec!["foo"], vec!["bar"]);
@@ -331,7 +330,7 @@ mod tests {
   #[test]
   fn schema_prune_inds_yes() {
     let t = table!("foo", fields! {
-      field!("bar", "String", true)
+      field!("bar", true)
     });
     let mut schema = schema! {t};
     add_ind!(schema, "foo", vec!["bar"], "baz", vec!["quux"]);
@@ -342,10 +341,10 @@ mod tests {
   #[test]
   fn schema_prune_inds_no() {
     let t1 = table!("foo", fields! {
-      field!("bar", "String", true)
+      field!("bar", true)
     });
     let t2 = table!("baz", fields! {
-      field!("quux", "String", true)
+      field!("quux", true)
     });
     let mut schema = schema! {t1, t2};
     add_ind!(schema, "foo", vec!["bar"], "baz", vec!["quux"]);

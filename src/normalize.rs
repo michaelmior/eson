@@ -20,7 +20,7 @@ fn decomposed_tables(tables: &mut HashMap<TableName, Table>, table_name: TableNa
     !vfd.rhs.contains(k)
   ).map(|(k, v)|
     (k, if v.key && vfd.rhs.contains(&v.name) {
-      Field { name: v.name, field_type: v.field_type, key: false }
+      Field { name: v.name, key: false }
     } else {
       v
     })
@@ -33,7 +33,7 @@ fn decomposed_tables(tables: &mut HashMap<TableName, Table>, table_name: TableNa
     vfd.lhs.contains(k) || vfd.rhs.contains(k)
   ).map(|(k, v)|
     (k, if !v.key && vfd.lhs.contains(&v.name) {
-      Field { name: v.name, field_type: v.field_type, key: true }
+      Field { name: v.name, key: true }
     } else {
       v
     })
@@ -99,7 +99,7 @@ mod test {
   #[test]
   fn test_normalize() {
     let mut t = table!("foo", fields! {
-      field!("foo", "String", true),
+      field!("foo", true),
       field!("bar"),
       field!("baz")
     });

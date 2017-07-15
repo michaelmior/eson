@@ -252,13 +252,13 @@ mod tests {
   #[test]
   fn ind_closure_transitive() {
     let t1 = table!("foo", fields! {
-      field!("bar", "String", true)
+      field!("bar", true)
     });
     let t2 = table!("baz", fields! {
-      field!("quux", "String", true)
+      field!("quux", true)
     });
     let t3 = table!("qux", fields! {
-      field!("quuz", "String", true)
+      field!("quuz", true)
     });
     let mut schema = schema! {t1, t2, t3};
     add_ind!(schema, "qux", vec!["quuz"], "baz", vec!["quux"]);
@@ -270,13 +270,13 @@ mod tests {
   #[test]
   fn ind_closure_transitive_reverse() {
     let t1 = table!("foo", fields! {
-      field!("bar", "String", true)
+      field!("bar", true)
     });
     let t2 = table!("baz", fields! {
-      field!("quux", "String", true)
+      field!("quux", true)
     });
     let t3 = table!("qux", fields! {
-      field!("quuz", "String", true)
+      field!("quuz", true)
     });
     let mut schema = schema! {t1, t2, t3};
     add_ind!(schema, "qux", vec!["quuz"], "baz", vec!["quux"]);
@@ -288,12 +288,12 @@ mod tests {
   #[test]
   fn ind_closure_fd() {
     let mut t1 = table!("foo", fields! {
-      field!("bar", "String", true),
+      field!("bar", true),
       field!("baz")
     });
     add_fd!(t1, vec!["bar"], vec!["baz"]);
     let t2 = table!("quux", fields! {
-      field!("qux", "String", true),
+      field!("qux", true),
       field!("corge")
     });
     let mut schema = schema! {t1, t2};

@@ -38,13 +38,10 @@ macro_rules! fields(
 #[cfg(test)]
 macro_rules! field(
   ($name:expr) => {
-    Field { name: $name.parse().unwrap(), field_type: "".to_string(), key: false }
+    Field { name: $name.parse().unwrap(), key: false }
   };
-  ($name:expr, $field_type:expr) => {
-    Field { name: $name.parse().unwrap(), field_type: $field_type.to_string(), key: false }
-  };
-  ($name:expr, $field_type:expr, $key:expr) => {
-    Field { name: $name.parse().unwrap(), field_type: $field_type.to_string(), key: $key }
+  ($name:expr, $key:expr) => {
+    Field { name: $name.parse().unwrap(), key: $key }
   }
 );
 
