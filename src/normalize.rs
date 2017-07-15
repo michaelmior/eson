@@ -13,6 +13,8 @@ fn decomposed_tables(tables: &mut HashMap<TableName, Table>, table_name: TableNa
   // Find a violating FD
   let vfd = t.violating_fd().unwrap();
 
+  info!("Decomposing {} because of {}", t, vfd);
+
   // Construct t1 with only fields from the FD
   let t1_fields = t.fields.clone().into_iter().filter(|&(ref k, _)|
     !vfd.rhs.contains(k)
@@ -69,7 +71,7 @@ impl Normalizable for Schema {
         changed = true;
         any_changed = true;
         let (t1, t2) = decomposed_tables(&mut self.tables, table_name.clone());
-        debug!("Decomposing {} into {} and {}", table_name, t1, t2);
+        info!("Decomposed tables are {} and {}", t1, t2);
 
         let t1_name = t1.name.clone();
         let t2_name = t2.name.clone();

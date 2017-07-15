@@ -116,7 +116,7 @@ fn main() {
 
   let mut changed = true;
   while changed {
-    debug!("Looping");
+    info!("Looping");
     changed = false;
     for table in schema.tables.values_mut() {
       changed = changed || table.fds.closure();

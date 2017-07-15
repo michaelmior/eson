@@ -55,7 +55,7 @@ impl FDClosure for HashMap<Vec<FieldName>, FD> {
             new_fd = FD { lhs: fd1.lhs.clone(), rhs: fd2.rhs.clone() };
           }
 
-          debug!("Inferred {} via transitivity", new_fd);
+          info!("Inferred {} via transitivity", new_fd);
           new_fds.push(new_fd);
         }
       }
@@ -158,7 +158,7 @@ impl INDClosure for Schema {
                                 right_table: ind1.right_table.clone(),
                                 right_fields: new_right };
             let ind_key = (ind1.left_table.clone(), ind1.right_table.clone());
-            debug!("Inferred {} via inference using FDs", new_ind);
+            info!("Inferred {} via inference using FDs", new_ind);
 
             // If the IND doesn't already exist add it and delete old ones
             if !self.inds.get(&ind_key).unwrap().contains(&new_ind) {
@@ -176,7 +176,7 @@ impl INDClosure for Schema {
         }
       }
 
-      // Infer new FDs by transitivity
+      // Infer new INDs by transitivity
       {
         // Group INDs by table and fields
         let ind_vec: Vec<&IND> = self.inds.values().flat_map(|inds| inds.clone()).collect();
@@ -193,7 +193,7 @@ impl INDClosure for Schema {
                                   left_fields: ind1.left_fields.clone(),
                                   right_table: ind2.right_table.clone(),
                                   right_fields: ind2.right_fields.clone() };
-              debug!("Inferred {} via transitivity", new_ind);
+              info!("Inferred {} via transitivity", new_ind);
 
               let table_key = (new_ind.left_table.clone(), new_ind.right_table.clone());
               if !self.inds.get(&table_key).unwrap_or(&vec![]).contains(&new_ind) {
