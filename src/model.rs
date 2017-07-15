@@ -106,7 +106,16 @@ impl Schema {
     let tables = self.tables.keys().collect::<HashSet<&TableName>>();
     self.inds.retain(|key, _|
       tables.contains(&key.0) && tables.contains(&key.1)
-    )
+    );
+
+    for inds in self.inds.values_mut() {
+      for ind in inds.iter_mut() {
+        let left_table = self.tables.get(&ind.left_table).unwrap();
+        ind.left_fields.retain(|f| left_table.fields.contains_key(f));
+        let right_table = self.tables.get(&ind.right_table).unwrap();
+        ind.right_fields.retain(|f| right_table.fields.contains_key(f));
+      }
+    }
   }
 }
 
@@ -373,5 +382,19 @@ mod tests {
     add_ind!(schema, "foo", vec!["bar"], "baz", vec!["quux"]);
     schema.prune_inds();
     assert_eq!(schema.inds.len(), 1)
+  }
+
+  #[test]
+  fn schema_prune_inds_fields() {
+    let t1 = table!("foo", fields! {
+      field!("bar", true)
+    });
+    let t2 = table!("qux", fields! {
+      field!("quux", true)
+    });
+    let mut schema = schema! {t1, t2};
+    add_ind!(schema, "foo", vec!["bar", "baz"], "quux", vec!["quux", "corge"]);
+    schema.prune_inds();
+    assert_eq!(schema.inds.len(), 0)
   }
 }
