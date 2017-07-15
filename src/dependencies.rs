@@ -80,11 +80,19 @@ impl FDClosure for HashMap<Vec<FieldName>, FD> {
   }
 }
 
+/// An inclusion depedency between two `Table`s
 #[derive(Clone, Debug, PartialEq)]
 pub struct IND {
+  /// The name of the `Table` on the left-hand side
   pub left_table: TableName,
+
+  /// `Field`s on the left-hand side of the dependency
   pub left_fields: Vec<FieldName>,
+
+  /// The name of the `Table` on the right-hand side
   pub right_table: TableName,
+
+  /// `Field`s on the right-hand side of the dependency
   pub right_fields: Vec<FieldName>,
 }
 
@@ -100,6 +108,7 @@ impl fmt::Display for IND {
 }
 
 impl IND {
+  /// The reverse of this dependency
   pub fn reverse(&self) -> IND {
     IND { left_table: self.right_table.clone(),
           left_fields: self.right_fields.clone(),

@@ -4,9 +4,13 @@ use std::fmt;
 use dependencies::{FD, FDClosure, IND};
 use symbols::{FieldName, TableName};
 
+/// A schema encapsulating tables and their dependencies
 #[derive(Default)]
 pub struct Schema {
+  /// Tables keyed by their name
   pub tables: HashMap<TableName, Table>,
+
+  /// Inclusion dependencies between tables
   pub inds: HashMap<(TableName, TableName), Vec<IND>>
 }
 
@@ -31,6 +35,7 @@ impl fmt::Display for Schema {
 }
 
 impl Schema {
+  /// Add a new `IND` to the schema
   pub fn add_ind(&mut self, ind: IND) {
     let ind_key = (ind.left_table.clone(), ind.right_table.clone());
     if self.inds.contains_key(&ind_key) {
@@ -51,6 +56,7 @@ impl Schema {
     }
   }
 
+  /// Copy `IND`s from the table in `src` to the table in `dst`
   pub fn copy_inds(&mut self, src: &TableName, dst: &TableName) {
     let mut new_inds = Vec::new();
     {
@@ -95,6 +101,7 @@ impl Schema {
     }
   }
 
+  /// Prune `IND`s which reference tables which no longer exist
   pub fn prune_inds(&mut self) {
     let tables = self.tables.keys().collect::<HashSet<&TableName>>();
     self.inds.retain(|key, _|
@@ -103,16 +110,26 @@ impl Schema {
   }
 }
 
+/// A field inside a `Table`
 #[derive(Clone, Debug)]
 pub struct Field {
+  /// The name of the field
   pub name: FieldName,
+
+  /// Whether this field is a key of its parent `Table`
   pub key: bool
 }
 
+/// A table, it's field and any intra-table dependencies
 #[derive(Debug)]
 pub struct Table {
+  /// The name of the table
   pub name: TableName,
+
+  /// All `Field`s in the table keyed by the name
   pub fields: HashMap<FieldName, Field>,
+
+  /// Functional dependencies keyed by their left-hand side
   pub fds: HashMap<Vec<FieldName>, FD>,
 }
 
@@ -143,6 +160,7 @@ impl fmt::Display for Table {
 }
 
 impl Table {
+  /// Add a new `FD` to this table
   pub fn add_fd(&mut self, mut lhs: Vec<FieldName>, mut rhs: Vec<FieldName>) {
     lhs.sort();
     lhs.dedup();
@@ -161,6 +179,7 @@ impl Table {
     self.fds.closure();
   }
 
+  /// Copy `FD`s from another given `Table`
   pub fn copy_fds(&mut self, other: &Table) {
     for fd in other.fds.values() {
       let new_lhs = fd.lhs.iter().map(|f| f.to_string().parse().unwrap())
@@ -173,18 +192,22 @@ impl Table {
     }
   }
 
+  /// Produce all fields marked as a key
   pub fn key_fields(&self) -> HashSet<FieldName> {
     self.fields.values().filter(|f| f.key).map(|f| f.name.clone()).collect::<HashSet<_>>()
   }
 
+  /// Check if a set of fields is a superkey for this table
   pub fn is_superkey(&self, fields: &HashSet<FieldName>) -> bool {
     self.key_fields().is_subset(fields)
   }
 
+  /// Check if this table is in BCNF according to its functional dependencies
   pub fn is_bcnf(&self) -> bool {
     self.violating_fd().is_none()
   }
 
+  /// Find a functional dependency which violates BCNF
   pub fn violating_fd(&self) -> Option<&FD> {
     self.fds.values().find(|fd|
       !fd.is_trivial() &&
