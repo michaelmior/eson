@@ -34,6 +34,8 @@ fn decomposed_tables(tables: &mut HashMap<TableName, Table>, table_name: TableNa
   ).map(|(k, v)|
     (k, if !v.key && vfd.lhs.contains(&v.name) {
       Field { name: v.name, key: true }
+    } else if v.key && !vfd.lhs.contains(&v.name) {
+      Field { name: v.name, key: false }
     } else {
       v
     })
@@ -116,5 +118,26 @@ mod test {
     let t2 = schema.tables.get(&TableName::from("foo_ext")).unwrap();
     assert_has_key!(t2, field_names!["bar"]);
     assert_has_fields!(t2, field_names!["bar", "baz"]);
+  }
+
+  #[test]
+  fn test_normalize_change_keys() {
+    let mut t = table!("foo", fields! {
+      field!("foo", true),
+      field!("bar", true),
+      field!("baz", true)
+    });
+    add_fd!(t, vec!["foo"], vec!["bar", "baz"]);
+    let mut schema = schema! {t};
+
+    schema.normalize();
+
+    let t1 = schema.tables.get(&TableName::from("foo_base")).unwrap();
+    assert_has_key!(t1, field_names!["foo"]);
+    assert_has_fields!(t1, field_names!["foo"]);
+
+    let t2 = schema.tables.get(&TableName::from("foo_ext")).unwrap();
+    assert_has_key!(t2, field_names!["foo"]);
+    assert_has_fields!(t2, field_names!["foo", "bar", "baz"]);
   }
 }
