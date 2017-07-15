@@ -80,7 +80,7 @@ impl FDClosure for HashMap<Vec<FieldName>, FD> {
   }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq)]
 pub struct IND {
   pub left_table: TableName,
   pub left_fields: Vec<FieldName>,
@@ -100,8 +100,7 @@ impl fmt::Display for IND {
 }
 
 impl IND {
-  #[cfg(test)]
-  fn reverse(&self) -> IND {
+  pub fn reverse(&self) -> IND {
     IND { left_table: self.right_table.clone(),
           left_fields: self.right_fields.clone(),
           right_table: self.left_table.clone(),
@@ -179,7 +178,7 @@ impl INDClosure for Schema {
       // Infer new INDs by transitivity
       {
         // Group INDs by table and fields
-        let ind_vec: Vec<&IND> = self.inds.values().flat_map(|inds| inds.clone()).collect();
+        let ind_vec: Vec<_> = self.inds.values().flat_map(|inds| inds.clone()).collect();
         let grouped_inds = group_by::group_by(ind_vec.iter(),
           |ind| (ind.left_table.clone(), ind.left_fields.clone()));
 

@@ -1,5 +1,6 @@
 use std::collections::HashMap;
 
+use dependencies::IND;
 use model::{Field, Schema, Table};
 use symbols::{FieldName, TableName};
 
@@ -77,6 +78,24 @@ impl Normalizable for Schema {
 
         let t1_name = t1.name.clone();
         let t2_name = t2.name.clone();
+
+        let mut ind_fields = Vec::new();
+        for key in t1.key_fields() {
+          ind_fields.push(key);
+        }
+        for key in t2.key_fields() {
+          if !ind_fields.contains(&key) {
+            ind_fields.push(key);
+          }
+        }
+        let ind = IND {
+          left_table: t1.name.clone(),
+          left_fields: ind_fields.clone(),
+          right_table: t2.name.clone(),
+          right_fields: ind_fields
+        };
+        self.add_ind(ind.clone().reverse());
+        self.add_ind(ind);
 
         self.tables.insert(t1.name.clone(), t1);
         self.tables.insert(t2.name.clone(), t2);
