@@ -19,12 +19,25 @@ macro_rules! field_names(
 );
 
 #[cfg(test)]
-macro_rules! assert_has_fields(
-  ($table:expr, $field_names:expr) => {{
+macro_rules! assert_fields(
+  ($table:expr, $field_names:expr, true) => {{
     for field_name in $field_names {
       assert!($table.fields.contains_key(&field_name),
         format!("{} missing from {}", field_name, $table.name));
     }
+  }};
+  ($table:expr, $field_names:expr, false) => {{
+    for field_name in $field_names {
+      assert!(!$table.fields.contains_key(&field_name),
+        format!("{} found in {}", field_name, $table.name));
+    }
+  }};
+);
+
+#[cfg(test)]
+macro_rules! assert_has_fields(
+  ($table:expr, $field_names:expr) => {{
+    assert_fields!($table, $field_names, true);
   }};
 );
 
