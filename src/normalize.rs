@@ -176,6 +176,34 @@ impl Normalizable for Schema {
       self.prune_inds();
     }
 
+    // Remove tables which are subsumed by INDs
+    let mut remove_tables: Vec<TableName> = Vec::new();
+    for inds in self.inds.values() {
+      for ind in inds {
+        if ind.left_table == ind.right_table && !remove_tables.contains(&ind.right_table) { continue; }
+        // If the LHS of the IND includes all the fields of the table
+        let left_table = self.tables.get(&ind.left_table);
+        if left_table.unwrap().fields.keys().all(|f| ind.left_fields.contains(f)) {
+          // and the reverse IND exists, then we can remove the left table
+          let reverse_ind = ind.reverse();
+
+          if self.contains_ind(&reverse_ind) {
+            remove_tables.push(ind.left_table.clone());
+          }
+        }
+      }
+    }
+
+    // Actually remove the tables
+    if remove_tables.len() > 0 {
+      for table in remove_tables {
+        self.tables.remove(&table);
+      }
+
+      self.prune_inds();
+      any_changed = true;
+    }
+
     any_changed
   }
 }
@@ -248,5 +276,27 @@ mod test {
     let table = schema.tables.get(&TableName::from("foo")).unwrap();
     assert_has_fields!(table, field_names!["bar"]);
     assert_missing_fields!(table, field_names!["baz"]);
+  }
+
+  #[test]
+  fn subsume_table() {
+    let t1 = table!("foo", fields! {
+      field!("bar", true),
+      field!("baz")
+    });
+
+    let t2 = table!("qux", fields! {
+      field!("quux", true),
+      field!("corge"),
+      field!("grault")
+    });
+
+    let mut schema = schema! {t1, t2};
+    add_ind!(schema, "foo", vec!["bar", "baz"], "qux", vec!["quux", "corge"]);
+    add_ind!(schema, "qux", vec!["quux", "corge"], "foo", vec!["bar", "baz"]);
+
+    assert!(schema.subsume());
+
+    assert!(!schema.tables.contains_key(&TableName::from("foo")));
   }
 }
