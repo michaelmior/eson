@@ -118,7 +118,7 @@ mod test {
   use super::*;
 
   #[test]
-  fn test_normalize() {
+  fn normalize() {
     let mut t = table!("foo", fields! {
       field!("foo", true),
       field!("bar"),
@@ -140,7 +140,7 @@ mod test {
   }
 
   #[test]
-  fn test_normalize_change_keys() {
+  fn normalize_change_keys() {
     let mut t = table!("foo", fields! {
       field!("foo", true),
       field!("bar", true),
