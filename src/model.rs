@@ -56,6 +56,11 @@ impl Schema {
     }
   }
 
+  /// Check if this schema contains a given IND
+  pub fn contains_ind(&self, ind: &IND) -> bool {
+    self.inds.values().any(|inds| inds.iter().any(|i| i == ind))
+  }
+
   /// Copy `IND`s from the table in `src` to the table in `dst`
   pub fn copy_inds(&mut self, src: &TableName, dst: &TableName) {
     let mut new_inds = Vec::new();
@@ -376,6 +381,26 @@ mod tests {
     };
     let copied_fds = t2.fds.values().collect::<Vec<_>>();
     assert_eq!(vec![&copied_fd], copied_fds)
+  }
+
+  #[test]
+  fn schema_contains_ind() {
+    let t1 = table!("foo", fields! {
+      field!("bar", true)
+    });
+    let t2 = table!("baz", fields! {
+      field!("quux", true)
+    });
+    let mut schema = schema! {t1, t2};
+    add_ind!(schema, "foo", vec!["bar"], "baz", vec!["quux"]);
+
+    let ind = IND {
+      left_table: TableName::from("foo"),
+     left_fields: vec![FieldName::from("bar")],
+      right_table: TableName::from("baz"),
+      right_fields: vec![FieldName::from("quux")]
+    };
+    assert!(schema.contains_ind(&ind))
   }
 
   #[test]
