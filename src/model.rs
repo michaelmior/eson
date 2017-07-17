@@ -110,11 +110,30 @@ impl Schema {
 
     for inds in self.inds.values_mut() {
       for ind in inds.iter_mut() {
+        // Get the indexes of all fields in each table to keep
         let left_table = self.tables.get(&ind.left_table).unwrap();
-        ind.left_fields.retain(|f| left_table.fields.contains_key(f));
         let right_table = self.tables.get(&ind.right_table).unwrap();
-        ind.right_fields.retain(|f| right_table.fields.contains_key(f));
+        let left_indexes = ind.left_fields.iter().enumerate().filter(|&(_, field)|
+          left_table.fields.contains_key(field)
+        ).map(|(i, _)| i).collect::<HashSet<_>>();
+        let right_indexes = ind.right_fields.iter().enumerate().filter(|&(_, field)|
+          right_table.fields.contains_key(field)
+        ).map(|(i, _)| i).collect::<HashSet<_>>();
+
+        // We can only keep fields which are in both tables
+        let retain_indexes = left_indexes.intersection(&right_indexes).collect::<HashSet<_>>();
+        for index in (0..ind.left_fields.len()).rev() {
+          if !retain_indexes.contains(&index) {
+            ind.left_fields.remove(index);
+            ind.right_fields.remove(index);
+          }
+        }
       }
+    }
+
+    // Remove any INDs which are now empty
+    for inds in self.inds.values_mut() {
+      inds.retain(|ind| ind.left_fields.len() > 0 && ind.right_fields.len() > 0);
     }
   }
 }
@@ -391,6 +410,30 @@ mod tests {
     });
     let t2 = table!("qux", fields! {
       field!("quux", true)
+    });
+
+    let mut schema = schema! {t1, t2};
+    add_ind!(schema, "foo", vec!["bar", "baz"], "qux", vec!["quux", "corge"]);
+
+    schema.prune_inds();
+
+    let ind = schema.inds.values().next().unwrap().iter().next().unwrap();
+
+    assert_eq!(ind.left_fields.len(), 1);
+    assert_eq!(ind.left_fields.iter().next().unwrap(), &FieldName::from("bar"));
+
+    assert_eq!(ind.right_fields.len(), 1);
+    assert_eq!(ind.right_fields.iter().next().unwrap(), &FieldName::from("quux"));
+  }
+
+  #[test]
+  fn schema_prune_inds_fields_one_side() {
+    let t1 = table!("foo", fields! {
+      field!("bar", true)
+    });
+    let t2 = table!("qux", fields! {
+      field!("quux", true),
+      field!("corge")
     });
 
     let mut schema = schema! {t1, t2};
