@@ -392,9 +392,18 @@ mod tests {
     let t2 = table!("qux", fields! {
       field!("quux", true)
     });
+
     let mut schema = schema! {t1, t2};
-    add_ind!(schema, "foo", vec!["bar", "baz"], "quux", vec!["quux", "corge"]);
+    add_ind!(schema, "foo", vec!["bar", "baz"], "qux", vec!["quux", "corge"]);
+
     schema.prune_inds();
-    assert_eq!(schema.inds.len(), 0)
+
+    let ind = schema.inds.values().next().unwrap().iter().next().unwrap();
+
+    assert_eq!(ind.left_fields.len(), 1);
+    assert_eq!(ind.left_fields.iter().next().unwrap(), &FieldName::from("bar"));
+
+    assert_eq!(ind.right_fields.len(), 1);
+    assert_eq!(ind.right_fields.iter().next().unwrap(), &FieldName::from("quux"));
   }
 }
