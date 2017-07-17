@@ -124,6 +124,7 @@ fn main() {
     copy_fds(&mut schema.inds, &mut schema.tables);
     changed = changed || schema.ind_closure();
     changed = changed || schema.normalize();
+    changed = changed || schema.subsume();
   }
 
   println!("{}", schema);
