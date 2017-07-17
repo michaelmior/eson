@@ -3,10 +3,10 @@
 
 #![plugin(peg_syntax_ext)]
 
-#[cfg(test)]
-#[macro_use] extern crate collect_mac;
-#[macro_use] extern crate log;
+#[cfg(test)] #[macro_use] extern crate collect_mac;
 extern crate env_logger;
+extern crate itertools;
+#[macro_use] extern crate log;
 extern crate string_intern;
 
 use std::collections::{HashMap, HashSet};

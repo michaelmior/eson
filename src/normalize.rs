@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use dependencies::IND;
 use model::{Field, Schema, Table};
@@ -6,6 +6,7 @@ use symbols::{FieldName, TableName};
 
 pub trait Normalizable {
   fn normalize(&mut self) -> bool;
+  fn subsume(&mut self) -> bool;
 }
 
 fn decomposed_tables(tables: &mut HashMap<TableName, Table>, table_name: TableName) -> (Table, Table) {
@@ -111,6 +112,72 @@ impl Normalizable for Schema {
 
     any_changed
   }
+
+  fn subsume(&mut self) -> bool {
+    let mut any_changed = false;
+    let mut changed = true;
+
+    while changed {
+      changed = false;
+
+      let mut remove_table: Option<TableName> = None;
+      let mut remove_fields: Vec<FieldName> = Vec::new();
+      for inds in self.inds.values() {
+        for ind in inds {
+          if ind.left_table == ind.right_table { continue; }
+          let right_table = self.tables.get(&ind.right_table).unwrap();
+          let right_key = right_table.key_fields();
+          if !right_key.iter().all(|v| ind.right_fields.contains(v)) { continue; }
+
+          // Get all fields implied by the FDs relevant to this IND
+          // (the LHS of the IND contains all the fields)
+          let fds = right_table.fds.values().filter(|fd|
+            fd.lhs.iter().all(|f| ind.right_fields.contains(f))
+          ).collect::<Vec<_>>();
+          let fd_fields = fds.iter().flat_map(|fd| fd.rhs.clone()).fold(HashSet::new(), |mut fields: HashSet<FieldName>, field|
+            match ind.right_fields.iter().position(|f| f == &field) {
+              Some(index) => {
+                fields.insert(ind.left_fields[index].clone());
+                fields
+              },
+              None => fields
+            }
+          );
+
+          // We can remove all fields implied by the FDs
+          let left_table = self.tables.get(&ind.left_table).unwrap();
+          remove_fields.extend(ind.left_fields.iter().map(|f| f.clone()).filter(|f|
+            fd_fields.contains(f) && left_table.fields.contains_key(f)
+          ));
+
+          // Check that we actually have fields to remove
+          if remove_fields.len() == 0 { continue; }
+
+          // Mark the changes and save the fields to remove
+          changed = true;
+          any_changed = true;
+          remove_table = Some(ind.left_table.clone());
+          break;
+        }
+      }
+
+      match remove_table {
+        Some(table_name) => {
+          // Remove the fields from the table (possibly removing the table)
+          let mut table = self.tables.get_mut(&table_name).unwrap();
+          for field in remove_fields {
+            table.fields.remove(&field);
+          }
+        },
+        None => ()
+      }
+
+      // Prune any INDs which may no longer be valid
+      self.prune_inds();
+    }
+
+    any_changed
+  }
 }
 
 #[cfg(test)]
@@ -158,5 +225,28 @@ mod test {
     let t2 = schema.tables.get(&TableName::from("foo_ext")).unwrap();
     assert_has_key!(t2, field_names!["foo"]);
     assert_has_fields!(t2, field_names!["foo", "bar", "baz"]);
+  }
+
+  #[test]
+  fn subsume_fields() {
+    let t1 = table!("foo", fields! {
+      field!("bar", true),
+      field!("baz")
+    });
+
+    let mut t2 = table!("qux", fields! {
+      field!("quux", true),
+      field!("corge")
+    });
+    add_fd!(t2, vec!["quux"], vec!["corge"]);
+
+    let mut schema = schema! {t1, t2};
+    add_ind!(schema, "foo", vec!["bar", "baz"], "qux", vec!["quux", "corge"]);
+
+    assert!(schema.subsume());
+
+    let table = schema.tables.get(&TableName::from("foo")).unwrap();
+    assert_has_fields!(table, field_names!["bar"]);
+    assert_missing_fields!(table, field_names!["baz"]);
   }
 }

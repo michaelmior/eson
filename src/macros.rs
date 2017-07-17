@@ -42,6 +42,13 @@ macro_rules! assert_has_fields(
 );
 
 #[cfg(test)]
+macro_rules! assert_missing_fields(
+  ($table:expr, $field_names:expr) => {{
+    assert_fields!($table, $field_names, false);
+  }};
+);
+
+#[cfg(test)]
 macro_rules! fields(
   { $($field:expr),+ } => {
     collect! [ $($field.name => $field),+ ]
