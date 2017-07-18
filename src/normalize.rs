@@ -204,6 +204,89 @@ impl Normalizable for Schema {
       any_changed = true;
     }
 
+    // Merge tables which have a common key
+    let mut remove_tables: HashSet<TableName> = HashSet::new();
+    let mut new_tables: Vec<(Table, TableName, TableName)> = Vec::new();
+    {
+      for inds in self.inds.values() {
+        for ind in inds {
+          // Skip over tables we are going to remove
+          // and any tables which are equal
+          // (we use an inequality for deterministic results and it
+          //  doesn't matter since we need the reverse IND anyway)
+          if remove_tables.contains(&ind.left_table) ||
+             remove_tables.contains(&ind.right_table) ||
+             ind.left_table >= ind.right_table {
+            continue;
+          }
+
+          let left_table = self.tables.get(&ind.left_table).unwrap();
+          let right_table = self.tables.get(&ind.right_table).unwrap();
+          let has_all_left = left_table.key_fields().iter().all(|f| ind.left_fields.contains(f));
+          let has_all_right = right_table.key_fields().iter().all(|f| ind.right_fields.contains(f));
+          if has_all_left && has_all_right && self.contains_ind(&ind.reverse()) {
+            // Copy the fields and FDs from the left table into a new table
+            let mut new_table = Table {
+              name: format!("{}_{}", left_table.name, right_table.name).parse().unwrap(),
+              ..Default::default()
+            };
+            for (name, field) in left_table.fields.iter() {
+              new_table.fields.insert(name.clone(), field.clone());
+            }
+            for fd in left_table.fds.values() {
+              new_table.add_fd(
+                fd.lhs.iter().map(|f| f.clone()).collect::<Vec<_>>(),
+                fd.rhs.iter().map(|f| f.clone()).collect::<Vec<_>>()
+              );
+            }
+
+            // Add fields from the right table, renaming if needed
+            let mut new_right_names: HashMap<&FieldName, FieldName> = HashMap::new();
+            let right_keys = right_table.key_fields();
+            for field in right_table.fields.values() {
+              // Don't add keys since we already have them from the left table
+              if right_keys.contains(&field.name) { continue; }
+
+              let mut new_name = field.name.clone();
+              let mut suffix = 2;
+              while new_table.fields.contains_key(&new_name) {
+                new_name = format!("{}{}", new_name, suffix).as_str().parse().unwrap();
+                suffix += 1;
+              }
+              new_right_names.insert(&field.name, new_name.clone());
+              new_table.fields.insert(new_name.clone(), Field {name: new_name, key: field.key});
+            }
+            for fd in left_table.fds.values() {
+              new_table.add_fd(
+                fd.lhs.iter().map(|f| new_right_names.get(f).unwrap().clone()).collect::<Vec<_>>(),
+                fd.rhs.iter().map(|f| new_right_names.get(f).unwrap().clone()).collect::<Vec<_>>()
+              );
+            }
+
+            any_changed = true;
+            new_tables.push((new_table, ind.left_table.clone(), ind.right_table.clone()));
+            remove_tables.insert(ind.left_table.clone());
+            remove_tables.insert(ind.right_table.clone());
+          }
+        }
+      }
+    }
+
+    // Add the new table and copy over INDs
+    for (new_table, old1, old2) in new_tables {
+      let new_name = new_table.name.clone();
+      self.tables.insert(new_table.name.clone(), new_table);
+      self.copy_inds(&old1, &new_name);
+      self.copy_inds(&old2, &new_name);
+    }
+
+    // Remove the old tables
+    for table in remove_tables {
+      self.tables.remove(&table);
+    }
+
+    self.prune_inds();
+
     any_changed
   }
 }
@@ -298,5 +381,28 @@ mod test {
     assert!(schema.subsume());
 
     assert!(!schema.tables.contains_key(&TableName::from("foo")));
+  }
+
+  #[test]
+  fn subsume_merge() {
+    let t1 = table!("foo", fields! {
+      field!("bar", true),
+      field!("baz")
+    });
+
+    let t2 = table!("qux", fields! {
+      field!("quux", true),
+      field!("corge")
+    });
+
+    let mut schema = schema! {t1, t2};
+    add_ind!(schema, "foo", vec!["bar"], "qux", vec!["quux"]);
+    add_ind!(schema, "qux", vec!["quux"], "foo", vec!["bar"]);
+
+    assert!(schema.subsume());
+
+    let table = schema.tables.get(&TableName::from("foo_qux")).unwrap();
+    assert_has_fields!(table, field_names!["bar", "baz", "corge"]);
+    assert_missing_fields!(table, field_names!["quux"]);
   }
 }
