@@ -48,7 +48,7 @@ impl Schema {
 
   #[allow(dead_code)]
   pub fn delete_ind(&mut self, ind: &IND) {
-    for (_, inds) in self.inds.iter_mut() {
+    for inds in self.inds.values_mut() {
       let index = inds.iter().position(|i| i == ind);
       if index.is_some() {
         inds.remove(index.unwrap());
@@ -65,14 +65,14 @@ impl Schema {
   pub fn copy_inds(&mut self, src: &TableName, dst: &TableName) {
     let mut new_inds = Vec::new();
     {
-      let dst_table = self.tables.get(dst).unwrap();
+      let dst_table = &self.tables[dst];
       for ind_group in self.inds.values() {
         for ind in ind_group {
           if ind.left_table == *src {
             let mut new_lhs = ind.left_fields.clone();
             new_lhs.retain(|f| dst_table.fields.contains_key(f));
 
-            if new_lhs.len() > 0 {
+            if !new_lhs.is_empty() {
               let new_ind = IND {
                 left_table: src.clone(),
                 left_fields: new_lhs,
@@ -87,7 +87,7 @@ impl Schema {
             let mut new_rhs = ind.right_fields.clone();
             new_rhs.retain(|f| dst_table.fields.contains_key(f));
 
-            if new_rhs.len() > 0 {
+            if !new_rhs.is_empty() {
               let new_ind = IND {
                 left_table: ind.left_table.clone(),
                 left_fields: ind.left_fields.clone(),
@@ -116,8 +116,8 @@ impl Schema {
     for inds in self.inds.values_mut() {
       for ind in inds.iter_mut() {
         // Get the indexes of all fields in each table to keep
-        let left_table = self.tables.get(&ind.left_table).unwrap();
-        let right_table = self.tables.get(&ind.right_table).unwrap();
+        let left_table = &self.tables[&ind.left_table];
+        let right_table = &self.tables[&ind.right_table];
         let left_indexes = ind.left_fields.iter().enumerate().filter(|&(_, field)|
           left_table.fields.contains_key(field)
         ).map(|(i, _)| i).collect::<HashSet<_>>();
@@ -138,7 +138,7 @@ impl Schema {
 
     // Remove any INDs which are now empty
     for inds in self.inds.values_mut() {
-      inds.retain(|ind| ind.left_fields.len() > 0 && ind.right_fields.len() > 0);
+      inds.retain(|ind| !ind.left_fields.is_empty() && !ind.right_fields.is_empty());
     }
   }
 }
@@ -219,7 +219,7 @@ impl Table {
           .filter(|f| self.fields.contains_key(f)).collect::<Vec<_>>();
       let new_rhs = fd.rhs.iter().map(|f| f.to_string().parse().unwrap())
           .filter(|f| self.fields.contains_key(f)).collect::<Vec<_>>();
-      if new_lhs.len() > 0 && new_rhs.len() > 0 {
+      if !new_lhs.is_empty() && !new_rhs.is_empty() {
         self.add_fd(new_lhs, new_rhs);
       }
     }

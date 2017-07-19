@@ -88,13 +88,13 @@ fn main() {
 
   let mut schema = Schema { ..Default::default() };
   // Build a HashMap of parsed Tables
-  for table in table_vec.into_iter() {
+  for table in table_vec {
     schema.tables.insert(table.name.clone(), table);
   }
 
   // Add the FDs to each table
   info!("Adding FDs");
-  for fd in fd_vec.iter() {
+  for fd in &fd_vec {
     let mut table = schema.tables.get_mut(&fd.0).unwrap();
     table.add_fd(
       fd.1.iter().map(|s| s.parse().unwrap()).collect::<Vec<_>>(),
@@ -104,7 +104,7 @@ fn main() {
 
   // Create a HashMap of INDs from the parsed data
   info!("Adding INDs");
-  for ind in ind_vec.iter() {
+  for ind in &ind_vec {
     let new_ind = dependencies::IND {
       left_table: ind.0.parse().unwrap(),
       left_fields: ind.1.iter().map(|s| s.parse().unwrap()).collect::<Vec<_>>(),

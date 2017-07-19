@@ -46,14 +46,13 @@ impl FDClosure for HashMap<Vec<FieldName>, FD> {
           let mut lhs_copy = fd1.lhs.clone().into_iter().collect::<Vec<_>>();
           lhs_copy.sort();
 
-          let new_fd;
-          if self.contains_key(&lhs_copy) {
+          let new_fd = if self.contains_key(&lhs_copy) {
             let mut new_rhs = self.get(&lhs_copy).unwrap().rhs.clone();
             new_rhs.extend(fd2.rhs.clone().into_iter());
-            new_fd = FD { lhs: fd1.lhs.clone(), rhs: new_rhs };
+            FD { lhs: fd1.lhs.clone(), rhs: new_rhs }
           } else {
-            new_fd = FD { lhs: fd1.lhs.clone(), rhs: fd2.rhs.clone() };
-          }
+            FD { lhs: fd1.lhs.clone(), rhs: fd2.rhs.clone() }
+          };
 
           info!("Inferred {} via transitivity", new_fd);
           new_fds.push(new_fd);
@@ -61,8 +60,8 @@ impl FDClosure for HashMap<Vec<FieldName>, FD> {
       }
 
       // Add any new FDs which were discovered
-      if new_fds.len() > 0 {
-        for new_fd in new_fds.into_iter() {
+      if !new_fds.is_empty() {
+        for new_fd in new_fds {
           let mut lhs_copy = new_fd.lhs.clone().into_iter().collect::<Vec<_>>();
           lhs_copy.sort();
 
@@ -136,7 +135,7 @@ impl INDClosure for Schema {
         for (i, ind1) in inds.iter().enumerate() {
           // Find all fields which can be inferred from the current FDs
           let mut all_fields = ind1.left_fields.clone().into_iter().collect::<HashSet<_>>();
-          let left_table = self.tables.get(&ind1.left_table).unwrap();
+          let left_table = &self.tables[&ind1.left_table];
           for fd in left_table.fds.values() {
             if fd.lhs.clone().into_iter().collect::<HashSet<_>>().is_subset(&all_fields) {
               all_fields.extend(fd.rhs.clone());
@@ -169,7 +168,7 @@ impl INDClosure for Schema {
             info!("Inferred {} via inference using FDs", new_ind);
 
             // If the IND doesn't already exist add it and delete old ones
-            if !self.inds.get(&ind_key).unwrap().contains(&new_ind) {
+            if !&self.inds[&ind_key].contains(&new_ind) {
               new_inds.push(new_ind);
 
               if delete_inds.contains_key(&ind_key) {
@@ -191,7 +190,7 @@ impl INDClosure for Schema {
         let grouped_inds = group_by::group_by(ind_vec.iter(),
           |ind| (ind.left_table.clone(), ind.left_fields.clone()));
 
-        for ind1 in ind_vec.iter() {
+        for ind1 in &ind_vec {
           // Check for a matching the RHS (implies a new IND via transitivity)
           let ind_key = &(ind1.right_table.clone(), ind1.right_fields.clone());
           if let Some(other_inds) = grouped_inds.get(&ind_key) {
@@ -212,16 +211,16 @@ impl INDClosure for Schema {
         }
       }
 
-      if new_inds.len() > 0 || delete_inds.len() > 0 {
+      if !new_inds.is_empty() || !delete_inds.is_empty() {
         changed = true;
 
         // Add new INDs
-        for new_ind in new_inds.into_iter() {
+        for new_ind in new_inds {
           self.add_ind(new_ind);
         }
 
         // Delete old INDs
-        for (tables, delete_indices) in delete_inds.iter_mut() {
+        for (tables, delete_indices) in &mut delete_inds {
           let mut inds = self.inds.get_mut(&tables).unwrap();
           delete_indices.sort_by(|a, b| a.cmp(b).reverse());
           for delete_index in delete_indices.iter() {

@@ -35,7 +35,7 @@ json_pair -> (String, Literal)
 json -> Literal
   = "{" space? pairs:(json_pair ** (space? "," space?)) space? "}" {
       let mut json = HashMap::new();
-      for pair in pairs.into_iter() {
+      for pair in pairs {
         let (key, value) = pair;
         json.insert(key, value);
       }
@@ -91,7 +91,7 @@ defines -> Vec<Field>
       }
 
       // Set the key value on necessary fields
-      for define in all_defines.iter_mut() {
+      for define in &mut all_defines {
         if keys.contains(&define.name) {
           define.key = true;
         }
@@ -128,7 +128,7 @@ create -> Table
     "(" space? fields:defines space? ")"
     options:(space "WITH" space options)? ";"? {
       let mut field_map = HashMap::new();
-      for field in fields.into_iter() {
+      for field in fields {
         field_map.insert(field.name.clone(), field);
       }
 

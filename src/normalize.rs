@@ -65,7 +65,7 @@ impl Normalizable for Schema {
       for table_name in table_names {
         // Skip tables already in BCNF
         {
-          let t = self.tables.get(&table_name).unwrap();
+          let t = &self.tables[&table_name];
           if t.is_bcnf() {
             continue;
           }
@@ -125,7 +125,7 @@ impl Normalizable for Schema {
       for inds in self.inds.values() {
         for ind in inds {
           if ind.left_table == ind.right_table { continue; }
-          let right_table = self.tables.get(&ind.right_table).unwrap();
+          let right_table = &self.tables[&ind.right_table];
           let right_key = right_table.key_fields();
           if !right_key.iter().all(|v| ind.right_fields.contains(v)) { continue; }
 
@@ -145,13 +145,13 @@ impl Normalizable for Schema {
           );
 
           // We can remove all fields implied by the FDs
-          let left_table = self.tables.get(&ind.left_table).unwrap();
+          let left_table = &self.tables[&ind.left_table];
           remove_fields.extend(ind.left_fields.iter().map(|f| f.clone()).filter(|f|
             fd_fields.contains(f) && left_table.fields.contains_key(f)
           ));
 
           // Check that we actually have fields to remove
-          if remove_fields.len() == 0 { continue; }
+          if remove_fields.is_empty() { continue; }
 
           // Mark the changes and save the fields to remove
           changed = true;
@@ -161,15 +161,12 @@ impl Normalizable for Schema {
         }
       }
 
-      match remove_table {
-        Some(table_name) => {
-          // Remove the fields from the table (possibly removing the table)
-          let mut table = self.tables.get_mut(&table_name).unwrap();
-          for field in remove_fields {
-            table.fields.remove(&field);
-          }
-        },
-        None => ()
+      if let Some(table_name) = remove_table {
+        // Remove the fields from the table (possibly removing the table)
+        let mut table = self.tables.get_mut(&table_name).unwrap();
+        for field in remove_fields {
+          table.fields.remove(&field);
+        }
       }
 
       // Prune any INDs which may no longer be valid
@@ -195,7 +192,7 @@ impl Normalizable for Schema {
     }
 
     // Actually remove the tables
-    if remove_tables.len() > 0 {
+    if !remove_tables.is_empty() {
       for table in remove_tables {
         self.tables.remove(&table);
       }
@@ -220,8 +217,8 @@ impl Normalizable for Schema {
             continue;
           }
 
-          let left_table = self.tables.get(&ind.left_table).unwrap();
-          let right_table = self.tables.get(&ind.right_table).unwrap();
+          let left_table = &self.tables[&ind.left_table];
+          let right_table = &self.tables[&ind.right_table];
           let has_all_left = left_table.key_fields().iter().all(|f| ind.left_fields.contains(f));
           let has_all_right = right_table.key_fields().iter().all(|f| ind.right_fields.contains(f));
           if has_all_left && has_all_right && self.contains_ind(&ind.reverse()) {
@@ -230,7 +227,7 @@ impl Normalizable for Schema {
               name: format!("{}_{}", left_table.name, right_table.name).parse().unwrap(),
               ..Default::default()
             };
-            for (name, field) in left_table.fields.iter() {
+            for (name, field) in &left_table.fields {
               new_table.fields.insert(name.clone(), field.clone());
             }
             for fd in left_table.fds.values() {
@@ -258,8 +255,8 @@ impl Normalizable for Schema {
             }
             for fd in left_table.fds.values() {
               new_table.add_fd(
-                fd.lhs.iter().map(|f| new_right_names.get(f).unwrap().clone()).collect::<Vec<_>>(),
-                fd.rhs.iter().map(|f| new_right_names.get(f).unwrap().clone()).collect::<Vec<_>>()
+                fd.lhs.iter().map(|f| new_right_names[f].clone()).collect::<Vec<_>>(),
+                fd.rhs.iter().map(|f| new_right_names[f].clone()).collect::<Vec<_>>()
               );
             }
 
