@@ -1,11 +1,13 @@
-use std::fmt;
+
 use std::collections::{HashMap, HashSet};
+use std::fmt;
 
 extern crate group_by;
 
-#[cfg(test)] use model::{Field, Table};
+#[cfg(test)]
+use model::{Field, Table};
 use model::Schema;
-use symbols::{TableName, FieldName};
+use symbols::{FieldName, TableName};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct FD {
@@ -41,7 +43,9 @@ impl FDClosure for HashMap<Vec<FieldName>, FD> {
       for fd1 in self.values() {
         for fd2 in self.values() {
           // Check if a new FD can be inferred via transitivity
-          if fd1 == fd2 || !fd1.rhs.is_subset(&fd2.lhs) { continue; }
+          if fd1 == fd2 || !fd1.rhs.is_subset(&fd2.lhs) {
+            continue;
+          }
 
           let mut lhs_copy = fd1.lhs.clone().into_iter().collect::<Vec<_>>();
           lhs_copy.sort();
@@ -49,9 +53,11 @@ impl FDClosure for HashMap<Vec<FieldName>, FD> {
           let new_fd = if self.contains_key(&lhs_copy) {
             let mut new_rhs = self.get(&lhs_copy).unwrap().rhs.clone();
             new_rhs.extend(fd2.rhs.clone().into_iter());
-            FD { lhs: fd1.lhs.clone(), rhs: new_rhs }
+            FD { lhs: fd1.lhs.clone(),
+                 rhs: new_rhs }
           } else {
-            FD { lhs: fd1.lhs.clone(), rhs: fd2.rhs.clone() }
+            FD { lhs: fd1.lhs.clone(),
+                 rhs: fd2.rhs.clone() }
           };
 
           info!("Inferred {} via transitivity", new_fd);
@@ -143,7 +149,9 @@ impl INDClosure for Schema {
           }
 
           for (j, ind2) in inds.iter().enumerate() {
-            if i == j { continue; }
+            if i == j {
+              continue;
+            }
 
             let mut new_left = ind1.left_fields.clone();
             let mut added_fields = ind2.left_fields.clone();
@@ -187,8 +195,9 @@ impl INDClosure for Schema {
       {
         // Group INDs by table and fields
         let ind_vec: Vec<_> = self.inds.values().flat_map(|inds| inds.clone()).collect();
-        let grouped_inds = group_by::group_by(ind_vec.iter(),
-          |ind| (ind.left_table.clone(), ind.left_fields.clone()));
+        let grouped_inds = group_by::group_by(ind_vec.iter(), |ind| {
+          (ind.left_table.clone(), ind.left_fields.clone())
+        });
 
         for ind1 in &ind_vec {
           // Check for a matching the RHS (implies a new IND via transitivity)

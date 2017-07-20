@@ -73,12 +73,10 @@ impl Schema {
             new_lhs.retain(|f| dst_table.fields.contains_key(f));
 
             if !new_lhs.is_empty() {
-              let new_ind = IND {
-                left_table: src.clone(),
-                left_fields: new_lhs,
-                right_table: ind.right_table.clone(),
-                right_fields: ind.right_fields.clone()
-              };
+              let new_ind = IND { left_table: src.clone(),
+                                  left_fields: new_lhs,
+                                  right_table: ind.right_table.clone(),
+                                  right_fields: ind.right_fields.clone() };
               new_inds.push(new_ind);
             }
           }
@@ -88,12 +86,10 @@ impl Schema {
             new_rhs.retain(|f| dst_table.fields.contains_key(f));
 
             if !new_rhs.is_empty() {
-              let new_ind = IND {
-                left_table: ind.left_table.clone(),
-                left_fields: ind.left_fields.clone(),
-                right_table: src.clone(),
-                right_fields: new_rhs
-              };
+              let new_ind = IND { left_table: ind.left_table.clone(),
+                                  left_fields: ind.left_fields.clone(),
+                                  right_table: src.clone(),
+                                  right_fields: new_rhs };
               new_inds.push(new_ind);
             }
           }
@@ -375,10 +371,8 @@ mod tests {
     add_fd!(t1, vec!["foo"], vec!["baz"]);
     t2.copy_fds(&t1);
 
-    let copied_fd = FD {
-      lhs: collect! [ "foo".parse().unwrap() ],
-      rhs: collect! [ "bar".parse().unwrap() ]
-    };
+    let copied_fd = FD { lhs: collect!["foo".parse().unwrap()],
+                         rhs: collect!["bar".parse().unwrap()] };
     let copied_fds = t2.fds.values().collect::<Vec<_>>();
     assert_eq!(vec![&copied_fd], copied_fds)
   }
@@ -394,12 +388,10 @@ mod tests {
     let mut schema = schema! {t1, t2};
     add_ind!(schema, "foo", vec!["bar"], "baz", vec!["quux"]);
 
-    let ind = IND {
-      left_table: TableName::from("foo"),
-     left_fields: vec![FieldName::from("bar")],
-      right_table: TableName::from("baz"),
-      right_fields: vec![FieldName::from("quux")]
-    };
+    let ind = IND { left_table: TableName::from("foo"),
+                    left_fields: vec![FieldName::from("bar")],
+                    right_table: TableName::from("baz"),
+                    right_fields: vec![FieldName::from("quux")] };
     assert!(schema.contains_ind(&ind))
   }
 
@@ -445,10 +437,12 @@ mod tests {
     let ind = schema.inds.values().next().unwrap().iter().next().unwrap();
 
     assert_eq!(ind.left_fields.len(), 1);
-    assert_eq!(ind.left_fields.iter().next().unwrap(), &FieldName::from("bar"));
+    assert_eq!(ind.left_fields.iter().next().unwrap(),
+               &FieldName::from("bar"));
 
     assert_eq!(ind.right_fields.len(), 1);
-    assert_eq!(ind.right_fields.iter().next().unwrap(), &FieldName::from("quux"));
+    assert_eq!(ind.right_fields.iter().next().unwrap(),
+               &FieldName::from("quux"));
   }
 
   #[test]
@@ -469,9 +463,11 @@ mod tests {
     let ind = schema.inds.values().next().unwrap().iter().next().unwrap();
 
     assert_eq!(ind.left_fields.len(), 1);
-    assert_eq!(ind.left_fields.iter().next().unwrap(), &FieldName::from("bar"));
+    assert_eq!(ind.left_fields.iter().next().unwrap(),
+               &FieldName::from("bar"));
 
     assert_eq!(ind.right_fields.len(), 1);
-    assert_eq!(ind.right_fields.iter().next().unwrap(), &FieldName::from("quux"));
+    assert_eq!(ind.right_fields.iter().next().unwrap(),
+               &FieldName::from("quux"));
   }
 }

@@ -3,19 +3,23 @@
 
 #![plugin(peg_syntax_ext)]
 
-#[cfg(test)] #[macro_use] extern crate collect_mac;
+#[cfg(test)]
+#[macro_use]
+extern crate collect_mac;
 extern crate env_logger;
 extern crate itertools;
-#[macro_use] extern crate log;
+#[macro_use]
+extern crate log;
 extern crate string_intern;
 
 use std::collections::{HashMap, HashSet};
 use std::env;
+use std::fs::File;
 use std::io;
 use std::io::prelude::*;
-use std::fs::File;
 
-#[macro_use] mod macros;
+#[macro_use]
+mod macros;
 peg_file! input("input.rustpeg");
 mod dependencies;
 mod model;
@@ -28,15 +32,17 @@ use normalize::Normalizable;
 use symbols::TableName;
 
 fn read_file(name: &str) -> Result<String, io::Error> {
-  let mut input_file = try!(File::open(name));
+  let mut input_file = File::open(name)?;
   let mut input_string = String::new();
-  try!(input_file.read_to_string(&mut input_string));
+  input_file.read_to_string(&mut input_string)?;
 
   Ok(input_string)
 }
 
 // Copy FDs between tables based on inclusion dependencies
-fn copy_fds(inds: &mut HashMap<(TableName, TableName), Vec<dependencies::IND>>, tables: &mut HashMap<TableName, model::Table>) -> () {
+fn copy_fds(inds: &mut HashMap<(TableName, TableName), Vec<dependencies::IND>>,
+            tables: &mut HashMap<TableName, model::Table>)
+            -> () {
   let mut new_fds = Vec::new();
 
   // Loop over all FDs

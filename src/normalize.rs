@@ -9,7 +9,8 @@ pub trait Normalizable {
   fn subsume(&mut self) -> bool;
 }
 
-fn decomposed_tables(tables: &mut HashMap<TableName, Table>, table_name: TableName) -> (Table, Table) {
+fn decomposed_tables(tables: &mut HashMap<TableName, Table>, table_name: TableName)
+                     -> (Table, Table) {
   let t = tables.get(&table_name).unwrap();
 
   // Find a violating FD
@@ -89,12 +90,10 @@ impl Normalizable for Schema {
             ind_fields.push(key);
           }
         }
-        let ind = IND {
-          left_table: t1.name.clone(),
-          left_fields: ind_fields.clone(),
-          right_table: t2.name.clone(),
-          right_fields: ind_fields
-        };
+        let ind = IND { left_table: t1.name.clone(),
+                        left_fields: ind_fields.clone(),
+                        right_table: t2.name.clone(),
+                        right_fields: ind_fields };
         self.add_ind(ind.clone().reverse());
         self.add_ind(ind);
 
@@ -124,10 +123,14 @@ impl Normalizable for Schema {
       let mut remove_fields: Vec<FieldName> = Vec::new();
       for inds in self.inds.values() {
         for ind in inds {
-          if ind.left_table == ind.right_table { continue; }
+          if ind.left_table == ind.right_table {
+            continue;
+          }
           let right_table = &self.tables[&ind.right_table];
           let right_key = right_table.key_fields();
-          if !right_key.iter().all(|v| ind.right_fields.contains(v)) { continue; }
+          if !right_key.iter().all(|v| ind.right_fields.contains(v)) {
+            continue;
+          }
 
           // Get all fields implied by the FDs relevant to this IND
           // (the LHS of the IND contains all the fields)
@@ -146,12 +149,14 @@ impl Normalizable for Schema {
 
           // We can remove all fields implied by the FDs
           let left_table = &self.tables[&ind.left_table];
-          remove_fields.extend(ind.left_fields.iter().map(|f| f.clone()).filter(|f|
+          remove_fields.extend(ind.left_fields.iter().map(|f| f.clone()).filter(|f| {
             fd_fields.contains(f) && left_table.fields.contains_key(f)
-          ));
+          }));
 
           // Check that we actually have fields to remove
-          if remove_fields.is_empty() { continue; }
+          if remove_fields.is_empty() {
+            continue;
+          }
 
           // Mark the changes and save the fields to remove
           changed = true;
@@ -177,7 +182,9 @@ impl Normalizable for Schema {
     let mut remove_tables: Vec<TableName> = Vec::new();
     for inds in self.inds.values() {
       for ind in inds {
-        if ind.left_table == ind.right_table && !remove_tables.contains(&ind.right_table) { continue; }
+        if ind.left_table == ind.right_table && !remove_tables.contains(&ind.right_table) {
+          continue;
+        }
         // If the LHS of the IND includes all the fields of the table
         let left_table = self.tables.get(&ind.left_table);
         if left_table.unwrap().fields.keys().all(|f| ind.left_fields.contains(f)) {
@@ -231,10 +238,8 @@ impl Normalizable for Schema {
               new_table.fields.insert(name.clone(), field.clone());
             }
             for fd in left_table.fds.values() {
-              new_table.add_fd(
-                fd.lhs.iter().map(|f| f.clone()).collect::<Vec<_>>(),
-                fd.rhs.iter().map(|f| f.clone()).collect::<Vec<_>>()
-              );
+              new_table.add_fd(fd.lhs.iter().map(|f| f.clone()).collect::<Vec<_>>(),
+                               fd.rhs.iter().map(|f| f.clone()).collect::<Vec<_>>());
             }
 
             // Add fields from the right table, renaming if needed
@@ -242,7 +247,9 @@ impl Normalizable for Schema {
             let right_keys = right_table.key_fields();
             for field in right_table.fields.values() {
               // Don't add keys since we already have them from the left table
-              if right_keys.contains(&field.name) { continue; }
+              if right_keys.contains(&field.name) {
+                continue;
+              }
 
               let mut new_name = field.name.clone();
               let mut suffix = 2;

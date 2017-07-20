@@ -1,4 +1,4 @@
-use string_intern::{Validator, Symbol};
+use string_intern::{Symbol, Validator};
 
 pub struct FieldNameSymbol;
 
