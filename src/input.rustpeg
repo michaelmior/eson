@@ -41,11 +41,11 @@ create -> Table
     }
 
 func_dep -> (String, Vec<String>, Vec<String>)
-  = "FD" space table:identifier space lhs:identifiers space "->"
+  = table:identifier space lhs:identifiers space "->"
     space rhs:identifiers { (table, lhs, rhs) }
 
 inc_dep -> (String, Vec<String>, String, Vec<String>)
-  = "IND" space left_table:identifier space left_fields:identifiers
+  = left_table:identifier space left_fields:identifiers
     space "<=" space
     right_table:identifier space right_fields:identifiers {
       (left_table, left_fields, right_table, right_fields)

@@ -1,8 +1,8 @@
 a(*id, *other_id)
 b(*id, *other_id)
 
-FD a id -> other_id
-FD b id -> other_id
+a id -> other_id
+b id -> other_id
 
-IND a other_id <= b id
-IND b other_id <= a id
+a other_id <= b id
+b other_id <= a id
