@@ -42,7 +42,7 @@ impl FDClosure for HashMap<Vec<FieldName>, FD> {
       for fd1 in self.values() {
         for fd2 in self.values() {
           // Check if a new FD can be inferred via transitivity
-          if fd1 == fd2 || !fd1.rhs.is_subset(&fd2.lhs) {
+          if fd1 == fd2 || !fd2.lhs.is_subset(&fd1.rhs) {
             continue;
           }
 
@@ -59,7 +59,6 @@ impl FDClosure for HashMap<Vec<FieldName>, FD> {
                  rhs: fd2.rhs.clone() }
           };
 
-          info!("Inferred {} via transitivity", new_fd);
           new_fds.push(new_fd);
         }
       }
@@ -70,8 +69,11 @@ impl FDClosure for HashMap<Vec<FieldName>, FD> {
           let mut lhs_copy = new_fd.lhs.clone().into_iter().collect::<Vec<_>>();
           lhs_copy.sort();
 
-          changed = true;
-          self.insert(lhs_copy, new_fd);
+          if !self.contains_key(&lhs_copy) || self[&lhs_copy] != new_fd {
+            changed = true;
+            info!("Inferred {} via transitivity", new_fd);
+            self.insert(lhs_copy, new_fd);
+          }
         }
       }
 
@@ -254,6 +256,27 @@ impl INDClosure for Schema {
 #[cfg(test)]
 mod tests {
   use super::*;
+
+  #[test]
+  fn fd_closure() {
+    let mut fds: HashMap<Vec<FieldName>, FD> = collect![
+      collect!["foo".parse().unwrap()] => FD {
+        lhs: collect!["foo".parse().unwrap()],
+        rhs: collect!["bar".parse().unwrap()]
+      },
+      collect!["bar".parse().unwrap()] => FD {
+        lhs: collect!["bar".parse().unwrap()],
+        rhs: collect!["baz".parse().unwrap()]
+      }
+    ];
+    assert!(fds.closure());
+
+    assert!(fds.values().any(|fd| *fd == FD {
+      lhs: collect!["foo".parse().unwrap()],
+      rhs: collect!["bar".parse().unwrap(), "baz".parse().unwrap()]
+    }));
+    assert!(!fds.closure());
+  }
 
   #[test]
   fn ind_reverse() {
