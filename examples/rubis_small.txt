@@ -9,9 +9,6 @@ bids_with_user bid_id -> user_id, item_id
 bids_by_date bid_id -> bid_date, bid_qty, bid_value, user_id, item_id
 bids_by_date user_id -> user_nickname
 
-user_bids item_id, item_end_date, bid_id, user_id <= bids_with_user item_id, item_end_date, bid_id, user_id
-bids_with_user item_id, item_end_date, bid_id, user_id <= user_bids item_id, item_end_date, bid_id, user_id
-user_bids item_id, bid_id, user_id <= bids_by_date item_id, bid_id, user_id
-bids_by_date item_id, bid_id, user_id <= user_bids item_id, bid_id, user_id
-bids_with_user item_id, bid_id, user_id <= bids_by_date item_id, bid_id, user_id
-bids_by_date item_id, bid_id, user_id <= bids_with_user item_id, bid_id, user_id
+user_bids item_id, item_end_date, bid_id, user_id == bids_with_user ...
+user_bids item_id, bid_id, user_id == bids_by_date ...
+bids_with_user item_id, bid_id, user_id == bids_by_date ...
