@@ -1,7 +1,4 @@
-#![feature(plugin)]
 #![feature(slice_patterns)]
-
-#![plugin(peg_syntax_ext)]
 
 #[cfg(test)]
 #[macro_use]
@@ -20,11 +17,14 @@ use std::io::prelude::*;
 
 #[macro_use]
 mod macros;
-peg_file! input("input.rustpeg");
 mod dependencies;
 mod model;
 mod normalize;
 mod symbols;
+
+mod input {
+  include!(concat!(env!("OUT_DIR"), "/input.rs"));
+}
 
 use dependencies::{FDClosure, INDClosure};
 use model::Schema;
