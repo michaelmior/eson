@@ -90,6 +90,8 @@ impl Normalizable for Schema {
             ind_fields.push(key);
           }
         }
+
+        assert!(t1.name != t2.name);
         let ind = IND { left_table: t1.name.clone(),
                         left_fields: ind_fields.clone(),
                         right_table: t2.name.clone(),

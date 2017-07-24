@@ -167,6 +167,7 @@ impl INDClosure for Schema {
             new_right.extend(added_fields);
 
             // Construct the new IND
+            assert!(ind1.left_table != ind1.right_table);
             let new_ind = IND { left_table: ind1.left_table.clone(),
                                 left_fields: new_left,
                                 right_table: ind1.right_table.clone(),
