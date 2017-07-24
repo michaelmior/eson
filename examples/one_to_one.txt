@@ -1,5 +1,5 @@
-CREATE COLUMNFAMILY a (id uuid, other_id uuid, PRIMARY KEY(id, other_id));
-CREATE COLUMNFAMILY b (id uuid, other_id uuid, PRIMARY KEY(id, other_id));
+a(*id, *other_id)
+b(*id, *other_id)
 
 FD a id -> other_id
 FD b id -> other_id

@@ -1,6 +1,6 @@
-CREATE COLUMNFAMILY user_bids (user_id uuid, item_end_date timestamp, bid_id uuid, item_id uuid, PRIMARY KEY(user_id, item_end_date, bid_id, item_id));
-CREATE COLUMNFAMILY bids_with_user (item_id uuid, bid_id uuid, user_id uuid, item_end_date timestamp, PRIMARY KEY(item_id, bid_id, user_id));
-CREATE COLUMNFAMILY bids_by_date (item_id uuid, bid_date timestamp, bid_id uuid, user_id uuid, user_nickname text, bid_qty int, bid_value float, PRIMARY KEY(item_id, bid_date, bid_id, user_id));
+user_bids(*user_id, *item_end_date, *bid_id, *item_id)
+bids_with_user(*item_id, *bid_id, *user_id, item_end_date)
+bids_by_date(*item_id, *bid_date, *bid_id, *user_id, user_nickname, bid_qty, bid_value)
 
 FD user_bids item_id -> item_end_date
 FD user_bids bid_id -> user_id, item_id

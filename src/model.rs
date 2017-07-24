@@ -245,23 +245,6 @@ impl Table {
   }
 }
 
-pub enum Literal {
-  Float(f64),
-  Int(i64),
-  Json(HashMap<String, Literal>),
-  Str(String)
-}
-
-pub enum Define {
-  Field(Field),
-  Key(FieldName)
-}
-
-pub enum TableOption {
-  Parameter((String, Literal)),
-  Order(Vec<(String, bool)>)
-}
-
 #[cfg(test)]
 mod tests {
   use super::*;
