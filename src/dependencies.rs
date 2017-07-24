@@ -203,6 +203,10 @@ impl INDClosure for Schema {
           let ind_key = &(ind1.right_table.clone(), ind1.right_fields.clone());
           if let Some(other_inds) = grouped_inds.get(&ind_key) {
             for ind2 in other_inds.iter() {
+              if ind1.left_table == ind2.right_table {
+                continue;
+              }
+
               // Add a new IND for each transitive relation
               let new_ind = IND { left_table: ind1.left_table.clone(),
                                   left_fields: ind1.left_fields.clone(),
