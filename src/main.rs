@@ -1,5 +1,6 @@
 #![feature(slice_patterns)]
 
+extern crate argparse;
 #[cfg(test)]
 #[macro_use]
 extern crate collect_mac;
@@ -14,6 +15,8 @@ use std::env;
 use std::fs::File;
 use std::io;
 use std::io::prelude::*;
+
+use argparse::{ArgumentParser, Store};
 
 #[macro_use]
 mod macros;
@@ -87,7 +90,16 @@ fn copy_fds(inds: &mut HashMap<(TableName, TableName), Vec<dependencies::IND>>,
 fn main() {
   env_logger::init().unwrap();
 
-  let filename = format!("examples/{}.txt", env::args().nth(1).unwrap());
+  let mut input = "".to_string();
+  {
+    let mut ap = ArgumentParser::new();
+    ap.set_description("NoSQL schema renormalization");
+    ap.refer(&mut input)
+      .add_argument("input", Store, "Example to run");
+    ap.parse_args_or_exit();
+  }
+
+  let filename = format!("examples/{}.txt", input);
   info!("Loading schema {}", filename);
   let input_string = read_file(&filename).unwrap();
   let (table_vec, fd_vec, ind_vec) = input::input(&input_string).unwrap();
