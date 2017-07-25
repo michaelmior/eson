@@ -96,7 +96,7 @@ fn main() {
     let mut ap = ArgumentParser::new();
     ap.set_description("NoSQL schema renormalization");
     ap.refer(&mut input)
-      .add_argument("input", Store, "Example to run");
+      .add_argument("input", Store, "Example to run").required();
     ap.refer(&mut normalize)
       .add_option(&["--no-norm"], StoreFalse,
                     "Don't normalize");
