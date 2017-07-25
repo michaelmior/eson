@@ -229,18 +229,19 @@ impl INDClosure for Schema {
       if !new_inds.is_empty() || !delete_inds.is_empty() {
         changed = true;
 
-        // Add new INDs
-        for new_ind in new_inds {
-          self.add_ind(new_ind);
-        }
-
         // Delete old INDs
         for (tables, delete_indices) in &mut delete_inds {
           let mut inds = self.inds.get_mut(&tables).unwrap();
           delete_indices.sort_by(|a, b| a.cmp(b).reverse());
-          for delete_index in delete_indices.iter() {
+          delete_indices.dedup();
+          for delete_index in delete_indices {
             inds.remove(*delete_index);
           }
+        }
+
+        // Add new INDs
+        for new_ind in new_inds {
+          self.add_ind(new_ind);
         }
       }
 
