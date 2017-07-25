@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 
-use dependencies::{FD, FDClosure, IND};
+use dependencies::{FD, FDClosure, IND, INDClosure};
 use symbols::{FieldName, TableName};
 
 /// A schema encapsulating tables and their dependencies
@@ -100,6 +100,8 @@ impl Schema {
     for new_ind in new_inds {
       self.add_ind(new_ind);
     }
+
+    self.ind_closure();
   }
 
   /// Prune `IND`s which reference tables which no longer exist
