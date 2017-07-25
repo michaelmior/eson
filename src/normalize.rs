@@ -96,6 +96,7 @@ impl Normalizable for Schema {
                         left_fields: ind_fields.clone(),
                         right_table: t2.name.clone(),
                         right_fields: ind_fields };
+        info!("Adding INDs {} and {}", ind, ind.reverse());
         self.add_ind(ind.clone().reverse());
         self.add_ind(ind);
 
@@ -171,6 +172,7 @@ impl Normalizable for Schema {
       if let Some(table_name) = remove_table {
         // Remove the fields from the table (possibly removing the table)
         let mut table = self.tables.get_mut(&table_name).unwrap();
+        info!("Removing {:?} from table {}", remove_fields, table);
         for field in remove_fields {
           table.fields.remove(&field);
         }
@@ -203,6 +205,7 @@ impl Normalizable for Schema {
     // Actually remove the tables
     if !remove_tables.is_empty() {
       for table in remove_tables {
+        info!("Subsuming table {}", table);
         self.tables.remove(&table);
       }
 
