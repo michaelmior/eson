@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 
-use dependencies::{FD, FDClosure, IND, INDClosure};
+use dependencies::{FD, FDClosure, IND};
 use symbols::{FieldName, TableName};
 
 /// A schema encapsulating tables and their dependencies
@@ -69,12 +69,9 @@ impl Schema {
       for ind_group in self.inds.values() {
         for ind in ind_group {
           if ind.left_table == *src {
-            let mut new_lhs = ind.left_fields.clone();
-            new_lhs.retain(|f| dst_table.fields.contains_key(f));
-
-            if !new_lhs.is_empty() {
-              let new_ind = IND { left_table: src.clone(),
-                                  left_fields: new_lhs,
+            if ind.left_fields.iter().any(|f| dst_table.fields.contains_key(f)) {
+              let new_ind = IND { left_table: dst.clone(),
+                                  left_fields: ind.left_fields.clone(),
                                   right_table: ind.right_table.clone(),
                                   right_fields: ind.right_fields.clone() };
               new_inds.push(new_ind);
@@ -82,14 +79,11 @@ impl Schema {
           }
 
           if ind.right_table == *src {
-            let mut new_rhs = ind.right_fields.clone();
-            new_rhs.retain(|f| dst_table.fields.contains_key(f));
-
-            if !new_rhs.is_empty() {
+            if ind.right_fields.iter().any(|f| dst_table.fields.contains_key(f)) {
               let new_ind = IND { left_table: ind.left_table.clone(),
                                   left_fields: ind.left_fields.clone(),
-                                  right_table: src.clone(),
-                                  right_fields: new_rhs };
+                                  right_table: dst.clone(),
+                                  right_fields: ind.right_fields.clone() };
               new_inds.push(new_ind);
             }
           }
@@ -101,7 +95,7 @@ impl Schema {
       self.add_ind(new_ind);
     }
 
-    self.ind_closure();
+    self.prune_inds();
   }
 
   /// Prune `IND`s which reference tables which no longer exist
@@ -378,6 +372,59 @@ mod tests {
                     right_table: TableName::from("baz"),
                     right_fields: vec![FieldName::from("quux")] };
     assert!(schema.contains_ind(&ind))
+  }
+
+  #[test]
+  fn schema_copy_inds() {
+    let t1 = table!("foo", fields! {
+      field!("bar", true),
+      field!("baz")
+    });
+    let t2 = table!("quux", fields! {
+      field!("bar", true),
+      field!("baz")
+    });
+    let t3 = table!("corge", fields! {
+      field!("grault", true),
+      field!("garply")
+    });
+    let mut schema = schema! {t1, t2, t3};
+    add_ind!(schema, "quux", vec!["bar", "baz"], "corge", vec!["grault", "garply"]);
+
+    schema.copy_inds(&TableName::from("quux"), &TableName::from("foo"));
+
+    let inds = &schema.inds[&(TableName::from("foo"), TableName::from("corge"))];
+    assert_eq!(inds.len(), 1);
+
+    let ind = &inds[0];
+    assert_eq!(ind.left_fields, field_names!["bar", "baz"]);
+    assert_eq!(ind.right_fields, field_names!["grault", "garply"]);
+  }
+
+  #[test]
+  fn schema_copy_inds_partial() {
+    let t1 = table!("foo", fields! {
+      field!("bar", true)
+    });
+    let t2 = table!("quux", fields! {
+      field!("bar", true),
+      field!("baz")
+    });
+    let t3 = table!("corge", fields! {
+      field!("grault", true),
+      field!("garply")
+    });
+    let mut schema = schema! {t1, t2, t3};
+    add_ind!(schema, "quux", vec!["bar", "baz"], "corge", vec!["grault", "garply"]);
+
+    schema.copy_inds(&TableName::from("quux"), &TableName::from("foo"));
+
+    let inds = &schema.inds[&(TableName::from("foo"), TableName::from("corge"))];
+    assert_eq!(inds.len(), 1);
+
+    let ind = &inds[0];
+    assert_eq!(ind.left_fields, field_names!["bar"]);
+    assert_eq!(ind.right_fields, field_names!["grault"]);
   }
 
   #[test]
