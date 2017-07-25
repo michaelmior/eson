@@ -89,7 +89,7 @@ impl FDClosure for HashMap<Vec<FieldName>, FD> {
 }
 
 /// An inclusion depedency between two `Table`s
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct IND {
   /// The name of the `Table` on the left-hand side
   pub left_table: TableName,
@@ -138,7 +138,7 @@ impl INDClosure for Schema {
       info!("IND closure loop...");
 
       changed = false;
-      let mut new_inds = Vec::new();
+      let mut new_inds = HashSet::new();
       let mut delete_inds: HashMap<_, Vec<_>> = HashMap::new();
 
       // Perform inference based on FDs
@@ -181,9 +181,9 @@ impl INDClosure for Schema {
             let ind_key = (ind1.left_table.clone(), ind1.right_table.clone());
 
             // If the IND doesn't already exist add it and delete old ones
-            if !&self.inds[&ind_key].contains(&new_ind) {
+            if !&self.inds[&ind_key].contains(&new_ind) && !new_inds.contains(&new_ind) {
               info!("Inferred {} via inference using FDs", new_ind);
-              new_inds.push(new_ind);
+              new_inds.insert(new_ind);
 
               if delete_inds.contains_key(&ind_key) {
                 let inds = delete_inds.get_mut(&ind_key).unwrap();
@@ -221,9 +221,9 @@ impl INDClosure for Schema {
                                   right_fields: ind2.right_fields.clone() };
 
               let table_key = (new_ind.left_table.clone(), new_ind.right_table.clone());
-              if !self.inds.get(&table_key).unwrap_or(&vec![]).contains(&new_ind) {
+              if !self.inds.get(&table_key).unwrap_or(&vec![]).contains(&new_ind) && !new_inds.contains(&new_ind) {
                 info!("Inferred {} via transitivity", new_ind);
-                new_inds.push(new_ind);
+                new_inds.insert(new_ind);
               }
             }
           }
