@@ -36,6 +36,8 @@ impl FDClosure for HashMap<Vec<FieldName>, FD> {
     let mut changed = true;
 
     while changed {
+      info!("FD closure loop...");
+
       changed = false;
       let mut new_fds = Vec::new();
 
@@ -133,6 +135,8 @@ impl INDClosure for Schema {
     let mut changed = true;
 
     while changed {
+      info!("IND closure loop...");
+
       changed = false;
       let mut new_inds = Vec::new();
       let mut delete_inds: HashMap<_, Vec<_>> = HashMap::new();
