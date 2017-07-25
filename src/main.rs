@@ -11,12 +11,11 @@ extern crate log;
 extern crate string_intern;
 
 use std::collections::{HashMap, HashSet};
-use std::env;
 use std::fs::File;
 use std::io;
 use std::io::prelude::*;
 
-use argparse::{ArgumentParser, Store};
+use argparse::{ArgumentParser, Store, StoreFalse};
 
 #[macro_use]
 mod macros;
@@ -91,11 +90,19 @@ fn main() {
   env_logger::init().unwrap();
 
   let mut input = "".to_string();
+  let mut normalize = true;
+  let mut subsume = true;
   {
     let mut ap = ArgumentParser::new();
     ap.set_description("NoSQL schema renormalization");
     ap.refer(&mut input)
       .add_argument("input", Store, "Example to run");
+    ap.refer(&mut normalize)
+      .add_option(&["--no-norm"], StoreFalse,
+                    "Don't normalize");
+    ap.refer(&mut subsume)
+      .add_option(&["--no-subsume"], StoreFalse,
+                    "Don't subsume tables");
     ap.parse_args_or_exit();
   }
 
@@ -140,9 +147,16 @@ fn main() {
       changed = changed || table.fds.closure();
     }
     copy_fds(&mut schema.inds, &mut schema.tables);
+
     changed = changed || schema.ind_closure();
-    changed = changed || schema.normalize();
-    changed = changed || schema.subsume();
+
+    if normalize {
+      changed = changed || schema.normalize();
+    }
+
+    if subsume {
+      changed = changed || schema.subsume();
+    }
   }
 
   println!("{}", schema);
