@@ -2,6 +2,7 @@ use std::collections::{HashMap, HashSet};
 use std::fmt;
 
 extern crate group_by;
+extern crate permutation;
 
 #[cfg(test)]
 use model::{Field, Table};
@@ -118,10 +119,11 @@ impl fmt::Display for IND {
 impl IND {
   /// The reverse of this dependency
   pub fn reverse(&self) -> IND {
+    let permutation = permutation::sort(&self.right_fields[..]);
     IND { left_table: self.right_table.clone(),
-          left_fields: self.right_fields.clone(),
+          left_fields: permutation.apply_slice(&self.right_fields[..]),
           right_table: self.left_table.clone(),
-          right_fields: self.left_fields.clone() }
+          right_fields: permutation.apply_slice(&self.left_fields[..]) }
   }
 }
 
@@ -172,12 +174,17 @@ impl INDClosure for Schema {
             added_fields.retain(|f| !new_right.contains(&f));
             new_right.extend(added_fields);
 
+            // Sort the fields in the INDs
+            let permutation = permutation::sort(&new_left[..]);
+            let sorted_left = permutation.apply_slice(new_left);
+            let sorted_right = permutation.apply_slice(new_right);
+
             // Construct the new IND
             assert!(ind1.left_table != ind1.right_table);
             let new_ind = IND { left_table: ind1.left_table.clone(),
-                                left_fields: new_left,
+                                left_fields: sorted_left,
                                 right_table: ind1.right_table.clone(),
-                                right_fields: new_right };
+                                right_fields: sorted_right };
             let ind_key = (ind1.left_table.clone(), ind1.right_table.clone());
 
             // If the IND doesn't already exist add it and delete old ones

@@ -87,14 +87,21 @@ macro_rules! add_fd(
 
 #[cfg(test)]
 macro_rules! add_ind(
-  ($schema:expr, $left_table:expr, $left_fields:expr, $right_table:expr, $right_fields:expr) => {
+  ($schema:expr, $left_table:expr, $left_fields:expr, $right_table:expr, $right_fields:expr) => {{
+    extern crate permutation;
+
+    let lhs = $left_fields.iter().map(|f| f.parse().unwrap()).collect::<Vec<_>>();
+    let permutation = permutation::sort(&lhs[..]);
+
+    let rhs = $right_fields.iter().map(|f| f.parse().unwrap()).collect::<Vec<_>>();
+
     $schema.add_ind(IND {
       left_table: $left_table.parse().unwrap(),
-      left_fields: $left_fields.iter().map(|f| f.parse().unwrap()).collect::<Vec<_>>(),
+      left_fields: permutation.apply_slice(&lhs[..]),
       right_table: $right_table.parse().unwrap(),
-      right_fields: $right_fields.iter().map(|f| f.parse().unwrap()).collect::<Vec<_>>()
+      right_fields: permutation.apply_slice(&rhs[..])
     });
-  };
+  }};
 );
 
 #[cfg(test)]

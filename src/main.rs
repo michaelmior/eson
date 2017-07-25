@@ -8,6 +8,7 @@ extern crate env_logger;
 extern crate itertools;
 #[macro_use]
 extern crate log;
+extern crate permutation;
 extern crate string_intern;
 
 use std::collections::{HashMap, HashSet};
@@ -130,11 +131,16 @@ fn main() {
   // Create a HashMap of INDs from the parsed data
   info!("Adding INDs");
   for ind in &ind_vec {
+    let lhs = ind.1.iter().map(|s| s.parse().unwrap()).collect::<Vec<_>>();
+    let permutation = permutation::sort(&lhs[..]);
+
+    let rhs = ind.3.iter().map(|s| s.parse().unwrap()).collect::<Vec<_>>();
+
     let new_ind = dependencies::IND {
       left_table: ind.0.parse().unwrap(),
-      left_fields: ind.1.iter().map(|s| s.parse().unwrap()).collect::<Vec<_>>(),
+      left_fields: permutation.apply_slice(&lhs[..]),
       right_table: ind.2.parse().unwrap(),
-      right_fields: ind.3.iter().map(|s| s.parse().unwrap()).collect::<Vec<_>>()
+      right_fields: permutation.apply_slice(&rhs[..])
     };
     schema.add_ind(new_ind);
   }
