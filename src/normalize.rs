@@ -317,7 +317,9 @@ mod test {
     add_fd!(t, vec!["bar"], vec!["baz"]);
     let mut schema = schema! {t};
 
+    assert!(schema.is_valid());
     schema.normalize();
+    assert!(schema.is_valid());
 
     let t1 = schema.tables.get(&TableName::from("foo_base")).unwrap();
     assert_has_key!(t1, field_names!["foo"]);
@@ -338,7 +340,9 @@ mod test {
     add_fd!(t, vec!["foo"], vec!["bar", "baz"]);
     let mut schema = schema! {t};
 
+    assert!(schema.is_valid());
     schema.normalize();
+    assert!(schema.is_valid());
 
     let t1 = schema.tables.get(&TableName::from("foo_base")).unwrap();
     assert_has_key!(t1, field_names!["foo"]);
@@ -365,7 +369,9 @@ mod test {
     let mut schema = schema! {t1, t2};
     add_ind!(schema, "foo", vec!["bar", "baz"], "qux", vec!["quux", "corge"]);
 
+    assert!(schema.is_valid());
     assert!(schema.subsume());
+    assert!(schema.is_valid());
 
     let table = schema.tables.get(&TableName::from("foo")).unwrap();
     assert_has_fields!(table, field_names!["bar"]);
@@ -389,7 +395,9 @@ mod test {
     add_ind!(schema, "foo", vec!["bar", "baz"], "qux", vec!["quux", "corge"]);
     add_ind!(schema, "qux", vec!["quux", "corge"], "foo", vec!["bar", "baz"]);
 
+    assert!(schema.is_valid());
     assert!(schema.subsume());
+    assert!(schema.is_valid());
 
     assert!(!schema.tables.contains_key(&TableName::from("foo")));
   }
@@ -410,7 +418,9 @@ mod test {
     add_ind!(schema, "foo", vec!["bar"], "qux", vec!["quux"]);
     add_ind!(schema, "qux", vec!["quux"], "foo", vec!["bar"]);
 
+    assert!(schema.is_valid());
     assert!(schema.subsume());
+    assert!(schema.is_valid());
 
     let table = schema.tables.get(&TableName::from("foo_qux")).unwrap();
     assert_has_fields!(table, field_names!["bar", "baz", "corge"]);

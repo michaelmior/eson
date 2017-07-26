@@ -133,6 +133,68 @@ impl Schema {
       inds.retain(|ind| !ind.left_fields.is_empty() && !ind.right_fields.is_empty());
     }
   }
+
+  /// Check that all of the `FD`s in the schema are valid
+  fn validate_fds(&self) -> bool {
+    for table in self.tables.values() {
+      for (key, fd) in table.fds.iter() {
+        // Ensure the key in the hash table is correct
+        let mut lhs = fd.lhs.iter().map(|f| (*f).clone()).collect::<Vec<_>>();
+        lhs.sort();
+        if lhs != *key {
+          return false;
+        }
+
+        // Check that the table contains all the fields
+        if !fd.lhs.iter().all(|f| table.fields.contains_key(f)) {
+          return false;
+        }
+        if !fd.rhs.iter().all(|f| table.fields.contains_key(f)) {
+          return false;
+        }
+      }
+    }
+
+    true
+  }
+
+  /// Check that all of the `IND`s in the schema are valid
+  fn validate_inds(&self) -> bool {
+    for (ind_key, inds) in self.inds.iter() {
+      for ind in inds {
+        if *ind_key != (ind.left_table.clone(), ind.right_table.clone()) {
+          return false;
+        }
+
+        // Check that the left table and its fields exist
+        match self.tables.get(&ind.left_table) {
+          Some(table) => {
+            if !ind.left_fields.iter().all(|f| table.fields.contains_key(f)) {
+              return false;
+            }
+          }
+          None => return false
+        }
+
+        // Check that the right table and its fields exist
+        match self.tables.get(&ind.right_table) {
+          Some(table) => {
+            if !ind.right_fields.iter().all(|f| table.fields.contains_key(f)) {
+              return false;
+            }
+          }
+          None => return false
+        }
+      }
+    }
+
+    true
+  }
+
+  /// Ensure all the dependencies are consistent with the tables
+  pub fn is_valid(&self) -> bool {
+    self.validate_fds() && self.validate_inds()
+  }
 }
 
 /// A field inside a `Table`
@@ -413,7 +475,9 @@ mod tests {
     let mut schema = schema! {t1, t2, t3};
     add_ind!(schema, "quux", vec!["bar", "baz"], "corge", vec!["grault", "garply"]);
 
+    assert!(schema.is_valid());
     schema.copy_inds(&TableName::from("quux"), &TableName::from("foo"));
+    assert!(schema.is_valid());
 
     let inds = &schema.inds[&(TableName::from("foo"), TableName::from("corge"))];
     assert_eq!(inds.len(), 1);
@@ -439,7 +503,9 @@ mod tests {
     let mut schema = schema! {t1, t2, t3};
     add_ind!(schema, "quux", vec!["bar", "baz"], "corge", vec!["grault", "garply"]);
 
+    assert!(schema.is_valid());
     schema.copy_inds(&TableName::from("quux"), &TableName::from("foo"));
+    assert!(schema.is_valid());
 
     let inds = &schema.inds[&(TableName::from("foo"), TableName::from("corge"))];
     assert_eq!(inds.len(), 1);
@@ -456,7 +522,11 @@ mod tests {
     });
     let mut schema = schema! {t};
     add_ind!(schema, "foo", vec!["bar"], "baz", vec!["quux"]);
+
+    assert!(!schema.is_valid());
     schema.prune_inds();
+    assert!(schema.is_valid());
+
     assert_eq!(schema.inds.len(), 0)
   }
 
@@ -470,7 +540,11 @@ mod tests {
     });
     let mut schema = schema! {t1, t2};
     add_ind!(schema, "foo", vec!["bar"], "baz", vec!["quux"]);
+
+    assert!(schema.is_valid());
     schema.prune_inds();
+    assert!(schema.is_valid());
+
     assert_eq!(schema.inds.len(), 1)
   }
 
@@ -486,7 +560,9 @@ mod tests {
     let mut schema = schema! {t1, t2};
     add_ind!(schema, "foo", vec!["bar", "baz"], "qux", vec!["quux", "corge"]);
 
+    assert!(!schema.is_valid());
     schema.prune_inds();
+    assert!(schema.is_valid());
 
     let ind = schema.inds.values().next().unwrap().iter().next().unwrap();
 
@@ -512,7 +588,9 @@ mod tests {
     let mut schema = schema! {t1, t2};
     add_ind!(schema, "foo", vec!["bar", "baz"], "qux", vec!["quux", "corge"]);
 
+    assert!(!schema.is_valid());
     schema.prune_inds();
+    assert!(schema.is_valid());
 
     let ind = schema.inds.values().next().unwrap().iter().next().unwrap();
 
