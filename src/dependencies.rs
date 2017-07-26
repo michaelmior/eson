@@ -319,9 +319,9 @@ mod tests {
     add_ind!(schema, "qux", vec!["quuz"], "baz", vec!["quux"]);
     add_ind!(schema, "baz", vec!["quux"], "foo", vec!["bar"]);
 
-    assert!(schema.is_valid());
+    schema.validate();
     schema.ind_closure();
-    assert!(schema.is_valid());
+    schema.validate();
 
     assert!(schema.inds.get(&(TableName::from("qux"), TableName::from("foo"))).is_some());
   }
@@ -341,9 +341,9 @@ mod tests {
     add_ind!(schema, "qux", vec!["quuz"], "baz", vec!["quux"]);
     add_ind!(schema, "foo", vec!["bar"], "baz", vec!["quux"]);
 
-    assert!(schema.is_valid());
+    schema.validate();
     schema.ind_closure();
-    assert!(schema.is_valid());
+    schema.validate();
 
     assert!(schema.inds.get(&(TableName::from("qux"), TableName::from("foo"))).is_none());
   }
@@ -363,9 +363,9 @@ mod tests {
     add_ind!(schema, "foo", vec!["bar"], "quux", vec!["qux"]);
     add_ind!(schema, "foo", vec!["baz"], "quux", vec!["corge"]);
 
-    assert!(schema.is_valid());
+    schema.validate();
     schema.ind_closure();
-    assert!(schema.is_valid());
+    schema.validate();
 
     let inds = schema.inds.get(&(TableName::from("foo"), TableName::from("quux")));
     assert!(inds.is_some());
