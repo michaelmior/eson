@@ -123,8 +123,7 @@ impl Normalizable for Schema {
     while changed {
       changed = false;
 
-      let mut remove_table: Option<TableName> = None;
-      let mut remove_fields: Vec<FieldName> = Vec::new();
+      let mut to_remove: Option<(TableName, Vec<FieldName>)> = None;
       for inds in self.inds.values() {
         for ind in inds {
           if ind.left_table == ind.right_table {
@@ -153,9 +152,9 @@ impl Normalizable for Schema {
 
           // We can remove all fields implied by the FDs
           let left_table = &self.tables[&ind.left_table];
-          remove_fields.extend(ind.left_fields.iter().map(|f| f.clone()).filter(|f| {
-            fd_fields.contains(f) && left_table.fields.contains_key(f)
-          }));
+          let remove_fields = ind.left_fields.iter().filter(|f| {
+            fd_fields.contains(*f) && left_table.fields.contains_key(*f)
+          }).map(|f| f.clone()).collect::<Vec<_>>();
 
           // Check that we actually have fields to remove
           if remove_fields.is_empty() {
@@ -165,12 +164,12 @@ impl Normalizable for Schema {
           // Mark the changes and save the fields to remove
           changed = true;
           any_changed = true;
-          remove_table = Some(ind.left_table.clone());
+          to_remove = Some((ind.left_table.clone(), remove_fields));
           break;
         }
       }
 
-      if let Some(table_name) = remove_table {
+      if let Some((table_name, remove_fields)) = to_remove {
         // Remove the fields from the table (possibly removing the table)
         let mut table = self.tables.get_mut(&table_name).unwrap();
         info!("Removing {:?} from table {}", remove_fields, table);
@@ -233,9 +232,18 @@ impl Normalizable for Schema {
 
           let left_table = &self.tables[&ind.left_table];
           let right_table = &self.tables[&ind.right_table];
-          let has_all_left = left_table.key_fields().iter().all(|f| ind.left_fields.contains(f));
-          let has_all_right = right_table.key_fields().iter().all(|f| ind.right_fields.contains(f));
-          if has_all_left && has_all_right && self.contains_ind(&ind.reverse()) {
+
+          // Get the keys from each table in the IND and make sure they match
+          let left_keys = ind.left_fields.iter().enumerate()
+            .filter(|&(_, f)| left_table.fields[f].key).collect::<Vec<_>>();
+          let right_keys = ind.right_fields.iter().enumerate()
+            .filter(|&(_, f)| right_table.fields[f].key).collect::<Vec<_>>();
+          let mut keys_match = left_keys.iter().map(|&(i, _)| i).collect::<Vec<_>>() ==
+            right_keys.iter().map(|&(j, _)| j).collect::<Vec<_>>();
+          keys_match = keys_match && left_table.key_fields().len() == left_keys.len();
+          keys_match = keys_match && right_table.key_fields().len() == right_keys.len();
+
+          if keys_match && self.contains_ind(&ind.reverse()) {
             // Copy the fields and FDs from the left table into a new table
             let mut new_table = Table {
               name: format!("{}_{}", left_table.name, right_table.name).parse().unwrap(),
@@ -251,10 +259,15 @@ impl Normalizable for Schema {
 
             // Add fields from the right table, renaming if needed
             let mut new_right_names: HashMap<&FieldName, FieldName> = HashMap::new();
-            let right_keys = right_table.key_fields();
+
+            // Add the new names for each of the keys
+            for (i, &(_, field)) in right_keys.iter().enumerate() {
+              new_right_names.insert(&field, left_keys[i].1.clone());
+            }
+
             for field in right_table.fields.values() {
-              // Don't add keys since we already have them from the left table
-              if right_keys.contains(&field.name) {
+              // Skip keys which we have already renamed
+              if new_right_names.contains_key(&field.name) {
                 continue;
               }
 
@@ -267,7 +280,7 @@ impl Normalizable for Schema {
               new_right_names.insert(&field.name, new_name.clone());
               new_table.fields.insert(new_name.clone(), Field {name: new_name, key: field.key});
             }
-            for fd in left_table.fds.values() {
+            for fd in right_table.fds.values() {
               new_table.add_fd(
                 fd.lhs.iter().map(|f| new_right_names[f].clone()).collect::<Vec<_>>(),
                 fd.rhs.iter().map(|f| new_right_names[f].clone()).collect::<Vec<_>>()
@@ -409,10 +422,11 @@ mod test {
       field!("baz")
     });
 
-    let t2 = table!("qux", fields! {
+    let mut t2 = table!("qux", fields! {
       field!("quux", true),
       field!("corge")
     });
+    add_fd!(t2, vec!["quux"], vec!["corge"]);
 
     let mut schema = schema! {t1, t2};
     add_ind!(schema, "foo", vec!["bar"], "qux", vec!["quux"]);
@@ -425,5 +439,9 @@ mod test {
     let table = schema.tables.get(&TableName::from("foo_qux")).unwrap();
     assert_has_fields!(table, field_names!["bar", "baz", "corge"]);
     assert_missing_fields!(table, field_names!["quux"]);
+
+    let fd = table.fds.values().next().unwrap();
+    assert_eq!(fd.lhs.clone().into_iter().collect::<Vec<_>>(), field_names!["bar"]);
+    assert_eq!(fd.rhs.clone().into_iter().collect::<Vec<_>>(), field_names!["corge"]);
   }
 }
