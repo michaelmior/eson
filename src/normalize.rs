@@ -177,6 +177,7 @@ impl Normalizable for Schema {
         for field in remove_fields {
           table.fields.remove(&field);
         }
+        table.prune_fds();
       }
 
       // Prune any INDs which may no longer be valid

@@ -136,7 +136,7 @@ impl Schema {
 }
 
 /// A field inside a `Table`
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub struct Field {
   /// The name of the field
   pub name: FieldName,
@@ -239,6 +239,17 @@ impl Table {
       !self.is_superkey(&fd.lhs)
     )
   }
+
+  /// Prune `FD`s which reference fields which no longer exist
+  pub fn prune_fds(&mut self) {
+    let fields = self.fields.keys().collect::<HashSet<_>>();
+    for fd in self.fds.values_mut() {
+      fd.lhs.retain(|f| fields.contains(&f));
+      fd.rhs.retain(|f| fields.contains(&f));
+    }
+
+    self.fds.retain(|_, fd| !fd.lhs.is_empty() && !fd.rhs.is_empty());
+  }
 }
 
 #[cfg(test)]
@@ -290,6 +301,17 @@ mod tests {
     });
     add_fd!(t, vec!["foo"], vec!["bar"]);
     assert!(t.violating_fd().is_none())
+  }
+
+  #[test]
+  fn prune_fds() {
+    let mut t = table!("foo", fields! {
+      field!("foo", true),
+      field!("bar")
+    });
+    add_fd!(t, vec!["quux"], vec!["qux"]);
+    t.prune_fds();
+    assert!(t.fds.len() == 0)
   }
 
   #[test]
