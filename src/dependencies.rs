@@ -64,7 +64,10 @@ impl FDClosure for HashMap<Vec<FieldName>, FD> {
                  rhs: fd2.rhs.clone().into_iter().filter(|f| !fd1.lhs.contains(f)).collect::<HashSet<_>>() }
           };
 
-          new_fds.push(new_fd);
+          // Ensure the new FD actually adds fields
+          if !self.contains_key(&lhs_copy) || !new_fd.rhs.is_subset(&self.get(&lhs_copy).unwrap().rhs) {
+            new_fds.push(new_fd);
+          }
         }
       }
 
