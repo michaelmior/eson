@@ -134,6 +134,49 @@ impl Schema {
     }
   }
 
+  // Copy FDs between tables based on inclusion dependencies
+  pub fn copy_fds(&mut self) {
+    let mut new_fds = Vec::new();
+
+    // Loop over all FDs
+    for ind_vec in self.inds.values() {
+      for ind in ind_vec.iter() {
+        let mut left_fields = <HashSet<_>>::new();
+        for field in self.tables.get(&ind.left_table).unwrap().fields.keys() {
+          left_fields.insert(field.clone());
+        }
+        // let left_fields = tables.get(&ind.left_table).unwrap()
+        //     .fields.keys().map(|f| *f).into_iter().collect::<HashSet<_>>();
+        let left_key = self.tables.get(&ind.left_table).unwrap()
+            .fields.values().filter(|f| f.key).map(|f| f.name.clone()).into_iter().collect::<HashSet<_>>();
+
+        new_fds.extend(self.tables.get(&ind.right_table).unwrap().fds.values().map(|fd| {
+          let fd_lhs = fd.lhs.clone().into_iter().collect::<HashSet<_>>();
+          let fd_rhs = fd.rhs.clone().into_iter().collect::<HashSet<_>>();
+
+          // Check that the fields in the LHS of the FD are a subset of the
+          // primary key for the table and that the RHS contains new fields
+          let implies_fd = fd_lhs.is_subset(&left_key) &&
+                           !fd_rhs.is_disjoint(&left_fields);
+
+          if implies_fd {
+            let left_vec = fd.lhs.clone().into_iter().collect::<Vec<_>>();
+            let right_vec = fd.rhs.clone().into_iter().filter(|f| left_fields.contains(f)).collect::<Vec<_>>();
+            Some((ind.left_table.clone(), left_vec, right_vec))
+          } else {
+            None
+          }
+        }).filter(|x| x.is_some()).map(|x| x.unwrap()));
+
+      }
+    }
+
+    // Add any new FDs which were found
+    for fd in new_fds {
+      self.tables.get_mut(&fd.0).unwrap().add_fd(fd.1, fd.2);
+    }
+  }
+
   /// Check that all of the `FD`s in the schema are valid
   fn validate_fds(&self) {
     for table in self.tables.values() {
