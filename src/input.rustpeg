@@ -7,7 +7,7 @@ space
   = [ \t\r\n]+
 
 identifier -> String
-  = id:$(([A-z] / "_")+) { id.to_string() }
+  = id:$([A-z_]+[A-z0-9_]*) { id.to_string() }
 
 identifiers -> Vec<String>
   = identifier ++ (space? "," space?)
