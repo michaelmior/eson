@@ -55,11 +55,13 @@ impl FDClosure for HashMap<Vec<FieldName>, FD> {
           let new_fd = if self.contains_key(&lhs_copy) {
             let mut new_rhs = self.get(&lhs_copy).unwrap().rhs.clone();
             new_rhs.extend(fd2.rhs.clone().into_iter());
+            new_rhs.retain(|f| !lhs_copy.contains(f));
+
             FD { lhs: fd1.lhs.clone(),
                  rhs: new_rhs }
           } else {
             FD { lhs: fd1.lhs.clone(),
-                 rhs: fd2.rhs.clone() }
+                 rhs: fd2.rhs.clone().into_iter().filter(|f| !fd1.lhs.contains(f)).collect::<HashSet<_>>() }
           };
 
           new_fds.push(new_fd);
