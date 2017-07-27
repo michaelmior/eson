@@ -4,6 +4,8 @@ use std::fmt;
 extern crate group_by;
 extern crate permutation;
 
+use itertools::Itertools;
+
 #[cfg(test)]
 use model::{Field, Table};
 use model::Schema;
@@ -17,7 +19,9 @@ pub struct FD {
 
 impl fmt::Display for FD {
   fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-    write!(f, "{:?} -> {:?}", self.lhs, self.rhs)
+    let lhs = self.lhs.iter().join(", ");
+    let rhs = self.rhs.iter().join(", ");
+    write!(f, "{} -> {}", lhs, rhs)
   }
 }
 
@@ -115,9 +119,10 @@ impl fmt::Display for IND {
     let right_fields = if self.left_fields == self.right_fields {
       "...".to_string()
     } else {
-      format!("{:?}", self.right_fields)
+      self.right_fields.iter().join(", ")
     };
-    write!(f, "{}({:?}) <= {}({})", self.left_table, self.left_fields, self.right_table, right_fields)
+    let left_fields = self.right_fields.iter().join(", ");
+    write!(f, "{}({}) <= {}({})", self.left_table, left_fields, self.right_table, right_fields)
   }
 }
 
