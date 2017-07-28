@@ -16,7 +16,7 @@ use std::fs::File;
 use std::io;
 use std::io::prelude::*;
 
-use argparse::{ArgumentParser, Store, StoreFalse};
+use argparse::{ArgumentParser, Store, StoreFalse, StoreTrue};
 
 #[macro_use]
 mod macros;
@@ -47,6 +47,7 @@ fn main() {
   let mut input = "".to_string();
   let mut normalize = true;
   let mut subsume = true;
+  let mut ignore_missing = false;
   {
     let mut ap = ArgumentParser::new();
     ap.set_description("NoSQL schema renormalization");
@@ -58,6 +59,9 @@ fn main() {
     ap.refer(&mut subsume)
       .add_option(&["--no-subsume"], StoreFalse,
                     "Don't subsume tables");
+    ap.refer(&mut ignore_missing)
+      .add_option(&["-i", "--ignore-missing"], StoreTrue,
+                    "Ignore dependencies with missing tables");
     ap.parse_args_or_exit();
   }
 
@@ -75,7 +79,12 @@ fn main() {
   // Add the FDs to each table
   info!("Adding FDs");
   for fd in &fd_vec {
-    let mut table = schema.tables.get_mut(&fd.0).unwrap();
+    if ignore_missing && !schema.tables.contains_key(&fd.0) {
+      continue;
+    }
+
+    let mut table = schema.tables.get_mut(&fd.0)
+      .expect(&format!("Missing table {} for FD", fd.0));
     table.add_fd(
       fd.1.iter().map(|s| s.parse().unwrap()).collect::<Vec<_>>(),
       fd.2.iter().map(|s| s.parse().unwrap()).collect::<Vec<_>>()
@@ -85,15 +94,22 @@ fn main() {
   // Create a HashMap of INDs from the parsed data
   info!("Adding INDs");
   for ind in &ind_vec {
+    let left_table = ind.0.parse().unwrap();
+    let right_table =  ind.2.parse().unwrap();
+    if ignore_missing &&
+        !(schema.tables.contains_key(&left_table) &&
+          schema.tables.contains_key(&right_table)) {
+      continue;
+    }
+
     let lhs = ind.1.iter().map(|s| s.parse().unwrap()).collect::<Vec<_>>();
     let permutation = permutation::sort(&lhs[..]);
-
     let rhs = ind.3.iter().map(|s| s.parse().unwrap()).collect::<Vec<_>>();
 
     let new_ind = dependencies::IND {
-      left_table: ind.0.parse().unwrap(),
+      left_table: left_table,
       left_fields: permutation.apply_slice(&lhs[..]),
-      right_table: ind.2.parse().unwrap(),
+      right_table: right_table,
       right_fields: permutation.apply_slice(&rhs[..])
     };
     schema.add_ind(new_ind);
