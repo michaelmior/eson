@@ -175,6 +175,7 @@ impl Schema {
   }
 
   /// Check that all of the `FD`s in the schema are valid
+  #[cfg(test)]
   fn validate_fds(&self) {
     for table in self.tables.values() {
       for (key, fd) in table.fds.iter() {
@@ -193,6 +194,7 @@ impl Schema {
   }
 
   /// Check that all of the `IND`s in the schema are valid
+  #[cfg(test)]
   fn validate_inds(&self) {
     for (ind_key, inds) in self.inds.iter() {
       for ind in inds {
@@ -215,6 +217,7 @@ impl Schema {
   }
 
   /// Ensure all the dependencies are consistent with the tables
+  #[cfg(test)]
   pub fn validate(&self) {
     self.validate_fds();
     self.validate_inds();
