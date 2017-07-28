@@ -4,6 +4,7 @@ extern crate argparse;
 #[cfg(test)]
 #[macro_use]
 extern crate collect_mac;
+extern crate defaultmap;
 extern crate env_logger;
 extern crate itertools;
 #[macro_use]
@@ -11,7 +12,6 @@ extern crate log;
 extern crate permutation;
 extern crate string_intern;
 
-use std::collections::{HashMap, HashSet};
 use std::fs::File;
 use std::io;
 use std::io::prelude::*;
@@ -32,7 +32,6 @@ mod input {
 use dependencies::{FDClosure, INDClosure};
 use model::Schema;
 use normalize::Normalizable;
-use symbols::TableName;
 
 fn read_file(name: &str) -> Result<String, io::Error> {
   let mut input_file = File::open(name)?;

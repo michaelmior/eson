@@ -1,6 +1,8 @@
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 
+use defaultmap::DefaultHashMap;
+
 use dependencies::{FD, FDClosure, IND};
 use symbols::{FieldName, TableName};
 
@@ -11,7 +13,7 @@ pub struct Schema {
   pub tables: HashMap<TableName, Table>,
 
   /// Inclusion dependencies between tables
-  pub inds: HashMap<(TableName, TableName), Vec<IND>>
+  pub inds: DefaultHashMap<(TableName, TableName), Vec<IND>>
 }
 
 impl fmt::Display for Schema {
@@ -38,12 +40,7 @@ impl Schema {
   /// Add a new `IND` to the schema
   pub fn add_ind(&mut self, ind: IND) {
     let ind_key = (ind.left_table.clone(), ind.right_table.clone());
-    if self.inds.contains_key(&ind_key) {
-      let ind_list = self.inds.get_mut(&ind_key).unwrap();
-      ind_list.push(ind);
-    } else {
-      self.inds.insert(ind_key, vec![ind]);
-    }
+    self.inds.get_mut(ind_key).push(ind);
   }
 
   #[allow(dead_code)]

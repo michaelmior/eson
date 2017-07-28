@@ -238,7 +238,7 @@ impl INDClosure for Schema {
                                   right_fields: ind2.right_fields.clone() };
 
               let table_key = (new_ind.left_table.clone(), new_ind.right_table.clone());
-              if !self.inds.get(&table_key).unwrap_or(&vec![]).contains(&new_ind) && !new_inds.contains(&new_ind) {
+              if !self.inds.get(&table_key).contains(&new_ind) && !new_inds.contains(&new_ind) {
                 info!("Inferred {} via transitivity", new_ind);
                 new_inds.insert(new_ind);
               }
@@ -252,7 +252,7 @@ impl INDClosure for Schema {
 
         // Delete old INDs
         for (tables, delete_indices) in &mut delete_inds {
-          let mut inds = self.inds.get_mut(&tables).unwrap();
+          let mut inds = self.inds.get_mut(tables.clone());
           delete_indices.sort_by(|a, b| a.cmp(b).reverse());
           delete_indices.dedup();
           for delete_index in delete_indices {
@@ -333,7 +333,7 @@ mod tests {
     schema.ind_closure();
     schema.validate();
 
-    assert!(schema.inds.get(&(TableName::from("qux"), TableName::from("foo"))).is_some());
+    assert!(schema.inds.get(&(TableName::from("qux"), TableName::from("foo"))).len() > 0);
   }
 
   #[test]
@@ -355,7 +355,7 @@ mod tests {
     schema.ind_closure();
     schema.validate();
 
-    assert!(schema.inds.get(&(TableName::from("qux"), TableName::from("foo"))).is_none());
+    assert!(schema.inds.get(&(TableName::from("qux"), TableName::from("foo"))).len() == 0);
   }
 
   #[test]
@@ -378,8 +378,7 @@ mod tests {
     schema.validate();
 
     let inds = schema.inds.get(&(TableName::from("foo"), TableName::from("quux")));
-    assert!(inds.is_some());
-    assert!(inds.unwrap().len() == 1);
-    assert!(inds.unwrap()[0].left_fields.len() == 2);
+    assert!(inds.len() == 1);
+    assert!(inds[0].left_fields.len() == 2);
   }
 }
