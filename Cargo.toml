@@ -9,7 +9,7 @@ peg = "0.5.4"
 
 [dependencies]
 argparse = "0.2.1"
-defaultmap = { git = "https://github.com/JelteF/defaultmap" }
+defaultmap = "0.3.0"
 env_logger = "0.3"
 group-by = "1.0.0"
 itertools = "0.6.1"
