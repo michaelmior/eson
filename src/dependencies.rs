@@ -26,6 +26,7 @@ impl fmt::Display for FD {
 }
 
 impl FD {
+  /// Check if this `FD` is trivial
   pub fn is_trivial(&self) -> bool {
     self.rhs.is_subset(&self.lhs)
   }
@@ -283,6 +284,15 @@ impl INDClosure for Schema {
 #[cfg(test)]
 mod tests {
   use super::*;
+
+  #[test]
+  fn fd_trivial() {
+    let fd = FD {
+      lhs: collect![FieldName::from("foo"), FieldName::from("bar")],
+      rhs: collect![FieldName::from("bar")]
+    };
+    assert!(fd.is_trivial());
+  }
 
   #[test]
   fn fd_reverse() {
