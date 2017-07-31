@@ -510,8 +510,8 @@ mod tests {
     assert_eq!(inds.len(), 1);
 
     let ind = &inds[0];
-    assert_eq!(ind.left_fields, field_names!["bar", "baz"]);
-    assert_eq!(ind.right_fields, field_names!["grault", "garply"]);
+    assert_eq!(ind.left_fields, field_vec!["bar", "baz"]);
+    assert_eq!(ind.right_fields, field_vec!["grault", "garply"]);
   }
 
   #[test]
@@ -538,8 +538,8 @@ mod tests {
     assert_eq!(inds.len(), 1);
 
     let ind = &inds[0];
-    assert_eq!(ind.left_fields, field_names!["bar"]);
-    assert_eq!(ind.right_fields, field_names!["grault"]);
+    assert_eq!(ind.left_fields, field_vec!["bar"]);
+    assert_eq!(ind.right_fields, field_vec!["grault"]);
   }
 
   #[test]

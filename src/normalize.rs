@@ -335,12 +335,12 @@ mod test {
     schema.validate();
 
     let t1 = schema.tables.get(&TableName::from("foo_base")).unwrap();
-    assert_has_key!(t1, field_names!["foo"]);
-    assert_has_fields!(t1, field_names!["foo", "bar"]);
+    assert_has_key!(t1, field_vec!["foo"]);
+    assert_has_fields!(t1, field_vec!["foo", "bar"]);
 
     let t2 = schema.tables.get(&TableName::from("foo_ext")).unwrap();
-    assert_has_key!(t2, field_names!["bar"]);
-    assert_has_fields!(t2, field_names!["bar", "baz"]);
+    assert_has_key!(t2, field_vec!["bar"]);
+    assert_has_fields!(t2, field_vec!["bar", "baz"]);
   }
 
   #[test]
@@ -358,12 +358,12 @@ mod test {
     schema.validate();
 
     let t1 = schema.tables.get(&TableName::from("foo_base")).unwrap();
-    assert_has_key!(t1, field_names!["foo"]);
-    assert_has_fields!(t1, field_names!["foo"]);
+    assert_has_key!(t1, field_vec!["foo"]);
+    assert_has_fields!(t1, field_vec!["foo"]);
 
     let t2 = schema.tables.get(&TableName::from("foo_ext")).unwrap();
-    assert_has_key!(t2, field_names!["foo"]);
-    assert_has_fields!(t2, field_names!["foo", "bar", "baz"]);
+    assert_has_key!(t2, field_vec!["foo"]);
+    assert_has_fields!(t2, field_vec!["foo", "bar", "baz"]);
   }
 
   #[test]
@@ -387,8 +387,8 @@ mod test {
     schema.validate();
 
     let table = schema.tables.get(&TableName::from("foo")).unwrap();
-    assert_has_fields!(table, field_names!["bar"]);
-    assert_missing_fields!(table, field_names!["baz"]);
+    assert_has_fields!(table, field_vec!["bar"]);
+    assert_missing_fields!(table, field_vec!["baz"]);
   }
 
   #[test]
@@ -437,11 +437,11 @@ mod test {
     schema.validate();
 
     let table = schema.tables.get(&TableName::from("foo_qux")).unwrap();
-    assert_has_fields!(table, field_names!["bar", "baz", "corge"]);
-    assert_missing_fields!(table, field_names!["quux"]);
+    assert_has_fields!(table, field_vec!["bar", "baz", "corge"]);
+    assert_missing_fields!(table, field_vec!["quux"]);
 
     let fd = table.fds.values().next().unwrap();
-    assert_eq!(fd.lhs.clone().into_iter().collect::<Vec<_>>(), field_names!["bar"]);
-    assert_eq!(fd.rhs.clone().into_iter().collect::<Vec<_>>(), field_names!["corge"]);
+    assert_eq!(fd.lhs.clone().into_iter().collect::<Vec<_>>(), field_vec!["bar"]);
+    assert_eq!(fd.rhs.clone().into_iter().collect::<Vec<_>>(), field_vec!["corge"]);
   }
 }

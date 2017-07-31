@@ -12,9 +12,16 @@ macro_rules! assert_has_key(
 );
 
 #[cfg(test)]
-macro_rules! field_names(
+macro_rules! field_vec(
   { $($field:expr),+ } => {
     vec! [ $(FieldName::from($field)),+ ]
+  };
+);
+
+#[cfg(test)]
+macro_rules! field_set(
+  { $($field:expr),+ } => {
+    collect![as HashSet<_>: $(FieldName::from($field)),+ ]
   };
 );
 

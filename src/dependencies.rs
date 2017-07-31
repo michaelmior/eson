@@ -288,8 +288,8 @@ mod tests {
   #[test]
   fn fd_trivial() {
     let fd = FD {
-      lhs: collect![FieldName::from("foo"), FieldName::from("bar")],
-      rhs: collect![FieldName::from("bar")]
+      lhs: field_set!["foo", "bar"],
+      rhs: field_set!["bar"]
     };
     assert!(fd.is_trivial());
   }
@@ -297,8 +297,8 @@ mod tests {
   #[test]
   fn fd_reverse() {
     let fd = FD {
-      lhs: collect![FieldName::from("foo")],
-      rhs: collect![FieldName::from("bar")]
+      lhs: field_set!["foo"],
+      rhs: field_set!["bar"]
     };
     let reverse = fd.reverse();
     assert_eq!(reverse.lhs, fd.rhs);
@@ -309,19 +309,19 @@ mod tests {
   fn fd_closure() {
     let mut fds: HashMap<Vec<FieldName>, FD> = collect![
       collect!["foo".parse().unwrap()] => FD {
-        lhs: collect!["foo".parse().unwrap()],
-        rhs: collect!["bar".parse().unwrap()]
+        lhs: field_set!["foo"],
+        rhs: field_set!["bar"]
       },
       collect!["bar".parse().unwrap()] => FD {
-        lhs: collect!["bar".parse().unwrap()],
-        rhs: collect!["baz".parse().unwrap()]
+        lhs: field_set!["bar"],
+        rhs: field_set!["baz"]
       }
     ];
     assert!(fds.closure());
 
     assert!(fds.values().any(|fd| *fd == FD {
-      lhs: collect!["foo".parse().unwrap()],
-      rhs: collect!["bar".parse().unwrap(), "baz".parse().unwrap()]
+      lhs: field_set!["foo"],
+      rhs: field_set!["bar", "baz"]
     }));
     assert!(!fds.closure());
   }
@@ -329,12 +329,12 @@ mod tests {
   #[test]
   fn ind_reverse() {
     let ind = IND {
-      left_table: "foo".parse().unwrap(), left_fields: vec!["bar".parse().unwrap()],
-      right_table: "baz".parse().unwrap(), right_fields: vec!["quux".parse().unwrap()]
+      left_table: TableName::from("foo"), left_fields: field_vec!["bar"],
+      right_table: TableName::from("baz"), right_fields: field_vec!["quux"]
     };
     let rev = IND {
-      left_table: "baz".parse().unwrap(), left_fields: vec!["quux".parse().unwrap()],
-      right_table: "foo".parse().unwrap(), right_fields: vec!["bar".parse().unwrap()]
+      left_table: TableName::from("baz"), left_fields: field_vec!["quux"],
+      right_table: TableName::from("foo"), right_fields: field_vec!["bar"]
     };
 
     assert_eq!(ind.reverse(), rev)
