@@ -135,15 +135,13 @@ impl Schema {
   pub fn copy_fds(&mut self) {
     let mut new_fds = Vec::new();
 
-    // Loop over all FDs
+    // Loop over INDs
     for ind_vec in self.inds.values() {
       for ind in ind_vec.iter() {
         let mut left_fields = <HashSet<_>>::new();
         for field in self.tables.get(&ind.left_table).unwrap().fields.keys() {
           left_fields.insert(field.clone());
         }
-        // let left_fields = tables.get(&ind.left_table).unwrap()
-        //     .fields.keys().map(|f| *f).into_iter().collect::<HashSet<_>>();
         let left_key = self.tables.get(&ind.left_table).unwrap()
             .fields.values().filter(|f| f.key).map(|f| f.name.clone()).into_iter().collect::<HashSet<_>>();
 
