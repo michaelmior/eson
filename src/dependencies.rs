@@ -29,6 +29,11 @@ impl FD {
   pub fn is_trivial(&self) -> bool {
     self.rhs.is_subset(&self.lhs)
   }
+
+  /// Produce a new `FD` with the left and right sides switched
+  pub fn reverse(&self) -> FD {
+    FD { lhs: self.rhs.clone(), rhs: self.lhs.clone() }
+  }
 }
 
 pub trait FDClosure {
@@ -278,6 +283,17 @@ impl INDClosure for Schema {
 #[cfg(test)]
 mod tests {
   use super::*;
+
+  #[test]
+  fn fd_reverse() {
+    let fd = FD {
+      lhs: collect![FieldName::from("foo")],
+      rhs: collect![FieldName::from("bar")]
+    };
+    let reverse = fd.reverse();
+    assert_eq!(reverse.lhs, fd.rhs);
+    assert_eq!(reverse.rhs, fd.lhs);
+  }
 
   #[test]
   fn fd_closure() {
