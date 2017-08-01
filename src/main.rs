@@ -41,40 +41,51 @@ fn read_file(name: &str) -> Result<String, io::Error> {
   Ok(input_string)
 }
 
+struct Options {
+  input: String,
+  normalize: bool,
+  subsume: bool,
+  ignore_missing: bool,
+  minimize: bool,
+  retain_fks: bool,
+}
+
 fn main() {
   env_logger::init().unwrap();
 
-  let mut input = "".to_string();
-  let mut normalize = true;
-  let mut subsume = true;
-  let mut ignore_missing = false;
-  let mut minimize = false;
-  let mut retain_fks = false;
+  let mut options = Options {
+    input: "".to_string(),
+    normalize: true,
+    subsume: true,
+    ignore_missing: false,
+    minimize: false,
+    retain_fks: false,
+  };
   {
     let mut ap = ArgumentParser::new();
     ap.set_description("NoSQL schema renormalization");
-    ap.refer(&mut input)
+    ap.refer(&mut options.input)
       .add_argument("input", Store, "Example to run").required();
-    ap.refer(&mut normalize)
+    ap.refer(&mut options.normalize)
       .add_option(&["--no-norm"], StoreFalse,
                     "Don't normalize");
-    ap.refer(&mut subsume)
+    ap.refer(&mut options.subsume)
       .add_option(&["--no-subsume"], StoreFalse,
                     "Don't subsume tables");
-    ap.refer(&mut ignore_missing)
+    ap.refer(&mut options.ignore_missing)
       .add_option(&["-i", "--ignore-missing"], StoreTrue,
                     "Ignore dependencies with missing tables");
-    ap.refer(&mut minimize)
+    ap.refer(&mut options.minimize)
       .add_option(&["-m", "--minimize-fds"], StoreTrue,
                     "For FDs which exist in both directions, \
                      select the one with the smallest left-hand side");
-    ap.refer(&mut retain_fks)
+    ap.refer(&mut options.retain_fks)
       .add_option(&["-k", "--retain-fks"], StoreTrue,
                     "Keep only INDs representing foreign keys");
     ap.parse_args_or_exit();
   }
 
-  let filename = format!("examples/{}.txt", input);
+  let filename = format!("examples/{}.txt", options.input);
   info!("Loading schema {}", filename);
   let input_string = read_file(&filename).unwrap();
   let (table_vec, fd_vec, ind_vec) = input::input(&input_string).unwrap();
@@ -88,7 +99,7 @@ fn main() {
   // Add the FDs to each table
   info!("Adding FDs");
   for fd in &fd_vec {
-    if ignore_missing && !schema.tables.contains_key(&fd.0) {
+    if options.ignore_missing && !schema.tables.contains_key(&fd.0) {
       continue;
     }
 
@@ -105,7 +116,7 @@ fn main() {
   for ind in &ind_vec {
     let left_table = ind.0.parse().unwrap();
     let right_table =  ind.2.parse().unwrap();
-    if ignore_missing &&
+    if options.ignore_missing &&
         !(schema.tables.contains_key(&left_table) &&
           schema.tables.contains_key(&right_table)) {
       continue;
@@ -125,24 +136,24 @@ fn main() {
   }
 
   for table in schema.tables.values_mut() {
-    if minimize {
+    if options.minimize {
       table.minimize_fds();
     }
     table.fds.closure();
   }
 
-  if retain_fks {
+  if options.retain_fks {
     schema.retain_fk_inds();
   }
 
   schema.copy_fds();
   schema.ind_closure();
 
-  if normalize {
+  if options.normalize {
     schema.normalize();
   }
 
-  if subsume {
+  if options.subsume {
     schema.subsume();
   }
 
