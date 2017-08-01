@@ -48,6 +48,7 @@ fn main() {
   let mut normalize = true;
   let mut subsume = true;
   let mut ignore_missing = false;
+  let mut minimize = false;
   {
     let mut ap = ArgumentParser::new();
     ap.set_description("NoSQL schema renormalization");
@@ -62,6 +63,10 @@ fn main() {
     ap.refer(&mut ignore_missing)
       .add_option(&["-i", "--ignore-missing"], StoreTrue,
                     "Ignore dependencies with missing tables");
+    ap.refer(&mut minimize)
+      .add_option(&["-m", "--minimize-fds"], StoreTrue,
+                    "For FDs which exist in both directions, \
+                     select the one with the smallest left-hand side");
     ap.parse_args_or_exit();
   }
 
@@ -116,6 +121,9 @@ fn main() {
   }
 
   for table in schema.tables.values_mut() {
+    if minimize {
+      table.minimize_fds();
+    }
     table.fds.closure();
   }
   schema.copy_fds();

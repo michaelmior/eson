@@ -337,6 +337,27 @@ impl Table {
 
     self.fds.retain(|_, fd| !fd.lhs.is_empty() && !fd.rhs.is_empty());
   }
+
+  /// Minimize the set functional dependencies such that
+  /// each `FD` `A->B` is removed if the `FD` `B->A` also
+  /// exists and `|B| < |A|`
+  pub fn minimize_fds(&mut self) {
+    let mut remove_fds = Vec::new();
+
+    for fd in self.fds.values() {
+      let reverse = fd.reverse();
+      let rhs = fd.rhs.clone().into_iter().collect::<Vec<_>>();
+      if self.fds.contains_key(&rhs) &&
+           self.fds[&rhs] == reverse &&
+           fd.lhs.len() > reverse.lhs.len() {
+        remove_fds.push(fd.lhs.clone().into_iter().collect::<Vec<_>>());
+      }
+    }
+
+    for fd in remove_fds {
+      self.fds.remove(&fd);
+    }
+  }
 }
 
 #[cfg(test)]
@@ -399,6 +420,22 @@ mod tests {
     add_fd!(t, vec!["quux"], vec!["qux"]);
     t.prune_fds();
     assert!(t.fds.len() == 0)
+  }
+
+  #[test]
+  fn minimize_fds() {
+    let mut t = table!("foo", fields! {
+      field!("foo", true),
+      field!("bar"),
+      field!("baz")
+    });
+    add_fd!(t, vec!["foo"], vec!["bar", "baz"]);
+    add_fd!(t, vec!["bar", "baz"], vec!["foo"]);
+    t.minimize_fds();
+
+    let minimized = FD { lhs: field_set!["foo"],
+                         rhs: field_set!["bar", "baz"] };
+    assert_eq!(t.fds.values().collect::<Vec<_>>(), vec![&minimized]);
   }
 
   #[test]
