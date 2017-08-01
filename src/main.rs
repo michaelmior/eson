@@ -49,6 +49,7 @@ fn main() {
   let mut subsume = true;
   let mut ignore_missing = false;
   let mut minimize = false;
+  let mut retain_fks = false;
   {
     let mut ap = ArgumentParser::new();
     ap.set_description("NoSQL schema renormalization");
@@ -67,6 +68,9 @@ fn main() {
       .add_option(&["-m", "--minimize-fds"], StoreTrue,
                     "For FDs which exist in both directions, \
                      select the one with the smallest left-hand side");
+    ap.refer(&mut retain_fks)
+      .add_option(&["-k", "--retain-fks"], StoreTrue,
+                    "Keep only INDs representing foreign keys");
     ap.parse_args_or_exit();
   }
 
@@ -126,8 +130,12 @@ fn main() {
     }
     table.fds.closure();
   }
-  schema.copy_fds();
 
+  if retain_fks {
+    schema.retain_fk_inds();
+  }
+
+  schema.copy_fds();
   schema.ind_closure();
 
   if normalize {

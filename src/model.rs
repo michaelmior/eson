@@ -131,6 +131,20 @@ impl Schema {
     }
   }
 
+  /// Remove INDs which do not represent foreign keys
+  pub fn retain_fk_inds(&mut self) {
+    for (&(_, ref right_table), ref mut inds) in self.inds.iter_mut() {
+      let ref right_table = self.tables[right_table];
+      inds.retain(|ind|
+        match right_table.fds.get(&ind.left_fields) {
+          Some(fd) => ind.right_fields.clone().into_iter()
+                         .collect::<HashSet<_>>().is_subset(&fd.rhs),
+          None => false
+        }
+      )
+    }
+  }
+
   // Copy FDs between tables based on inclusion dependencies
   pub fn copy_fds(&mut self) {
     let mut new_fds = Vec::new();
@@ -665,5 +679,44 @@ mod tests {
     assert_eq!(ind.right_fields.len(), 1);
     assert_eq!(ind.right_fields.iter().next().unwrap(),
                &FieldName::from("quux"));
+  }
+
+  #[test]
+  fn retain_fk_inds_no() {
+    let t1 = table!("foo", fields! {
+      field!("bar", true),
+      field!("qux")
+    });
+    let t2 = table!("quux", fields! {
+      field!("corge", true),
+      field!("garply")
+    });
+
+    let mut schema = schema! {t1, t2};
+    add_ind!(schema, "foo", vec!["qux"], "quux", vec!["garply"]);
+
+    schema.retain_fk_inds();
+
+    assert!(schema.inds.values().all(|inds| inds.is_empty()))
+  }
+
+  #[test]
+  fn retain_fk_inds_yes() {
+    let t1 = table!("foo", fields! {
+      field!("bar", true),
+      field!("qux")
+    });
+    let mut t2 = table!("quux", fields! {
+      field!("corge", true),
+      field!("garply")
+    });
+    add_fd!(t2, vec!["corge"], vec!["garply"]);
+
+    let mut schema = schema! {t1, t2};
+    add_ind!(schema, "foo", vec!["bar", "qux"], "quux", vec!["corge", "garply"]);
+
+    schema.retain_fk_inds();
+
+    assert!(schema.inds.values().all(|inds| inds.is_empty()))
   }
 }
