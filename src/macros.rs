@@ -84,12 +84,15 @@ macro_rules! table(
 
 #[cfg(test)]
 macro_rules! add_fd(
-  ($table:expr, $lhs:expr, $rhs:expr) => {
-    $table.add_fd(
-      $lhs.iter().map(|f| f.parse().unwrap()).collect::<Vec<_>>(),
-      $rhs.iter().map(|f| f.parse().unwrap()).collect::<Vec<_>>()
-    );
-  };
+  ($table:expr, $lhs:expr, $rhs:expr) => {{
+    let mut lhs = $lhs.iter().map(|f| f.parse().unwrap()).collect::<Vec<_>>();
+    lhs.sort();
+
+    let mut rhs = $rhs.iter().map(|f| f.parse().unwrap()).collect::<Vec<_>>();
+    rhs.sort();
+
+    $table.add_fd(lhs, rhs);
+  }};
 );
 
 #[cfg(test)]

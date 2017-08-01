@@ -350,7 +350,9 @@ impl Table {
       if self.fds.contains_key(&rhs) &&
            self.fds[&rhs] == reverse &&
            fd.lhs.len() > reverse.lhs.len() {
-        remove_fds.push(fd.lhs.clone().into_iter().collect::<Vec<_>>());
+        let mut key = fd.lhs.clone().into_iter().collect::<Vec<_>>();
+        key.sort();
+        remove_fds.push(key);
       }
     }
 
