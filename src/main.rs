@@ -115,24 +115,19 @@ fn main() {
     schema.add_ind(new_ind);
   }
 
-  let mut changed = true;
-  while changed {
-    info!("Looping");
-    changed = false;
-    for table in schema.tables.values_mut() {
-      changed = changed || table.fds.closure();
-    }
-    schema.copy_fds();
+  for table in schema.tables.values_mut() {
+    table.fds.closure();
+  }
+  schema.copy_fds();
 
-    changed = changed || schema.ind_closure();
+  schema.ind_closure();
 
-    if normalize {
-      changed = changed || schema.normalize();
-    }
+  if normalize {
+    schema.normalize();
+  }
 
-    if subsume {
-      changed = changed || schema.subsume();
-    }
+  if subsume {
+    schema.subsume();
   }
 
   println!("{}", schema);
