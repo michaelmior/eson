@@ -13,12 +13,9 @@ defaultmap = "0.3.0"
 env_logger = "0.3"
 group-by = "1.0.0"
 itertools = "0.6.1"
-log = "0.3"
 permutation = "0.2.5"
-
-[dependencies.string-intern]
-version = "0.1.7"
-default-features = false
+string-intern = { version ="0.1.7", default-features = false }
+log = "0.3"
 
 [dev-dependencies]
 collect-mac = "0.1.0"
