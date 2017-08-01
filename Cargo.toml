@@ -15,7 +15,10 @@ group-by = "1.0.0"
 itertools = "0.6.1"
 log = "0.3"
 permutation = "0.2.5"
-string-intern = "0.1.6"
+
+[dependencies.string-intern]
+version = "0.1.7"
+default-features = false
 
 [dev-dependencies]
 collect-mac = "0.1.0"
