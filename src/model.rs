@@ -139,7 +139,10 @@ impl Schema {
         match right_table.fds.get(&ind.left_fields) {
           Some(fd) => ind.right_fields.clone().into_iter()
                          .collect::<HashSet<_>>().is_subset(&fd.rhs),
-          None => false
+          None => {
+            debug!("Removing {} since it does not represent a foreign key", ind);
+            false
+          }
         }
       )
     }
@@ -365,6 +368,7 @@ impl Table {
            self.fds[&rhs] == reverse &&
            fd.lhs.len() > reverse.lhs.len() {
         let mut key = fd.lhs.clone().into_iter().collect::<Vec<_>>();
+        debug!("Removing {} due to minimization", fd);
         key.sort();
         remove_fds.push(key);
       }
