@@ -5,18 +5,20 @@ extern crate argparse;
 #[macro_use]
 extern crate collect_mac;
 extern crate defaultmap;
-extern crate env_logger;
 extern crate itertools;
 #[macro_use]
 extern crate log;
 extern crate permutation;
+extern crate simple_logging;
 extern crate string_intern;
 
 use std::fs::File;
 use std::io;
 use std::io::prelude::*;
+use std::str::FromStr;
 
 use argparse::{ArgumentParser, Store, StoreFalse, StoreTrue};
+use log::LogLevelFilter;
 
 #[macro_use]
 mod macros;
@@ -48,11 +50,10 @@ struct Options {
   ignore_missing: bool,
   minimize: bool,
   retain_fks: bool,
+  log_level: String,
 }
 
 fn main() {
-  env_logger::init().unwrap();
-
   let mut options = Options {
     input: "".to_string(),
     normalize: true,
@@ -60,12 +61,16 @@ fn main() {
     ignore_missing: false,
     minimize: false,
     retain_fks: false,
+    log_level: "Off".to_string(),
   };
   {
     let mut ap = ArgumentParser::new();
     ap.set_description("NoSQL schema renormalization");
     ap.refer(&mut options.input)
       .add_argument("input", Store, "Example to run").required();
+    ap.refer(&mut options.log_level)
+      .add_option(&["-l", "--log-level"], Store,
+                    "The level of logging to use");
     ap.refer(&mut options.normalize)
       .add_option(&["--no-norm"], StoreFalse,
                     "Don't normalize");
@@ -84,6 +89,10 @@ fn main() {
                     "Keep only INDs representing foreign keys");
     ap.parse_args_or_exit();
   }
+
+  let log_level = LogLevelFilter::from_str(options.log_level.as_str())
+    .expect("invalid logging level");
+  simple_logging::log_to_stderr(log_level).ok();
 
   let filename = format!("examples/{}.txt", options.input);
   info!("Loading schema {}", filename);
