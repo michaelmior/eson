@@ -158,12 +158,18 @@ fn main() {
   schema.copy_fds();
   schema.ind_closure();
 
-  if options.normalize {
-    schema.normalize();
-  }
+  let mut changed = true;
+  while changed {
+    info!("Looping");
+    changed = false;
 
-  if options.subsume {
-    schema.subsume();
+    if options.normalize {
+      changed = schema.normalize() || changed;
+    }
+
+    if options.subsume {
+      changed = schema.subsume() || changed;
+    }
   }
 
   println!("{}", schema);
