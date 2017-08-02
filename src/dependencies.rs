@@ -89,7 +89,7 @@ impl FDClosure for HashMap<Vec<FieldName>, FD> {
 
           if !self.contains_key(&lhs_copy) || self[&lhs_copy] != new_fd {
             changed = true;
-            info!("Inferred {} via transitivity", new_fd);
+            debug!("Inferred {} via transitivity", new_fd);
             self.insert(lhs_copy, new_fd);
           }
         }
@@ -205,7 +205,7 @@ impl INDClosure for Schema {
 
             // If the IND doesn't already exist add it and delete old ones
             if !&self.inds[&ind_key].contains(&new_ind) && !new_inds.contains(&new_ind) {
-              info!("Inferred {} via inference using FDs", new_ind);
+              debug!("Inferred {} via inference using FDs", new_ind);
               new_inds.insert(new_ind);
 
               if delete_inds.contains_key(&ind_key) {
@@ -245,7 +245,7 @@ impl INDClosure for Schema {
 
               let table_key = (new_ind.left_table.clone(), new_ind.right_table.clone());
               if !self.inds.get(&table_key).contains(&new_ind) && !new_inds.contains(&new_ind) {
-                info!("Inferred {} via transitivity", new_ind);
+                debug!("Inferred {} via transitivity", new_ind);
                 new_inds.insert(new_ind);
               }
             }

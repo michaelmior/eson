@@ -16,7 +16,7 @@ fn decomposed_tables(tables: &mut HashMap<TableName, Table>, table_name: TableNa
   // Find a violating FD
   let vfd = t.violating_fd().unwrap();
 
-  info!("Decomposing {} because of {}", t, vfd);
+  debug!("Decomposing {} because of {}", t, vfd);
 
   // Construct t1 with only fields from the FD
   let t1_fields = t.fields.clone().into_iter().filter(|&(ref k, _)|
@@ -76,7 +76,7 @@ impl Normalizable for Schema {
         changed = true;
         any_changed = true;
         let (t1, t2) = decomposed_tables(&mut self.tables, table_name.clone());
-        info!("Decomposed tables are {} and {}", t1, t2);
+        debug!("Decomposed tables are {} and {}", t1, t2);
 
         let t1_name = t1.name.clone();
         let t2_name = t2.name.clone();
@@ -97,7 +97,7 @@ impl Normalizable for Schema {
                         left_fields: ind_fields.clone(),
                         right_table: t2.name.clone(),
                         right_fields: ind_fields };
-        info!("Adding INDs {} and {}", ind, ind.reverse());
+        debug!("Adding INDs {} and {}", ind, ind.reverse());
         self.add_ind(ind.clone().reverse());
         self.add_ind(ind);
 
@@ -172,7 +172,7 @@ impl Normalizable for Schema {
       if let Some((table_name, remove_fields)) = to_remove {
         // Remove the fields from the table (possibly removing the table)
         let mut table = self.tables.get_mut(&table_name).unwrap();
-        info!("Removing {:?} from table {}", remove_fields, table);
+        debug!("Removing {:?} from table {}", remove_fields, table);
         for field in remove_fields {
           table.fields.remove(&field);
         }
@@ -206,7 +206,7 @@ impl Normalizable for Schema {
     // Actually remove the tables
     if !remove_tables.is_empty() {
       for table in remove_tables {
-        info!("Subsuming table {}", table);
+        debug!("Subsuming table {}", table);
         self.tables.remove(&table);
       }
 
