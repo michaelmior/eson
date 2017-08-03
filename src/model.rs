@@ -156,13 +156,17 @@ impl Schema {
     for ind_vec in self.inds.values() {
       for ind in ind_vec.iter() {
         let mut left_fields = <HashSet<_>>::new();
-        for field in self.tables.get(&ind.left_table).unwrap().fields.keys() {
+        let left_table = self.tables.get(&ind.left_table)
+          .expect(&format!("Table for LHS of IND {} does not exist", ind));
+        for field in left_table.fields.keys() {
           left_fields.insert(field.clone());
         }
-        let left_key = self.tables.get(&ind.left_table).unwrap()
-            .fields.values().filter(|f| f.key).map(|f| f.name.clone()).into_iter().collect::<HashSet<_>>();
+        let left_key = left_table.fields.values()
+          .filter(|f| f.key).map(|f| f.name.clone()).into_iter().collect::<HashSet<_>>();
 
-        new_fds.extend(self.tables.get(&ind.right_table).unwrap().fds.values().map(|fd| {
+        let right_table = self.tables.get(&ind.right_table)
+          .expect(&format!("Table for RHS of IND {} does not exist", ind));
+        new_fds.extend(right_table.fds.values().map(|fd| {
           let fd_lhs = fd.lhs.clone().into_iter().collect::<HashSet<_>>();
           let fd_rhs = fd.rhs.clone().into_iter().collect::<HashSet<_>>();
 
