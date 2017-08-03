@@ -65,30 +65,30 @@ macro_rules! fields(
 #[cfg(test)]
 macro_rules! field(
   ($name:expr) => {
-    Field { name: $name.parse().unwrap(), key: false }
+    Field { name: FieldName::from($name), key: false }
   };
   ($name:expr, $key:expr) => {
-    Field { name: $name.parse().unwrap(), key: $key }
+    Field { name: FieldName::from($name), key: $key }
   }
 );
 
 #[cfg(test)]
 macro_rules! table(
   ($name:expr) => {
-    Table { name: $name.parse().unwrap(), ..Default::default() }
+    Table { name: TableName::from($name), ..Default::default() }
   };
   ($name:expr, $fields:expr) => {
-    Table { name: $name.parse().unwrap(), fields: $fields, ..Default::default() }
+    Table { name: TableName::from($name), fields: $fields, ..Default::default() }
   };
 );
 
 #[cfg(test)]
 macro_rules! add_fd(
   ($table:expr, $lhs:expr, $rhs:expr) => {{
-    let mut lhs = $lhs.iter().map(|f| f.parse().unwrap()).collect::<Vec<_>>();
+    let mut lhs = $lhs.iter().map(|f| FieldName::from(f)).collect::<Vec<_>>();
     lhs.sort();
 
-    let mut rhs = $rhs.iter().map(|f| f.parse().unwrap()).collect::<Vec<_>>();
+    let mut rhs = $rhs.iter().map(|f| FieldName::from(f)).collect::<Vec<_>>();
     rhs.sort();
 
     $table.add_fd(lhs, rhs);
@@ -100,15 +100,15 @@ macro_rules! add_ind(
   ($schema:expr, $left_table:expr, $left_fields:expr, $right_table:expr, $right_fields:expr) => {{
     extern crate permutation;
 
-    let lhs = $left_fields.iter().map(|f| f.parse().unwrap()).collect::<Vec<_>>();
+    let lhs = $left_fields.iter().map(|f| FieldName::from(f)).collect::<Vec<_>>();
     let permutation = permutation::sort(&lhs[..]);
 
-    let rhs = $right_fields.iter().map(|f| f.parse().unwrap()).collect::<Vec<_>>();
+    let rhs = $right_fields.iter().map(|f| FieldName::from(f)).collect::<Vec<_>>();
 
     $schema.add_ind(IND {
-      left_table: $left_table.parse().unwrap(),
+      left_table: TableName::from($left_table),
       left_fields: permutation.apply_slice(&lhs[..]),
-      right_table: $right_table.parse().unwrap(),
+      right_table: TableName::from($right_table),
       right_fields: permutation.apply_slice(&rhs[..])
     });
   }};

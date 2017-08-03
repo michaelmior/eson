@@ -308,11 +308,11 @@ mod tests {
   #[test]
   fn fd_closure() {
     let mut fds: HashMap<Vec<FieldName>, FD> = collect![
-      collect!["foo".parse().unwrap()] => FD {
+      field_vec!["foo"] => FD {
         lhs: field_set!["foo"],
         rhs: field_set!["bar"]
       },
-      collect!["bar".parse().unwrap()] => FD {
+      field_vec!["bar"] => FD {
         lhs: field_set!["bar"],
         rhs: field_set!["baz"]
       }

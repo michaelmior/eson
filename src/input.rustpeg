@@ -19,7 +19,8 @@ field_define -> Field
   = key:"*"? name:identifier {
       let is_key = match key { Some(_) => true, None => false };
 
-      Field { name: name.parse().unwrap(), key: is_key }
+      let parsed_name = name.parse().expect(&format!("Invalid field name {}", name));
+      Field { name: parsed_name, key: is_key }
     }
 
 field_defines -> Vec<Field>
@@ -33,8 +34,9 @@ create -> Table
         field_map.insert(field.name.clone(), field);
       }
 
+      let parsed_name = table.parse().expect(&format!("Invalid table name {}", table));
       Table {
-        name: table.parse().unwrap(),
+        name: parsed_name,
         fields: field_map,
         ..Default::default()
       }

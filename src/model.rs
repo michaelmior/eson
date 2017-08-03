@@ -315,9 +315,9 @@ impl Table {
   /// Copy `FD`s from another given `Table`
   pub fn copy_fds(&mut self, other: &Table) {
     for fd in other.fds.values() {
-      let new_lhs = fd.lhs.iter().map(|f| f.to_string().parse().unwrap())
+      let new_lhs = fd.lhs.clone().into_iter()
           .filter(|f| self.fields.contains_key(f)).collect::<Vec<_>>();
-      let new_rhs = fd.rhs.iter().map(|f| f.to_string().parse().unwrap())
+      let new_rhs = fd.rhs.clone().into_iter()
           .filter(|f| self.fields.contains_key(f)).collect::<Vec<_>>();
       if !new_lhs.is_empty() && !new_rhs.is_empty() {
         self.add_fd(new_lhs, new_rhs);
@@ -520,8 +520,8 @@ mod tests {
     add_fd!(t1, vec!["foo"], vec!["baz"]);
     t2.copy_fds(&t1);
 
-    let copied_fd = FD { lhs: collect!["foo".parse().unwrap()],
-                         rhs: collect!["bar".parse().unwrap()] };
+    let copied_fd = FD { lhs: field_set!["foo"],
+                         rhs: field_set!["bar"] };
     let copied_fds = t2.fds.values().collect::<Vec<_>>();
     assert_eq!(vec![&copied_fd], copied_fds)
   }
