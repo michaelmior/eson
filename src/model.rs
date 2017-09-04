@@ -148,7 +148,7 @@ impl Schema {
     }
   }
 
-  // Copy FDs between tables based on inclusion dependencies
+  /// Copy FDs between tables based on inclusion dependencies
   pub fn copy_fds(&mut self) {
     let mut new_fds = Vec::new();
 
@@ -359,7 +359,7 @@ impl Table {
     self.fds.retain(|_, fd| !fd.lhs.is_empty() && !fd.rhs.is_empty());
   }
 
-  /// Minimize the set functional dependencies such that
+  /// Minimize the set of functional dependencies such that
   /// each `FD` `A->B` is removed if the `FD` `B->A` also
   /// exists and `|B| < |A|`
   pub fn minimize_fds(&mut self) {
