@@ -312,6 +312,17 @@ impl Table {
     self.fds.closure();
   }
 
+  /// Check if this table contains a given FD
+  pub fn contains_fd(&self, fd: &FD) -> bool {
+    let mut key = fd.lhs.clone().into_iter().collect::<Vec<_>>();
+    key.sort();
+
+    match self.fds.get(&key) {
+      Some(table_fd) => fd.rhs.is_subset(&table_fd.rhs),
+      None => false
+    }
+  }
+
   /// Copy `FD`s from another given `Table`
   pub fn copy_fds(&mut self, other: &Table) {
     for fd in other.fds.values() {
@@ -503,6 +514,32 @@ mod tests {
     });
     let key = collect![as HashSet<_>: FieldName::from("bar")];
     assert!(!t.is_superkey(&key))
+  }
+
+  #[test]
+  fn table_contains_fd() {
+    let mut t1 = table!("foo", fields! {
+      field!("foo", true),
+      field!("bar")
+    });
+    add_fd!(t1, vec!["foo"], vec!["bar"]);
+    let fd = FD { lhs: field_set!["foo"],
+                  rhs: field_set!["bar"] };
+
+    assert!(t1.contains_fd(&fd))
+  }
+
+  #[test]
+  fn table_contains_fd_no() {
+    let mut t1 = table!("foo", fields! {
+      field!("foo", true),
+      field!("bar")
+    });
+    add_fd!(t1, vec!["foo"], vec!["bar"]);
+    let fd = FD { lhs: field_set!["bar"],
+                  rhs: field_set!["foo"] };
+
+    assert!(!t1.contains_fd(&fd))
   }
 
   #[test]
