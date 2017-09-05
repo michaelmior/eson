@@ -97,12 +97,22 @@ fn main() {
   let filename = format!("examples/{}.txt", options.input);
   info!("Loading schema {}", filename);
   let input_string = read_file(&filename).unwrap();
-  let (table_vec, fd_vec, ind_vec) = input::input(&input_string).unwrap();
+  let (table_vec, fd_vec, ind_vec, frequencies) = input::input(&input_string).unwrap();
 
   let mut schema = Schema { ..Default::default() };
   // Build a HashMap of parsed Tables
   for table in table_vec {
     schema.tables.insert(table.name.clone(), table);
+  }
+
+  // Copy frequencies to the tables and fields
+  for freq in frequencies {
+    let mut table = schema.tables.get_mut(&freq.0).unwrap();
+    if freq.1.is_some() {
+      table.fields.get_mut(&freq.1.unwrap()).unwrap().cardinality = Some(freq.2);
+    } else {
+      table.row_count = Some(freq.2);
+    }
   }
 
   // Add the FDs to each table

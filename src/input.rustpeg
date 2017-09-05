@@ -12,6 +12,9 @@ identifier -> String
 identifiers -> Vec<String>
   = identifier ++ (space? "," space?)
 
+integer -> usize
+  = i:$([0-9]+) { i.parse().unwrap() }
+
 table -> String
   = table:identifier { table }
 
@@ -20,7 +23,7 @@ field_define -> Field
       let is_key = match key { Some(_) => true, None => false };
 
       let parsed_name = name.parse().expect(&format!("Invalid field name {}", name));
-      Field { name: parsed_name, key: is_key }
+      Field { name: parsed_name, key: is_key, cardinality: None }
     }
 
 field_defines -> Vec<Field>
@@ -66,10 +69,24 @@ inc_dep -> Vec<(String, Vec<String>, String, Vec<String>)>
       inds
     }
 
+table_frequency -> (String, Option<String>, usize)
+  = table:identifier space count:integer {
+    (table, None, count)
+  }
+
+column_frequency -> (String, Option<String>, usize)
+  = table:identifier space column:identifier space count:integer {
+    (table, Some(column), count)
+  }
+
+frequency -> (String, Option<String>, usize)
+  = table_frequency / column_frequency
+
 pub input -> (Vec<Table>, Vec<(String, Vec<String>, Vec<String>)>,
-          Vec<(String, Vec<String>, String, Vec<String>)>)
+          Vec<(String, Vec<String>, String, Vec<String>)>, Vec<(String, Option<String>, usize)>)
   = tables:(create ++ "\n") "\n"*
     func_deps:(func_dep ** "\n") "\n"*
-    inc_deps:(inc_dep ** "\n") "\n"* {
-      (tables, func_deps, inc_deps.into_iter().flat_map(|i| i).collect::<Vec<_>>())
+    inc_deps:(inc_dep ** "\n") "\n"*
+    frequencies:((frequency ** "\n"))? "\n"* {
+      (tables, func_deps, inc_deps.into_iter().flat_map(|i| i).collect::<Vec<_>>(), frequencies.unwrap_or(Vec::new()))
     }

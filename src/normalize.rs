@@ -23,7 +23,7 @@ fn decomposed_tables(tables: &mut HashMap<TableName, Table>, table_name: TableNa
     !vfd.rhs.contains(k)
   ).map(|(k, v)|
     (k, if v.key && vfd.rhs.contains(&v.name) {
-      Field { name: v.name, key: false }
+      Field { name: v.name, key: false, cardinality: v.cardinality }
     } else {
       v
     })
@@ -36,9 +36,9 @@ fn decomposed_tables(tables: &mut HashMap<TableName, Table>, table_name: TableNa
     vfd.lhs.contains(k) || vfd.rhs.contains(k)
   ).map(|(k, v)|
     (k, if !v.key && vfd.lhs.contains(&v.name) {
-      Field { name: v.name, key: true }
+      Field { name: v.name, key: true, cardinality: v.cardinality }
     } else if v.key && !vfd.lhs.contains(&v.name) {
-      Field { name: v.name, key: false }
+      Field { name: v.name, key: false, cardinality: v.cardinality }
     } else {
       v
     })
@@ -278,7 +278,7 @@ impl Normalizable for Schema {
                 suffix += 1;
               }
               new_right_names.insert(&field.name, new_name.clone());
-              new_table.fields.insert(new_name.clone(), Field {name: new_name, key: field.key});
+              new_table.fields.insert(new_name.clone(), Field {name: new_name, key: field.key, cardinality: field.cardinality});
             }
             for fd in right_table.fds.values() {
               new_table.add_fd(

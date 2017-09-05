@@ -250,7 +250,10 @@ pub struct Field {
   pub name: FieldName,
 
   /// Whether this field is a key of its parent `Table`
-  pub key: bool
+  pub key: bool,
+
+  /// The cardinality of this field
+  pub cardinality: Option<usize>,
 }
 
 /// A table, it's field and any intra-table dependencies
@@ -264,11 +267,19 @@ pub struct Table {
 
   /// Functional dependencies keyed by their left-hand side
   pub fds: HashMap<Vec<FieldName>, FD>,
+
+  /// The number of rows in this table
+  pub row_count: Option<usize>,
 }
 
 impl Default for Table {
   fn default() -> Table {
-    Table { name: TableName::from(""), fields: HashMap::new(), fds: HashMap::new() }
+    Table {
+      name: TableName::from(""),
+      fields: HashMap::new(),
+      fds: HashMap::new(),
+      row_count: None
+    }
   }
 }
 
