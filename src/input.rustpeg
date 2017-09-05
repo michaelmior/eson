@@ -23,7 +23,12 @@ field_define -> Field
       let is_key = match key { Some(_) => true, None => false };
 
       let parsed_name = name.parse().expect(&format!("Invalid field name {}", name));
-      Field { name: parsed_name, key: is_key, cardinality: None }
+      Field {
+        name: parsed_name,
+        key: is_key,
+        cardinality: None,
+        max_length: None
+      }
     }
 
 field_defines -> Vec<Field>
@@ -69,21 +74,22 @@ inc_dep -> Vec<(String, Vec<String>, String, Vec<String>)>
       inds
     }
 
-table_frequency -> (String, Option<String>, usize)
+table_frequency -> (String, Option<String>, usize, Option<usize>)
   = table:identifier space count:integer {
-    (table, None, count)
+    (table, None, count, None)
   }
 
-column_frequency -> (String, Option<String>, usize)
-  = table:identifier space column:identifier space count:integer {
-    (table, Some(column), count)
+column_frequency -> (String, Option<String>, usize, Option<usize>)
+  = table:identifier space column:identifier space count:integer max_length: integer {
+    (table, Some(column), count, Some(max_length))
   }
 
-frequency -> (String, Option<String>, usize)
+frequency -> (String, Option<String>, usize, Option<usize>)
   = table_frequency / column_frequency
 
 pub input -> (Vec<Table>, Vec<(String, Vec<String>, Vec<String>)>,
-          Vec<(String, Vec<String>, String, Vec<String>)>, Vec<(String, Option<String>, usize)>)
+          Vec<(String, Vec<String>, String, Vec<String>)>,
+          Vec<(String, Option<String>, usize, Option<usize>)>)
   = tables:(create ++ "\n") "\n"*
     func_deps:(func_dep ** "\n") "\n"*
     inc_deps:(inc_dep ** "\n") "\n"*

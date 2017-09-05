@@ -254,6 +254,9 @@ pub struct Field {
 
   /// The cardinality of this field
   pub cardinality: Option<usize>,
+
+  /// The maximum length of values in this field
+  pub max_length: Option<usize>,
 }
 
 /// A table, it's field and any intra-table dependencies

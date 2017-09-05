@@ -65,10 +65,20 @@ macro_rules! fields(
 #[cfg(test)]
 macro_rules! field(
   ($name:expr) => {
-    Field { name: FieldName::from($name), key: false }
+    Field {
+      name: FieldName::from($name),
+      key: false,
+      cardinality: None,
+      max_length: None
+    }
   };
   ($name:expr, $key:expr) => {
-    Field { name: FieldName::from($name), key: $key }
+    Field {
+      name: FieldName::from($name),
+      key: $key,
+      cardinality: None,
+      max_length: None
+    }
   }
 );
 
