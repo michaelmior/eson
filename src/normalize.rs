@@ -1,5 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
+use ordermap::OrderMap;
+
 use dependencies::IND;
 use model::{Field, Schema, Table};
 use symbols::{FieldName, TableName};
@@ -32,7 +34,7 @@ fn decomposed_tables(tables: &mut HashMap<TableName, Table>, table_name: TableNa
     } else {
       v
     })
-  ).collect::<HashMap<FieldName, Field>>();
+  ).collect::<OrderMap<FieldName, Field>>();
   let mut t1 = Table { name: (t.name.to_string().clone() + "_base").parse().unwrap(), fields: t1_fields, ..Default::default() };
   t1.copy_fds(t);
 
@@ -57,7 +59,7 @@ fn decomposed_tables(tables: &mut HashMap<TableName, Table>, table_name: TableNa
     } else {
       v
     })
-  ).collect::<HashMap<FieldName, Field>>();
+  ).collect::<OrderMap<FieldName, Field>>();
   let mut t2 = Table { name: (t.name.to_string().clone() + "_ext").parse().unwrap(), fields: t2_fields, ..Default::default() };
   t2.copy_fds(t);
 

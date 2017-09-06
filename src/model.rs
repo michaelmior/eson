@@ -2,6 +2,7 @@ use std::collections::{HashMap, HashSet};
 use std::fmt;
 
 use defaultmap::DefaultHashMap;
+use ordermap::OrderMap;
 
 use dependencies::{FD, FDClosure, IND};
 use symbols::{FieldName, TableName};
@@ -266,7 +267,7 @@ pub struct Table {
   pub name: TableName,
 
   /// All `Field`s in the table keyed by the name
-  pub fields: HashMap<FieldName, Field>,
+  pub fields: OrderMap<FieldName, Field>,
 
   /// Functional dependencies keyed by their left-hand side
   pub fds: HashMap<Vec<FieldName>, FD>,
@@ -279,7 +280,7 @@ impl Default for Table {
   fn default() -> Table {
     Table {
       name: TableName::from(""),
-      fields: HashMap::new(),
+      fields: OrderMap::new(),
       fds: HashMap::new(),
       row_count: None
     }

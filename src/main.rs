@@ -8,6 +8,7 @@ extern crate defaultmap;
 extern crate itertools;
 #[macro_use]
 extern crate log;
+extern crate ordermap;
 extern crate permutation;
 extern crate simple_logging;
 extern crate string_intern;

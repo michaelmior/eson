@@ -1,5 +1,6 @@
-use std::collections::HashMap;
 use std::str;
+
+use ordermap::OrderMap;
 
 use super::model::{Field, Table};
 
@@ -37,7 +38,7 @@ field_defines -> Vec<Field>
 create -> Table
   = table:table space?
     "(" space? fields:field_defines space? ")" {
-      let mut field_map = HashMap::new();
+      let mut field_map = OrderMap::new();
       for field in fields {
         field_map.insert(field.name.clone(), field);
       }
