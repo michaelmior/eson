@@ -5,6 +5,7 @@ extern crate argparse;
 #[macro_use]
 extern crate collect_mac;
 extern crate defaultmap;
+extern crate float_ord;
 extern crate itertools;
 #[macro_use]
 extern crate log;

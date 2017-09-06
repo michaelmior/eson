@@ -66,18 +66,26 @@ macro_rules! field(
     Field {
       name: FieldName::from($name),
       key: false,
-      cardinality: None,
-      max_length: None
+      cardinality: Some(1),
+      max_length: Some(1)
     }
   };
   ($name:expr, $key:expr) => {
     Field {
       name: FieldName::from($name),
       key: $key,
-      cardinality: None,
-      max_length: None
+      cardinality: Some(1),
+      max_length: Some(1)
     }
-  }
+  };
+  ($name:expr, $key:expr, $cardinality:expr, $max_length:expr) => {
+    Field {
+      name: FieldName::from($name),
+      key: $key,
+      cardinality: Some($cardinality),
+      max_length: Some($max_length)
+    }
+  };
 );
 
 #[cfg(test)]

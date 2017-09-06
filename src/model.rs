@@ -1,7 +1,9 @@
 use std::collections::{HashMap, HashSet};
 use std::fmt;
+use std::usize;
 
 use defaultmap::DefaultHashMap;
+use float_ord::FloatOrd;
 use ordermap::OrderMap;
 
 use dependencies::{FD, FDClosure, IND};
@@ -308,6 +310,46 @@ impl fmt::Display for Table {
 }
 
 impl Table {
+  /// Pick a primary key from the set of FDs
+  pub fn set_primary_key(&mut self, use_stats: bool) {
+    let pk = if use_stats {
+      self.fds.values().max_by_key(|fd| {
+        // Below is taken from https://dx.doi.org/10.5441/002/edbt.2017.31
+
+        let length_score = 1.0 / fd.lhs.len() as f32;
+
+        let total_length: usize = fd.lhs.iter().map(|f| self.fields[f].max_length.unwrap()).sum();
+        let value_score = 1.0 / (f32::max(1.0, total_length as f32 - 7.0) as f32);
+
+        // Get the position of each field in the table
+        let mut indexes = fd.lhs.iter().map(|f| {
+          self.fields.get_pair_index(f).unwrap().0
+        }).collect::<Vec<_>>();
+        indexes.sort();
+
+        let left = indexes[0] as f32;
+
+        // Count the number of fields between each field by subtracting subsequent indexes
+        let between = if indexes.len() == 1 {
+          0.0
+        } else {
+          (&indexes[1..indexes.len() - 1]).iter().fold((0, indexes[0]), |(sum, last), index| {
+            (sum + (index - last - 1), last)
+          }).0 as f32
+        };
+        let position_score = 0.5 * (1.0 / (left + 1.0) + 1.0 / (between + 1.0));
+
+        FloatOrd(length_score + value_score + position_score)
+      }).unwrap().clone()
+    } else {
+      self.fds.values().find(|fd| fd.lhs.len() + fd.rhs.len() == self.fields.len()).unwrap()
+    };
+
+    for field in self.fields.values_mut() {
+      field.key = pk.lhs.contains(&field.name);
+    }
+  }
+
   /// Add a new `FD` to this table
   pub fn add_fd(&mut self, mut lhs: Vec<FieldName>, mut rhs: Vec<FieldName>) {
     lhs.sort();
@@ -509,6 +551,65 @@ mod tests {
     let key_fields = t.key_fields();
     assert!(key_fields.contains("foo"));
     assert!(!key_fields.contains("bar"));
+  }
+
+  #[test]
+  fn table_set_primary_key_no_stats() {
+    let mut t = table!("foo", fields! {
+      field!("foo"),
+      field!("bar")
+    });
+    add_fd!(t, vec!["foo"], vec!["bar"]);
+
+    t.set_primary_key(false);
+
+    assert_has_key!(t, field_vec!["foo"])
+  }
+
+  #[test]
+  fn table_set_primary_key_length() {
+    let mut t = table!("foo", fields! {
+      field!("foo"),
+      field!("bar"),
+      field!("baz")
+    });
+    add_fd!(t, vec!["foo", "bar"], vec!["baz"]);
+    add_fd!(t, vec!["baz"], vec!["foo", "bar"]);
+
+    t.set_primary_key(true);
+
+    assert_has_key!(t, field_vec!["baz"])
+  }
+
+  #[test]
+  fn table_set_primary_key_value() {
+    let mut t = table!("foo", fields! {
+      field!("foo", false, 1, usize::MAX),
+      field!("bar"),
+      field!("baz")
+    });
+    add_fd!(t, vec!["foo"], vec!["bar", "baz"]);
+    add_fd!(t, vec!["baz"], vec!["foo", "bar"]);
+
+    t.set_primary_key(true);
+
+    assert_has_key!(t, field_vec!["baz"])
+  }
+
+  #[test]
+  fn table_set_primary_key_position() {
+    let mut t = table!("foo", fields! {
+      field!("foo"),
+      field!("bar"),
+      field!("baz")
+    });
+
+    add_fd!(t, vec!["foo"], vec!["bar", "baz"]);
+    add_fd!(t, vec!["baz"], vec!["foo", "bar"]);
+
+    t.set_primary_key(true);
+
+    assert_has_key!(t, field_vec!["foo"])
   }
 
   #[test]
