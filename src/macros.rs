@@ -28,10 +28,8 @@ macro_rules! field_set(
 #[cfg(test)]
 macro_rules! assert_fields(
   ($table:expr, $field_names:expr, true) => {{
-    for field_name in $field_names {
-      assert!($table.fields.contains_key(&field_name),
-        format!("{} missing from {}", field_name, $table.name));
-    }
+    let fields = $table.fields.keys().map(|f| f.clone()).into_iter().collect::<Vec<_>>();
+    assert_eq!(fields, $field_names)
   }};
   ($table:expr, $field_names:expr, false) => {{
     for field_name in $field_names {
