@@ -310,6 +310,27 @@ impl fmt::Display for Table {
 }
 
 impl Table {
+  /// Calculate field positions for scoring
+  fn get_field_positions(&self, fields: &HashSet<FieldName>) -> (f32, f32) {
+    let mut indexes = fields.iter().map(|f| {
+      self.fields.get_pair_index(f).unwrap().0
+    }).collect::<Vec<_>>();
+    indexes.sort();
+
+    let left = indexes[0] as f32;
+
+    // Count the number of fields between each field by subtracting subsequent indexes
+    let between = if indexes.len() == 1 {
+      0.0
+    } else {
+      (&indexes[1..indexes.len() - 1]).iter().fold((0, indexes[0]), |(sum, last), index| {
+        (sum + (index - last - 1), last)
+      }).0 as f32
+    };
+
+    (left, between)
+  }
+
   /// Pick a primary key from the set of FDs
   pub fn set_primary_key(&mut self, use_stats: bool) {
     let pk = if use_stats {
@@ -322,21 +343,7 @@ impl Table {
         let value_score = 1.0 / (f32::max(1.0, total_length as f32 - 7.0) as f32);
 
         // Get the position of each field in the table
-        let mut indexes = fd.lhs.iter().map(|f| {
-          self.fields.get_pair_index(f).unwrap().0
-        }).collect::<Vec<_>>();
-        indexes.sort();
-
-        let left = indexes[0] as f32;
-
-        // Count the number of fields between each field by subtracting subsequent indexes
-        let between = if indexes.len() == 1 {
-          0.0
-        } else {
-          (&indexes[1..indexes.len() - 1]).iter().fold((0, indexes[0]), |(sum, last), index| {
-            (sum + (index - last - 1), last)
-          }).0 as f32
-        };
+        let (left, between)  = self.get_field_positions(&fd.lhs);
         let position_score = 0.5 * (1.0 / (left + 1.0) + 1.0 / (between + 1.0));
 
         FloatOrd(length_score + value_score + position_score)
