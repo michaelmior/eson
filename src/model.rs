@@ -1,5 +1,6 @@
 use std::collections::{HashMap, HashSet};
 use std::fmt;
+use std::hash::{Hash, Hasher};
 use std::usize;
 
 use defaultmap::DefaultHashMap;
@@ -247,7 +248,7 @@ impl Schema {
 }
 
 /// A field inside a `Table`
-#[derive(Clone, Debug, Eq, Hash)]
+#[derive(Clone, Debug, Eq)]
 pub struct Field {
   /// The name of the field
   pub name: FieldName,
@@ -263,7 +264,15 @@ pub struct Field {
 }
 
 impl PartialEq for Field {
-  fn eq(&self, other: &Field) -> bool { self.name == other.name }
+  fn eq(&self, other: &Field) -> bool {
+    self.name == other.name
+  }
+}
+
+impl Hash for Field {
+  fn hash<H: Hasher>(&self, state: &mut H) {
+    self.name.hash(state);
+  }
 }
 
 /// A table, it's field and any intra-table dependencies
@@ -295,6 +304,12 @@ impl Default for Table {
 
 impl PartialEq for Table {
   fn eq(&self, other: &Self) -> bool { self.name == other.name }
+}
+
+impl Hash for Table {
+  fn hash<H: Hasher>(&self, state: &mut H) {
+    self.name.hash(state);
+  }
 }
 
 impl fmt::Display for Table {
