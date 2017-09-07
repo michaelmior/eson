@@ -247,7 +247,7 @@ impl Schema {
 }
 
 /// A field inside a `Table`
-#[derive(Clone, Debug, Eq, Hash, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash)]
 pub struct Field {
   /// The name of the field
   pub name: FieldName,
@@ -260,6 +260,10 @@ pub struct Field {
 
   /// The maximum length of values in this field
   pub max_length: Option<usize>,
+}
+
+impl PartialEq for Field {
+  fn eq(&self, other: &Field) -> bool { self.name == other.name }
 }
 
 /// A table, it's field and any intra-table dependencies
