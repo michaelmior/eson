@@ -190,6 +190,11 @@ impl INDClosure for Schema {
             added_fields.retain(|f| !new_right.contains(&f));
             new_right.extend(added_fields);
 
+            // We assume that dependencies which duplicate fields are not helpful
+            if new_left.len() != new_right.len() {
+              continue;
+            }
+
             // Sort the fields in the INDs
             let permutation = permutation::sort(&new_left[..]);
             let sorted_left = permutation.apply_slice(new_left);
