@@ -434,7 +434,9 @@ impl Table {
         let length_score = 0.5 * (1.0 / fd.lhs.len() as f32 +
                                   1.0 / (fd.rhs.len() as f32) / (self.fields.len() as f32 - 2.0));
 
-        let total_length: usize = fd.lhs.iter().map(|f| self.fields[f].max_length.unwrap()).sum();
+        let total_length: usize = fd.lhs.iter().map(|f| {
+          self.fields[f].max_length.expect(&format!("No max length for {} in {}", f, self.name))
+        }).sum();
         let value_score = 1.0 / (f32::max(1.0, total_length as f32 - 7.0) as f32);
 
         let (_, left_between) = self.get_field_positions(&fd.lhs);
