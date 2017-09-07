@@ -263,7 +263,9 @@ impl INDClosure for Schema {
       }
 
       if !new_inds.is_empty() || !delete_inds.is_empty() {
-        changed = true;
+        if !delete_inds.is_empty() {
+          changed = true;
+        }
 
         // Delete old INDs
         for (tables, delete_indices) in &mut delete_inds {
@@ -277,7 +279,7 @@ impl INDClosure for Schema {
 
         // Add new INDs
         for new_ind in new_inds {
-          self.add_ind(new_ind);
+          changed = changed || self.add_ind(new_ind);
         }
       }
 

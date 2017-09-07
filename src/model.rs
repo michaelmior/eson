@@ -42,9 +42,16 @@ impl fmt::Display for Schema {
 
 impl Schema {
   /// Add a new `IND` to the schema
-  pub fn add_ind(&mut self, ind: IND) {
+  pub fn add_ind(&mut self, ind: IND) -> bool {
     let ind_key = (ind.left_table.clone(), ind.right_table.clone());
-    self.inds.get_mut(ind_key).push(ind);
+    let inds = self.inds.get_mut(ind_key);
+
+    if inds.contains(&ind) {
+      false
+    } else {
+      inds.push(ind);
+      true
+    }
   }
 
   #[allow(dead_code)]
