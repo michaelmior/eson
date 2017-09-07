@@ -52,6 +52,7 @@ struct Options {
   ignore_missing: bool,
   minimize: bool,
   retain_fks: bool,
+  use_stats: bool,
   log_level: String,
 }
 
@@ -63,6 +64,7 @@ fn main() {
     ignore_missing: false,
     minimize: false,
     retain_fks: false,
+    use_stats: false,
     log_level: "Off".to_string(),
   };
   {
@@ -89,6 +91,9 @@ fn main() {
     ap.refer(&mut options.retain_fks)
       .add_option(&["-k", "--retain-fks"], StoreTrue,
                     "Keep only INDs representing foreign keys");
+    ap.refer(&mut options.use_stats)
+      .add_option(&["-s", "--use-stats"], StoreTrue,
+                    "Use statistics to guide normalization");
     ap.parse_args_or_exit();
   }
 
@@ -132,6 +137,13 @@ fn main() {
       fd.1.iter().map(|s| s.parse().unwrap()).collect::<Vec<_>>(),
       fd.2.iter().map(|s| s.parse().unwrap()).collect::<Vec<_>>()
     );
+  }
+
+  // Adjust the primary keys using statistics if desired
+  if options.use_stats {
+    for mut table in schema.tables.values_mut() {
+      table.set_primary_key(true);
+    }
   }
 
   // Create a HashMap of INDs from the parsed data
@@ -178,7 +190,7 @@ fn main() {
     changed = false;
 
     if options.normalize {
-      changed = schema.normalize() || changed;
+      changed = schema.normalize(options.use_stats) || changed;
     }
 
     if options.subsume {

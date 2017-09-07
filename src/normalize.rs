@@ -7,16 +7,16 @@ use model::{Field, Schema, Table};
 use symbols::{FieldName, TableName};
 
 pub trait Normalizable {
-  fn normalize(&mut self) -> bool;
+  fn normalize(&mut self, use_stats: bool) -> bool;
   fn subsume(&mut self) -> bool;
 }
 
-fn decomposed_tables(tables: &mut HashMap<TableName, Table>, table_name: TableName)
+fn decomposed_tables(tables: &mut HashMap<TableName, Table>, table_name: TableName, use_stats: bool)
                      -> (Table, Table) {
   let t = tables.get(&table_name).unwrap();
 
   // Find a violating FD
-  let vfd = t.violating_fd(false).unwrap();
+  let vfd = t.violating_fd(use_stats).unwrap();
 
   debug!("Decomposing {} because of {}", t, vfd);
 
@@ -63,11 +63,16 @@ fn decomposed_tables(tables: &mut HashMap<TableName, Table>, table_name: TableNa
   let mut t2 = Table { name: (t.name.to_string().clone() + "_ext").parse().unwrap(), fields: t2_fields, ..Default::default() };
   t2.copy_fds(t);
 
+  if use_stats {
+    t1.set_primary_key(true);
+    t2.set_primary_key(true);
+  }
+
   (t1, t2)
 }
 
 impl Normalizable for Schema {
-  fn normalize(&mut self) -> bool {
+  fn normalize(&mut self, use_stats: bool) -> bool {
     let mut any_changed = false;
     let mut changed = true;
 
@@ -92,7 +97,7 @@ impl Normalizable for Schema {
         // Decompose the tables and update the map
         changed = true;
         any_changed = true;
-        let (t1, t2) = decomposed_tables(&mut self.tables, table_name.clone());
+        let (t1, t2) = decomposed_tables(&mut self.tables, table_name.clone(), use_stats);
         debug!("Decomposed tables are {} and {}", t1, t2);
 
         let t1_name = t1.name.clone();
@@ -353,7 +358,7 @@ mod test {
     let mut schema = schema! {t};
 
     schema.validate();
-    schema.normalize();
+    schema.normalize(false);
     schema.validate();
 
     let t1 = schema.tables.get(&TableName::from("foo_base")).unwrap();
@@ -376,7 +381,7 @@ mod test {
     let mut schema = schema! {t};
 
     schema.validate();
-    schema.normalize();
+    schema.normalize(false);
     schema.validate();
 
     let t1 = schema.tables.get(&TableName::from("foo_base")).unwrap();
