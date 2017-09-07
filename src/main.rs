@@ -111,7 +111,9 @@ fn main() {
   for freq in frequencies {
     let mut table = schema.tables.get_mut(&freq.0).unwrap();
     if freq.1.is_some() {
-      table.fields.get_mut(&freq.1.unwrap()).unwrap().cardinality = Some(freq.2);
+      let field = freq.1.unwrap();
+      table.fields.get_mut(&field).unwrap().cardinality = Some(freq.2);
+      table.fields.get_mut(&field).unwrap().max_length = freq.3;
     } else {
       table.row_count = Some(freq.2);
     }

@@ -81,7 +81,7 @@ table_frequency -> (String, Option<String>, usize, Option<usize>)
   }
 
 column_frequency -> (String, Option<String>, usize, Option<usize>)
-  = table:identifier space column:identifier space count:integer max_length: integer {
+  = table:identifier space column:identifier space count:integer space max_length: integer {
     (table, Some(column), count, Some(max_length))
   }
 
