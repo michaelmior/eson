@@ -412,15 +412,36 @@ impl Table {
 
   /// Check if this table is in BCNF according to its functional dependencies
   pub fn is_bcnf(&self) -> bool {
-    self.violating_fd().is_none()
+    self.violating_fd(false).is_none()
   }
 
   /// Find a functional dependency which violates BCNF
-  pub fn violating_fd(&self) -> Option<&FD> {
-    self.fds.values().find(|fd|
+  pub fn violating_fd(&self, use_stats: bool) -> Option<&FD> {
+    let mut violators = self.fds.values().filter(|fd|
       !fd.is_trivial() &&
       !self.is_superkey(&fd.lhs)
-    )
+    );
+
+    if use_stats {
+      violators.max_by_key(|fd| {
+        // Below is taken from https://dx.doi.org/10.5441/002/edbt.2017.31
+        let length_score = 0.5 * (1.0 / fd.lhs.len() as f32 +
+                                  1.0 / (fd.rhs.len() as f32) / (self.fields.len() as f32 - 2.0));
+
+        let total_length: usize = fd.lhs.iter().map(|f| self.fields[f].max_length.unwrap()).sum();
+        let value_score = 1.0 / (f32::max(1.0, total_length as f32 - 7.0) as f32);
+
+        let (_, left_between) = self.get_field_positions(&fd.lhs);
+        let (_, right_between) = self.get_field_positions(&fd.rhs);
+        let position_score = 0.5 * (1.0 / (left_between + 1.0) + 1.0 / (right_between + 1.0));
+
+        // TODO: Add duplication score
+
+        FloatOrd(length_score + value_score + position_score)
+      })
+    } else {
+      violators.next()
+    }
   }
 
   /// Prune `FD`s which reference fields which no longer exist
@@ -490,14 +511,14 @@ mod tests {
   }
 
   #[test]
-  fn table_violating_fd() {
+  fn table_violating_fd_no_stats() {
     let mut t = table!("foo", fields! {
       field!("foo", true),
       field!("bar")
     });
     add_fd!(t, vec!["bar"], vec!["foo"]);
     let fd = t.fds.values().next().unwrap();
-    assert_eq!(t.violating_fd().unwrap(), fd)
+    assert_eq!(t.violating_fd(false).unwrap(), fd)
   }
 
   #[test]
@@ -507,7 +528,55 @@ mod tests {
       field!("bar")
     });
     add_fd!(t, vec!["foo"], vec!["bar"]);
-    assert!(t.violating_fd().is_none())
+    assert!(t.violating_fd(false).is_none())
+  }
+
+  #[test]
+  fn table_violating_fd_length() {
+    let mut t = table!("foo", fields! {
+      field!("foo", true),
+      field!("bar"),
+      field!("baz"),
+      field!("quux")
+    });
+    add_fd!(t, vec!["bar", "baz"], vec!["quux"]);
+    add_fd!(t, vec!["bar"], vec!["baz", "quux"]);
+
+    assert_eq!(t.violating_fd(true).unwrap().lhs.len(), 1);
+  }
+
+  #[test]
+  fn table_violating_fd_value() {
+    let mut t = table!("foo", fields! {
+      field!("foo", true),
+      field!("bar", false, 1, usize::MAX),
+      field!("baz"),
+      field!("quux")
+    });
+    add_fd!(t, vec!["baz"], vec!["bar", "quux"]);
+    add_fd!(t, vec!["bar"], vec!["baz", "quux"]);
+
+    let lhs = &t.violating_fd(true).unwrap().lhs;
+    assert_eq!(*lhs.iter().next().unwrap(), FieldName::from("baz"));
+  }
+
+  #[test]
+  fn table_violating_fd_position() {
+    let mut t = table!("foo", fields! {
+      field!("foo", true),
+      field!("bar"),
+      field!("baz"),
+      field!("quux"),
+      field!("qux"),
+      field!("corge"),
+      field!("grault"),
+      field!("garply")
+    });
+    add_fd!(t, vec!["bar"], vec!["baz", "quux"]);
+    add_fd!(t, vec!["qux"], vec!["corge", "garply"]);
+
+    let lhs = &t.violating_fd(true).unwrap().lhs;
+    assert_eq!(*lhs.iter().next().unwrap(), FieldName::from("bar"));
   }
 
   #[test]

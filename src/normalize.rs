@@ -16,7 +16,7 @@ fn decomposed_tables(tables: &mut HashMap<TableName, Table>, table_name: TableNa
   let t = tables.get(&table_name).unwrap();
 
   // Find a violating FD
-  let vfd = t.violating_fd().unwrap();
+  let vfd = t.violating_fd(false).unwrap();
 
   debug!("Decomposing {} because of {}", t, vfd);
 
