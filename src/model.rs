@@ -323,7 +323,7 @@ impl Table {
     let between = if indexes.len() == 1 {
       0.0
     } else {
-      (&indexes[1..indexes.len() - 1]).iter().fold((0, indexes[0]), |(sum, last), index| {
+      (&indexes[1..indexes.len()]).iter().fold((0, indexes[0]), |(sum, last), index| {
         (sum + (index - last - 1), last)
       }).0 as f32
     };
