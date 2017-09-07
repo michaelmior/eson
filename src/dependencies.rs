@@ -127,7 +127,7 @@ impl fmt::Display for IND {
     } else {
       self.right_fields.iter().join(", ")
     };
-    let left_fields = self.right_fields.iter().join(", ");
+    let left_fields = self.left_fields.iter().join(", ");
     write!(f, "{}({}) <= {}({})", self.left_table, left_fields, self.right_table, right_fields)
   }
 }
