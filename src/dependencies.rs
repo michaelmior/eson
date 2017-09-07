@@ -1,3 +1,4 @@
+use log::LogLevel::Info;
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 
@@ -153,7 +154,10 @@ impl INDClosure for Schema {
     let mut changed = true;
 
     while changed {
-      info!("IND closure loop...");
+      if log_enabled!(Info) {
+        let total_inds: usize = self.inds.values().map(|inds| inds.len()).sum();
+        info!("IND closure loop ({})...", total_inds);
+      }
 
       changed = false;
       let mut new_inds = HashSet::new();
