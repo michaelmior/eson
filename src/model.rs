@@ -359,25 +359,29 @@ impl Table {
 
   /// Pick a primary key from the set of FDs
   pub fn set_primary_key(&mut self, use_stats: bool) {
-    let pk = if use_stats {
-      self.fds.values().max_by_key(|fd| {
-        // Below is taken from https://dx.doi.org/10.5441/002/edbt.2017.31
+    let pk = {
+      let mut pks = self.fds.values().filter(|fd| fd.lhs.len() + fd.rhs.len() == self.fields.len());
 
-        let length_score = 1.0 / fd.lhs.len() as f32;
+      if use_stats {
+        pks.max_by_key(|fd| {
+          // Below is taken from https://dx.doi.org/10.5441/002/edbt.2017.31
 
-        let total_length: usize = fd.lhs.iter().map(|f| {
-          self.fields[f].max_length.expect(&format!("No max length for {} in {}", f, self.name))
-        }).sum();
-        let value_score = 1.0 / (f32::max(1.0, total_length as f32 - 7.0) as f32);
+          let length_score = 1.0 / fd.lhs.len() as f32;
 
-        // Get the position of each field in the table
-        let (left, between)  = self.get_field_positions(&fd.lhs);
-        let position_score = 0.5 * (1.0 / (left + 1.0) + 1.0 / (between + 1.0));
+          let total_length: usize = fd.lhs.iter().map(|f| {
+            self.fields[f].max_length.expect(&format!("No max length for {} in {}", f, self.name))
+          }).sum();
+          let value_score = 1.0 / (f32::max(1.0, total_length as f32 - 7.0) as f32);
 
-        FloatOrd(length_score + value_score + position_score)
-      }).unwrap().clone()
-    } else {
-      self.fds.values().find(|fd| fd.lhs.len() + fd.rhs.len() == self.fields.len()).unwrap()
+          // Get the position of each field in the table
+          let (left, between)  = self.get_field_positions(&fd.lhs);
+          let position_score = 0.5 * (1.0 / (left + 1.0) + 1.0 / (between + 1.0));
+
+          FloatOrd(length_score + value_score + position_score)
+        }).expect("No primary key found").clone()
+      } else {
+        pks.next().expect("No primary key found")
+      }
     };
 
     for field in self.fields.values_mut() {
@@ -657,6 +661,19 @@ mod tests {
     let key_fields = t.key_fields();
     assert!(key_fields.contains("foo"));
     assert!(!key_fields.contains("bar"));
+  }
+
+  #[test]
+  #[should_panic]
+  fn table_set_primary_key_invalid() {
+    let mut t = table!("foo", fields! {
+      field!("foo"),
+      field!("bar"),
+      field!("baz")
+    });
+    add_fd!(t, vec!["foo"], vec!["bar"]);
+
+    t.set_primary_key(false);
   }
 
   #[test]
