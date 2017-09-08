@@ -46,7 +46,7 @@ impl Schema {
     let ind_key = (ind.left_table.clone(), ind.right_table.clone());
     let inds = self.inds.get_mut(ind_key);
 
-    if inds.contains(&ind) {
+    if inds.iter().any(|ind2| ind.is_subset(ind2)) {
       false
     } else {
       inds.push(ind);
@@ -66,7 +66,7 @@ impl Schema {
 
   /// Check if this schema contains a given IND
   pub fn contains_ind(&self, ind: &IND) -> bool {
-    self.inds.values().any(|inds| inds.iter().any(|i| i == ind))
+    self.inds.values().any(|inds| inds.iter().any(|i| ind.is_subset(i)))
   }
 
   /// Copy `IND`s from the table in `src` to the table in `dst`
@@ -783,6 +783,43 @@ mod tests {
                          rhs: field_set!["bar"] };
     let copied_fds = t2.fds.values().collect::<Vec<_>>();
     assert_eq!(vec![&copied_fd], copied_fds)
+  }
+
+  #[test]
+  fn schema_add_ind_subset() {
+    let t1 = table!("foo", fields! {
+      field!("bar"),
+      field!("qux")
+    });
+    let t2 = table!("baz", fields! {
+      field!("quux"),
+      field!("corge")
+    });
+    let mut schema = schema! {t1, t2};
+    add_ind!(schema, "foo", vec!["bar", "qux"], "baz", vec!["quux", "corge"]);
+    add_ind!(schema, "foo", vec!["bar"], "baz", vec!["quux"]);
+
+    assert!(schema.inds.values().map(|inds| inds.len()).sum::<usize>() == 1usize)
+  }
+
+  #[test]
+  fn schema_contains_ind_subset() {
+    let t1 = table!("foo", fields! {
+      field!("bar"),
+      field!("qux")
+    });
+    let t2 = table!("baz", fields! {
+      field!("quux"),
+      field!("corge")
+    });
+    let mut schema = schema! {t1, t2};
+    add_ind!(schema, "foo", vec!["bar", "qux"], "baz", vec!["quux", "corge"]);
+
+    let ind = IND {
+      left_table: TableName::from("foo"), left_fields: field_vec!["bar"],
+      right_table: TableName::from("baz"), right_fields: field_vec!["quux"]
+    };
+    assert!(schema.contains_ind(&ind))
   }
 
   #[test]
