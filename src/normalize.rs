@@ -102,7 +102,7 @@ impl Normalizable for Schema {
         // Skip tables already in BCNF
         {
           let t = &self.tables[&table_name];
-          if t.is_bcnf() {
+          if t.is_bcnf(use_stats) {
             continue;
           }
         }

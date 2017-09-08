@@ -456,8 +456,8 @@ impl Table {
   }
 
   /// Check if this table is in BCNF according to its functional dependencies
-  pub fn is_bcnf(&self) -> bool {
-    self.violating_fd(false).is_none()
+  pub fn is_bcnf(&self, skip_keys: bool) -> bool {
+    self.violating_fd(skip_keys).is_none()
   }
 
   /// Find a functional dependency which violates BCNF
@@ -468,7 +468,7 @@ impl Table {
     );
 
     if use_stats {
-      violators.max_by_key(|fd| {
+      violators.filter(|fd| fd.lhs.len() + fd.rhs.len() < self.fields.len()).max_by_key(|fd| {
         // Below is taken from https://dx.doi.org/10.5441/002/edbt.2017.31
         let length_score = 0.5 * (1.0 / fd.lhs.len() as f32 +
                                   1.0 / (fd.rhs.len() as f32) / (self.fields.len() as f32 - 2.0));
@@ -569,7 +569,7 @@ mod tests {
       field!("bar")
     });
     add_fd!(t, vec!["foo"], vec!["bar"]);
-    assert!(t.is_bcnf())
+    assert!(t.is_bcnf(false))
   }
 
   #[test]
@@ -683,7 +683,7 @@ mod tests {
     });
     add_fd!(t, vec!["foo"], vec!["bar"]);
     add_fd!(t, vec!["bar"], vec!["baz"]);
-    assert!(!t.is_bcnf())
+    assert!(!t.is_bcnf(false))
   }
 
   #[test]
