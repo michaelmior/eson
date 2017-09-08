@@ -142,6 +142,18 @@ impl IND {
           right_table: self.left_table.clone(),
           right_fields: permutation.apply_slice(&self.left_fields[..]) }
   }
+
+  /// Check if this IND is a subset of another
+  pub fn is_subset(&self, other: &IND) -> bool {
+    let left_indexes = self.left_fields.iter().flat_map(|f| {
+      other.left_fields.iter().position(|f2| f2 == f)
+    }).collect::<Vec<_>>();
+    let right_indexes = self.right_fields.iter().flat_map(|f| {
+      other.right_fields.iter().position(|f2| f2 == f)
+    }).collect::<Vec<_>>();
+
+    left_indexes.len() == self.left_fields.len() && left_indexes == right_indexes
+  }
 }
 
 pub trait INDClosure {
@@ -349,6 +361,45 @@ mod tests {
     };
 
     assert_eq!(ind.reverse(), rev)
+  }
+
+  #[test]
+  fn ind_is_subset() {
+    let ind1 = IND {
+      left_table: TableName::from("foo"), left_fields: field_vec!["bar"],
+      right_table: TableName::from("baz"), right_fields: field_vec!["quux"]
+    };
+    let ind2 = IND {
+      left_table: TableName::from("foo"), left_fields: field_vec!["bar", "qux"],
+      right_table: TableName::from("baz"), right_fields: field_vec!["quux", "corge"]
+    };
+
+    assert!(ind1.is_subset(&ind2));
+    assert!(!ind2.is_subset(&ind1));
+  }
+
+  #[test]
+  fn ind_is_subset_self() {
+    let ind = IND {
+      left_table: TableName::from("foo"), left_fields: field_vec!["bar", "qux"],
+      right_table: TableName::from("baz"), right_fields: field_vec!["quux", "corge"]
+    };
+
+    assert!(ind.is_subset(&ind))
+  }
+
+  #[test]
+  fn ind_is_subset_no() {
+    let ind1 = IND {
+      left_table: TableName::from("foo"), left_fields: field_vec!["bar"],
+      right_table: TableName::from("baz"), right_fields: field_vec!["garply"]
+    };
+    let ind2 = IND {
+      left_table: TableName::from("foo"), left_fields: field_vec!["bar", "qux"],
+      right_table: TableName::from("baz"), right_fields: field_vec!["quux", "corge"]
+    };
+
+    assert!(!ind1.is_subset(&ind2))
   }
 
   #[test]
