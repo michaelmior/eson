@@ -44,11 +44,14 @@ create -> Table
       }
 
       let parsed_name = table.parse().expect(&format!("Invalid table name {}", table));
-      Table {
+      let mut t = Table {
         name: parsed_name,
         fields: field_map,
         ..Default::default()
-      }
+      };
+      t.add_pk_fd();
+
+      t
     }
 
 func_dep -> (String, Vec<String>, Vec<String>)

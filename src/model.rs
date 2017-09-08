@@ -336,6 +336,19 @@ impl fmt::Display for Table {
 }
 
 impl Table {
+  /// Add an FD for the primary key
+  pub fn add_pk_fd(&mut self) {
+    let (lhs_names, rhs_names) = {
+      let (lhs, rhs): (Vec<_>, Vec<_>) = self.fields.values().partition(|f| f.key);
+
+      (lhs.iter().map(|f| f.name.clone()).collect::<Vec<_>>(),
+       rhs.iter().map(|f| f.name.clone()).collect::<Vec<_>>())
+    };
+    if lhs_names.len() > 0 && rhs_names.len() > 0 {
+      self.add_fd(lhs_names, rhs_names);
+    }
+  }
+
   /// Calculate field positions for scoring
   fn get_field_positions(&self, fields: &HashSet<FieldName>) -> (f32, f32) {
     let mut indexes = fields.iter().map(|f| {
@@ -535,6 +548,21 @@ mod tests {
   }
 
   #[test]
+  fn table_add_pk_fd() {
+    let mut t = table!("foo", fields! {
+      field!("foo", true),
+      field!("bar")
+    });
+
+    t.add_pk_fd();
+
+    let fd = FD { lhs: field_set!["foo"],
+                  rhs: field_set!["bar"] };
+
+    assert!(t.contains_fd(&fd))
+  }
+
+  #[test]
   fn table_is_bcnf_yes() {
     let mut t = table!("foo", fields! {
       field!("foo", true),
@@ -551,8 +579,11 @@ mod tests {
       field!("bar")
     });
     add_fd!(t, vec!["bar"], vec!["foo"]);
-    let fd = t.fds.values().next().unwrap();
-    assert_eq!(t.violating_fd(false).unwrap(), fd)
+    let fd = FD {
+      lhs: field_set!["bar"],
+      rhs: field_set!["foo"]
+    };
+    assert_eq!(t.violating_fd(false).unwrap(), &fd)
   }
 
   #[test]
@@ -620,8 +651,11 @@ mod tests {
       field!("bar")
     });
     add_fd!(t, vec!["quux"], vec!["qux"]);
+    assert!(t.fds.len() == 2);
+
     t.prune_fds();
-    assert!(t.fds.len() == 0)
+
+    assert!(t.fds.len() == 1);
   }
 
   #[test]

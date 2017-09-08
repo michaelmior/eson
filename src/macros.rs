@@ -90,12 +90,18 @@ macro_rules! field(
 
 #[cfg(test)]
 macro_rules! table(
-  ($name:expr) => {
-    Table { name: TableName::from($name), ..Default::default() }
-  };
-  ($name:expr, $fields:expr) => {
-    Table { name: TableName::from($name), fields: $fields, ..Default::default() }
-  };
+  ($name:expr) => {{
+    let mut t = Table { name: TableName::from($name), ..Default::default() };
+    t.add_pk_fd();
+
+    t
+  }};
+  ($name:expr, $fields:expr) => {{
+    let mut t = Table { name: TableName::from($name), fields: $fields, ..Default::default() };
+    t.add_pk_fd();
+
+    t
+  }};
 );
 
 #[cfg(test)]

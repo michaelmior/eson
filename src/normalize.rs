@@ -2,6 +2,9 @@ use std::collections::{HashMap, HashSet};
 
 use ordermap::OrderMap;
 
+#[cfg(test)]
+use dependencies::FD;
+
 use dependencies::IND;
 use model::{Field, Schema, Table};
 use symbols::{FieldName, TableName};
@@ -35,7 +38,12 @@ fn decomposed_tables(tables: &mut HashMap<TableName, Table>, table_name: TableNa
       v
     })
   ).collect::<OrderMap<FieldName, Field>>();
-  let mut t1 = Table { name: (t.name.to_string().clone() + "_base").parse().unwrap(), fields: t1_fields, ..Default::default() };
+  let mut t1 = Table {
+    name: (t.name.to_string().clone() + "_base").parse().unwrap(),
+    fields: t1_fields,
+    ..Default::default()
+  };
+  t1.add_pk_fd();
   t1.copy_fds(t);
 
   // Construct t2 excluding fields which are only on the RHS of the FD
@@ -60,7 +68,12 @@ fn decomposed_tables(tables: &mut HashMap<TableName, Table>, table_name: TableNa
       v
     })
   ).collect::<OrderMap<FieldName, Field>>();
-  let mut t2 = Table { name: (t.name.to_string().clone() + "_ext").parse().unwrap(), fields: t2_fields, ..Default::default() };
+  let mut t2 = Table {
+    name: (t.name.to_string().clone() + "_ext").parse().unwrap(),
+    fields: t2_fields,
+    ..Default::default()
+  };
+  t2.add_pk_fd();
   t2.copy_fds(t);
 
   if use_stats {
@@ -313,6 +326,7 @@ impl Normalizable for Schema {
                 fd.rhs.iter().map(|f| new_right_names[f].clone()).collect::<Vec<_>>()
               );
             }
+            new_table.add_pk_fd();
 
             any_changed = true;
             new_tables.push((new_table, ind.left_table.clone(), ind.right_table.clone()));
@@ -467,8 +481,10 @@ mod test {
     assert_has_fields!(table, field_vec!["bar", "baz", "corge"]);
     assert_missing_fields!(table, field_vec!["quux"]);
 
-    let fd = table.fds.values().next().unwrap();
-    assert_eq!(fd.lhs.clone().into_iter().collect::<Vec<_>>(), field_vec!["bar"]);
-    assert_eq!(fd.rhs.clone().into_iter().collect::<Vec<_>>(), field_vec!["corge"]);
+    let fd = FD {
+      lhs: field_set!["bar"],
+      rhs: field_set!["corge"]
+    };
+    assert!(table.contains_fd(&fd));
   }
 }
