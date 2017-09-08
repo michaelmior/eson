@@ -279,7 +279,7 @@ impl INDClosure for Schema {
 
         // Add new INDs
         for new_ind in new_inds {
-          changed = changed || self.add_ind(new_ind);
+          changed = self.add_ind(new_ind) || changed;
         }
       }
 
