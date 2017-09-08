@@ -391,9 +391,9 @@ impl Table {
           let position_score = 0.5 * (1.0 / (left + 1.0) + 1.0 / (between + 1.0));
 
           FloatOrd(length_score + value_score + position_score)
-        }).expect("No primary key found").clone()
+        }).expect(&format!("No primary key found for {}", self)).clone()
       } else {
-        pks.next().expect("No primary key found")
+        pks.next().expect(&format!("No primary key found for {}", self))
       }
     };
 
