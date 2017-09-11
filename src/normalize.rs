@@ -209,11 +209,24 @@ impl Normalizable for Schema {
 
       if let Some((table_name, remove_fields)) = to_remove {
         // Remove the fields from the table (possibly removing the table)
-        let mut table = self.tables.get_mut(&table_name).unwrap();
-        for field in remove_fields {
-          table.fields.remove(&field);
+        let mut remove_name = None;
+
+        {
+          let mut table = self.tables.get_mut(&table_name).unwrap();
+          for field in remove_fields {
+            table.fields.remove(&field);
+          }
+          table.prune_fds();
+
+          if table.fields.len() == 0 {
+            remove_name = Some(table.name.clone());
+          }
         }
-        table.prune_fds();
+
+        // Remove the table if it was found to be empty
+        if remove_name.is_some() {
+          self.tables.remove(&remove_name.unwrap());
+        }
       }
 
       // Prune any INDs which may no longer be valid
