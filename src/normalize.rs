@@ -196,6 +196,9 @@ impl Normalizable for Schema {
             continue;
           }
 
+          debug!("Removing {:?} from table {} because of {}",
+                 remove_fields, ind.left_table, ind);
+
           // Mark the changes and save the fields to remove
           changed = true;
           any_changed = true;
@@ -207,7 +210,6 @@ impl Normalizable for Schema {
       if let Some((table_name, remove_fields)) = to_remove {
         // Remove the fields from the table (possibly removing the table)
         let mut table = self.tables.get_mut(&table_name).unwrap();
-        debug!("Removing {:?} from table {}", remove_fields, table);
         for field in remove_fields {
           table.fields.remove(&field);
         }
