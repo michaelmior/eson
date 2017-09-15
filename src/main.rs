@@ -114,13 +114,17 @@ fn main() {
 
   // Copy frequencies to the tables and fields
   for freq in frequencies {
-    let mut table = schema.tables.get_mut(&freq.0).unwrap();
-    if freq.1.is_some() {
-      let field = freq.1.unwrap();
-      table.fields.get_mut(&field).unwrap().cardinality = Some(freq.2);
-      table.fields.get_mut(&field).unwrap().max_length = freq.3;
-    } else {
-      table.row_count = Some(freq.2);
+    let mut table = schema.tables.get_mut(&freq.0)
+      .expect(&format!("found stats for unknown table {}", freq.0));
+    match freq.1 {
+      Some(field_name) => {
+        let field = table.fields.get_mut(&field_name)
+          .expect(&format!("found stats for unknown field {} on {}", field_name, freq.0));
+        field.cardinality = Some(freq.2);
+        field.cardinality = Some(freq.2);
+        field.max_length = freq.3;
+      }
+      None => { table.row_count = Some(freq.2) }
     }
   }
 
