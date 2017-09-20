@@ -263,8 +263,7 @@ impl INDClosure for Schema {
                                   right_table: ind2.right_table.clone(),
                                   right_fields: ind2.right_fields.clone() };
 
-              let table_key = (new_ind.left_table.clone(), new_ind.right_table.clone());
-              if !self.inds.get(&table_key).contains(&new_ind) && !new_inds.contains(&new_ind) {
+              if !self.contains_ind(&new_ind) && !new_inds.contains(&new_ind) {
                 debug!("Inferred {} via transitivity", new_ind);
                 new_inds.insert(new_ind);
               }
