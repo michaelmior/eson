@@ -99,9 +99,8 @@ fn main() {
     .expect("invalid logging level");
   simple_logging::log_to_stderr(log_level).ok();
 
-  let filename = format!("examples/{}.txt", options.input);
-  info!("Loading schema {}", filename);
-  let input_string = read_file(&filename).unwrap();
+  info!("Loading schema {}", options.input);
+  let input_string = read_file(&options.input).unwrap();
   let (table_vec, fd_vec, ind_vec, frequencies) = input::input(&input_string).unwrap();
 
   let mut schema = Schema { ..Default::default() };
