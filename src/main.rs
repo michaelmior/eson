@@ -1,5 +1,3 @@
-#![feature(slice_patterns)]
-
 extern crate argparse;
 #[cfg(test)]
 #[macro_use]
