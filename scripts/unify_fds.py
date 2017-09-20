@@ -19,7 +19,7 @@ for line in open(sys.argv[1]).readlines():
 
 out = open(sys.argv[1], 'w')
 
-# Write all liens before the INDs
+# Write all lines before the FDs
 while True:
     line = other_lines.pop(0)
     out.write(line)

@@ -9,7 +9,7 @@ for line in open(sys.argv[1]).readlines():
         other_lines.append(line)
         continue
 
-    line = line.replace(', ', ',').strip()
+    line = line.replace(', ', ',').replace('(', ' ').replace(')', '').strip()
     left_table, left_fields, _, right_table, right_fields = line.split(' ')
     left_fields = left_fields.split(',')
     right_fields = right_fields.split(',')
@@ -18,7 +18,7 @@ for line in open(sys.argv[1]).readlines():
 
 out = open(sys.argv[1], 'w')
 
-# Write all lines before the FDs
+# Write all lines before the INDs
 blanks = 0
 while True:
     line = other_lines.pop(0)
