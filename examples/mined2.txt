@@ -1,0 +1,687 @@
+i1177375268(*buynow_id, *buynow_date, *items_id)
+i1557291277(*users_id, *comments_id, comments_comment, comments_date, comments_rating)
+i1879743023(*comments_id, *users_id, users_nickname)
+i2049737091(*items_id, *bids_id, *users_id, items_end_date)
+i2087519603(*items_id, *categories_id)
+i210798434(*items_id, *bids_date, *bids_id, *users_id, bids_bid, bids_qty, users_nickname)
+i2269844981(*items_id, *users_id, items_end_date)
+i2366332486(*users_id, *buynow_date, *buynow_id, buynow_qty)
+i2594090645(*items_id, items_buy_now, items_description, items_end_date, items_initial_price, items_max_bid, items_name, items_nb_of_bids, items_quantity, items_reserve_price, items_start_date)
+i262196338(*items_id, *bids_bid, *bids_id, bids_date, bids_qty)
+i3050485475(*categories_id, categories_name)
+i3116489164(*users_id, users_balance, users_creation_date, users_email, users_firstname, users_lastname, users_nickname, users_password, users_rating)
+i409321726(*users_id, *items_end_date, *bids_id, *items_id)
+i920605840(*categories_id, *items_id, items_end_date, items_initial_price, items_max_bid, items_name, items_nb_of_bids)
+i941409494(*users_id, *items_end_date, *items_id)
+
+i1557291277 comments_id -> users_id, comments_comment, comments_date, comments_rating
+i1557291277 comments_comment -> users_id, comments_id, comments_date, comments_rating
+i1557291277 comments_date, users_id -> comments_id, comments_comment, comments_rating
+i210798434 bids_id -> items_id, bids_date, users_id, bids_bid, bids_qty, users_nickname
+i210798434 bids_date, users_id -> items_id, bids_id, bids_bid, bids_qty
+i210798434 bids_bid, bids_date -> items_id, bids_id, users_id, bids_qty, users_nickname
+i210798434 users_nickname -> users_id
+i210798434 users_id -> users_nickname
+i210798434 bids_qty, bids_date, items_id -> bids_id, users_id, bids_bid, users_nickname
+i210798434 bids_bid, items_id, users_nickname -> bids_date, bids_id, bids_qty
+i210798434 bids_date, users_nickname -> items_id, bids_id, bids_bid, bids_qty
+i210798434 bids_bid, users_id, items_id -> bids_date, bids_id, bids_qty
+i3116489164 users_balance, users_rating -> users_id, users_creation_date, users_email, users_firstname, users_lastname, users_nickname, users_password
+i3116489164 users_lastname, users_firstname -> users_id, users_balance, users_creation_date, users_email, users_nickname, users_password, users_rating
+i3116489164 users_password -> users_id, users_balance, users_creation_date, users_email, users_firstname, users_lastname, users_nickname, users_rating
+i3116489164 users_nickname -> users_id, users_balance, users_creation_date, users_email, users_firstname, users_lastname, users_password, users_rating
+i3116489164 users_id -> users_balance, users_creation_date, users_email, users_firstname, users_lastname, users_nickname, users_password, users_rating
+i3116489164 users_lastname, users_balance -> users_id, users_creation_date, users_email, users_firstname, users_nickname, users_password, users_rating
+i3116489164 users_balance, users_firstname -> users_id, users_creation_date, users_email, users_lastname, users_nickname, users_password, users_rating
+i3116489164 users_email -> users_id, users_balance, users_creation_date, users_firstname, users_lastname, users_nickname, users_password, users_rating
+i3116489164 users_creation_date -> users_id, users_balance, users_email, users_firstname, users_lastname, users_nickname, users_password, users_rating
+i941409494 users_id, items_end_date -> items_id
+i941409494 items_id -> users_id, items_end_date
+i262196338 bids_id -> items_id, bids_bid, bids_date, bids_qty
+i262196338 bids_bid, bids_date -> items_id, bids_id, bids_qty
+i262196338 bids_qty, bids_date, items_id -> bids_bid, bids_id
+i1177375268 buynow_id -> buynow_date, items_id
+i1177375268 buynow_date, items_id -> buynow_id
+i2049737091 bids_id -> items_id, users_id, items_end_date
+i2049737091 users_id, items_end_date -> items_id
+i2049737091 items_id -> items_end_date
+i3050485475 categories_id -> categories_name
+i2594090645 items_quantity, items_nb_of_bids, items_buy_now -> items_id, items_description, items_end_date, items_initial_price, items_max_bid, items_name, items_reserve_price, items_start_date
+i2594090645 items_end_date, items_name -> items_id, items_buy_now, items_description, items_initial_price, items_max_bid, items_nb_of_bids, items_quantity, items_reserve_price, items_start_date
+i2594090645 items_initial_price, items_end_date -> items_id, items_buy_now, items_description, items_max_bid, items_name, items_nb_of_bids, items_quantity, items_reserve_price, items_start_date
+i2594090645 items_start_date, items_name -> items_id, items_buy_now, items_description, items_end_date, items_initial_price, items_max_bid, items_nb_of_bids, items_quantity, items_reserve_price
+i2594090645 items_quantity, items_end_date -> items_id, items_buy_now, items_description, items_initial_price, items_max_bid, items_name, items_nb_of_bids, items_reserve_price, items_start_date
+i2594090645 items_start_date, items_end_date -> items_id, items_buy_now, items_description, items_initial_price, items_max_bid, items_name, items_nb_of_bids, items_quantity, items_reserve_price
+i2594090645 items_buy_now, items_reserve_price -> items_id, items_description, items_end_date, items_initial_price, items_max_bid, items_name, items_nb_of_bids, items_quantity, items_start_date
+i2594090645 items_buy_now, items_end_date -> items_id, items_description, items_initial_price, items_max_bid, items_name, items_nb_of_bids, items_quantity, items_reserve_price, items_start_date
+i2594090645 items_end_date, items_reserve_price -> items_id, items_buy_now, items_description, items_initial_price, items_max_bid, items_name, items_nb_of_bids, items_quantity, items_start_date
+i2594090645 items_start_date, items_reserve_price -> items_id, items_buy_now, items_description, items_end_date, items_initial_price, items_max_bid, items_name, items_nb_of_bids, items_quantity
+i2594090645 items_max_bid, items_reserve_price -> items_id, items_buy_now, items_description, items_end_date, items_initial_price, items_name, items_nb_of_bids, items_quantity, items_start_date
+i2594090645 items_nb_of_bids, items_end_date -> items_id, items_buy_now, items_description, items_initial_price, items_max_bid, items_name, items_quantity, items_reserve_price, items_start_date
+i2594090645 items_start_date, items_nb_of_bids -> items_id, items_buy_now, items_description, items_end_date, items_initial_price, items_max_bid, items_name, items_quantity, items_reserve_price
+i2594090645 items_max_bid, items_initial_price -> items_id, items_buy_now, items_description, items_end_date, items_name, items_nb_of_bids, items_quantity, items_reserve_price, items_start_date
+i2594090645 items_start_date, items_initial_price -> items_id, items_buy_now, items_description, items_end_date, items_max_bid, items_name, items_nb_of_bids, items_quantity, items_reserve_price
+i2594090645 items_buy_now, items_initial_price -> items_id, items_description, items_end_date, items_max_bid, items_name, items_nb_of_bids, items_quantity, items_reserve_price, items_start_date
+i2594090645 items_max_bid, items_nb_of_bids, items_name -> items_id, items_buy_now, items_description, items_end_date, items_initial_price, items_quantity, items_reserve_price, items_start_date
+i2594090645 items_start_date, items_buy_now -> items_id, items_description, items_end_date, items_initial_price, items_max_bid, items_name, items_nb_of_bids, items_quantity, items_reserve_price
+i2594090645 items_max_bid, items_buy_now -> items_id, items_description, items_end_date, items_initial_price, items_name, items_nb_of_bids, items_quantity, items_reserve_price, items_start_date
+i2594090645 items_max_bid, items_end_date -> items_id, items_buy_now, items_description, items_initial_price, items_name, items_nb_of_bids, items_quantity, items_reserve_price, items_start_date
+i2594090645 items_nb_of_bids, items_reserve_price, items_name -> items_id, items_buy_now, items_description, items_end_date, items_initial_price, items_max_bid, items_quantity, items_start_date
+i2594090645 items_nb_of_bids, items_buy_now, items_name -> items_id, items_description, items_end_date, items_initial_price, items_max_bid, items_quantity, items_reserve_price, items_start_date
+i2594090645 items_quantity, items_reserve_price, items_name -> items_id, items_buy_now, items_description, items_end_date, items_initial_price, items_max_bid, items_nb_of_bids, items_start_date
+i2594090645 items_start_date, items_max_bid -> items_id, items_buy_now, items_description, items_end_date, items_initial_price, items_name, items_nb_of_bids, items_quantity, items_reserve_price
+i2594090645 items_start_date, items_quantity -> items_id, items_buy_now, items_description, items_end_date, items_initial_price, items_max_bid, items_name, items_nb_of_bids, items_reserve_price
+i2594090645 items_id -> items_buy_now, items_description, items_end_date, items_initial_price, items_max_bid, items_name, items_nb_of_bids, items_quantity, items_reserve_price, items_start_date
+i2594090645 items_nb_of_bids, items_initial_price, items_name -> items_id, items_buy_now, items_description, items_end_date, items_max_bid, items_quantity, items_reserve_price, items_start_date
+i2594090645 items_description -> items_id, items_buy_now, items_end_date, items_initial_price, items_max_bid, items_name, items_nb_of_bids, items_quantity, items_reserve_price, items_start_date
+i2594090645 items_initial_price, items_reserve_price -> items_id, items_buy_now, items_description, items_end_date, items_max_bid, items_name, items_nb_of_bids, items_quantity, items_start_date
+i2366332486 buynow_date, buynow_qty -> users_id, buynow_id
+i2366332486 buynow_date, users_id -> buynow_id, buynow_qty
+i2366332486 buynow_id -> users_id, buynow_date, buynow_qty
+i920605840 items_nb_of_bids, items_end_date -> categories_id, items_id, items_initial_price, items_max_bid, items_name
+i920605840 items_end_date, items_name -> categories_id, items_id, items_initial_price, items_max_bid, items_nb_of_bids
+i920605840 items_max_bid, items_nb_of_bids, items_name -> categories_id, items_id, items_end_date, items_initial_price
+i920605840 items_initial_price, items_end_date -> categories_id, items_id, items_max_bid, items_name, items_nb_of_bids
+i920605840 categories_id, items_initial_price, items_name -> items_id, items_end_date, items_max_bid, items_nb_of_bids
+i920605840 categories_id, items_max_bid, items_nb_of_bids -> items_id, items_end_date, items_initial_price, items_name
+i920605840 items_id -> categories_id, items_end_date, items_initial_price, items_max_bid, items_name, items_nb_of_bids
+i920605840 items_max_bid, items_end_date -> categories_id, items_id, items_initial_price, items_name, items_nb_of_bids
+i920605840 items_max_bid, items_initial_price -> categories_id, items_id, items_end_date, items_name, items_nb_of_bids
+i920605840 items_nb_of_bids, items_initial_price, items_name -> categories_id, items_id, items_end_date, items_max_bid
+i920605840 categories_id, items_end_date -> items_id, items_initial_price, items_max_bid, items_name, items_nb_of_bids
+i920605840 categories_id, items_nb_of_bids, items_initial_price -> items_id, items_end_date, items_max_bid, items_name
+i920605840 categories_id, items_max_bid, items_name -> items_id, items_end_date, items_initial_price, items_nb_of_bids
+i2269844981 users_id, items_end_date -> items_id
+i2269844981 items_id -> users_id, items_end_date
+i409321726 bids_id -> users_id, items_end_date, items_id
+i409321726 users_id, items_end_date -> items_id
+i409321726 items_id -> items_end_date
+i1879743023 comments_id -> users_id, users_nickname
+i1879743023 users_id -> users_nickname
+i1879743023 users_nickname -> users_id
+i2087519603 items_id -> categories_id
+
+i2087519603 categories_id <= i1557291277 users_id
+i2087519603 categories_id <= i1557291277 comments_id
+i2087519603 items_id <= i1557291277 comments_id
+i1557291277 users_id <= i210798434 items_id
+i2269844981 users_id <= i409321726 items_id
+i920605840 items_nb_of_bids <= i3116489164 users_rating
+i920605840 categories_id <= i3116489164 users_id
+i409321726 users_id == i2366332486 users_id
+i409321726 users_id <= i2366332486 buynow_id
+i409321726 items_id <= i2366332486 buynow_id
+i941409494 users_id <= i1177375268 buynow_id
+i941409494 users_id == i1177375268 items_id
+i941409494 items_id == i1177375268 buynow_id
+i3050485475 categories_id <= i1879743023 comments_id
+i3050485475 categories_id <= i1879743023 users_id
+i2269844981 users_id <= i262196338 items_id
+i2087519603 categories_id <= i1177375268 buynow_id
+i2087519603 categories_id <= i1177375268 items_id
+i2087519603 items_id <= i1177375268 buynow_id
+i1177375268 items_id <= i210798434 items_id
+i409321726 users_id <= i210798434 items_id
+i409321726 users_id == i210798434 users_id
+i409321726 bids_id == i210798434 bids_id
+i409321726 items_id == i210798434 items_id
+i409321726 users_id, bids_id <= i210798434 users_id, bids_id
+i409321726 users_id, items_id <= i210798434 users_id, items_id
+i409321726 bids_id, items_id <= i210798434 bids_id, items_id
+i409321726 users_id, bids_id, items_id <= i210798434 users_id, bids_id, items_id
+i409321726 users_id <= i2049737091 items_id
+i409321726 users_id == i2049737091 users_id
+i409321726 items_end_date == i2049737091 items_end_date
+i409321726 bids_id == i2049737091 bids_id
+i409321726 items_id == i2049737091 items_id
+i409321726 users_id, items_end_date == i2049737091 users_id, items_end_date
+i409321726 users_id, items_end_date, bids_id <= i2049737091 users_id, items_end_date, bids_id
+i409321726 users_id, bids_id <= i2049737091 users_id, bids_id
+i409321726 items_end_date, bids_id <= i2049737091 items_end_date, bids_id
+i409321726 users_id, items_id <= i2049737091 users_id, items_id
+i409321726 items_end_date, items_id <= i2049737091 items_end_date, items_id
+i409321726 bids_id, items_id <= i2049737091 bids_id, items_id
+i409321726 users_id, items_end_date, items_id <= i2049737091 users_id, items_end_date, items_id
+i409321726 users_id, bids_id, items_id <= i2049737091 users_id, bids_id, items_id
+i409321726 items_end_date, bids_id, items_id <= i2049737091 items_end_date, bids_id, items_id
+i409321726 users_id, items_end_date, items_id, bids_id <= i2049737091 users_id, items_end_date, items_id, bids_id
+i262196338 items_id <= i1879743023 comments_id
+i2594090645 items_id <= i1879743023 comments_id
+i2087519603 items_id, categories_id <= i920605840 items_id, categories_id
+i262196338 bids_qty <= i1557291277 comments_rating
+i262196338 items_id <= i1557291277 comments_id
+i3116489164 users_id == i1557291277 users_id
+i3116489164 users_id <= i1557291277 comments_id
+i920605840 categories_id <= i409321726 users_id
+i920605840 categories_id <= i409321726 items_id
+i2366332486 users_id == i1557291277 users_id
+i2366332486 users_id <= i1557291277 comments_id
+i2366332486 buynow_id <= i1557291277 comments_id
+i2366332486 buynow_qty <= i1557291277 comments_rating
+i210798434 users_id <= i409321726 items_id
+i210798434 items_id, bids_id, users_id <= i409321726 items_id, bids_id, users_id
+i210798434 items_id, bids_id <= i409321726 items_id, bids_id
+i210798434 items_id, users_id <= i409321726 items_id, users_id
+i210798434 bids_id, users_id <= i409321726 bids_id, users_id
+i2049737091 users_id <= i1879743023 comments_id
+i2049737091 users_id == i1879743023 users_id
+i2049737091 items_id <= i1879743023 comments_id
+i2087519603 categories_id <= i2366332486 users_id
+i2087519603 categories_id <= i2366332486 buynow_id
+i2087519603 items_id <= i2366332486 buynow_id
+i3050485475 categories_id <= i2049737091 items_id
+i3050485475 categories_id <= i2049737091 users_id
+i262196338 items_id <= i941409494 items_id
+i3116489164 users_id <= i941409494 items_id
+i941409494 users_id == i2366332486 users_id
+i941409494 users_id <= i2366332486 buynow_id
+i941409494 items_id == i2366332486 buynow_id
+i262196338 items_id <= i2366332486 buynow_id
+i2594090645 items_id == i2366332486 buynow_id
+i1557291277 users_id <= i1879743023 comments_id
+i409321726 users_id <= i2594090645 items_id
+i409321726 items_end_date <= i2594090645 items_end_date
+i409321726 items_id <= i2594090645 items_id
+i409321726 items_end_date, items_id <= i2594090645 items_end_date, items_id
+i1177375268 items_id <= i2269844981 items_id
+i1557291277 users_id <= i262196338 items_id
+i941409494 users_id <= i2049737091 items_id
+i941409494 users_id == i2049737091 users_id
+i1557291277 users_id <= i2269844981 items_id
+i210798434 items_id <= i1177375268 buynow_id
+i210798434 users_id <= i1177375268 buynow_id
+i210798434 users_id == i1177375268 items_id
+i3050485475 categories_id <= i1177375268 buynow_id
+i3050485475 categories_id <= i1177375268 items_id
+i3050485475 categories_id <= i2269844981 items_id
+i3050485475 categories_id <= i2269844981 users_id
+i210798434 items_id <= i2269844981 items_id
+i210798434 users_id <= i2269844981 items_id
+i210798434 bids_qty <= i920605840 items_nb_of_bids
+i409321726 users_id == i3116489164 users_id
+i2366332486 users_id <= i210798434 items_id
+i2366332486 users_id == i210798434 users_id
+i2366332486 buynow_qty <= i210798434 bids_qty
+i2366332486 users_id, buynow_qty <= i210798434 users_id, bids_qty
+i2366332486 buynow_qty <= i3116489164 users_rating
+i2049737091 users_id <= i262196338 items_id
+i1177375268 items_id <= i2594090645 items_id
+i2087519603 categories_id <= i210798434 items_id
+i2087519603 categories_id <= i210798434 users_id
+i409321726 users_id <= i941409494 items_id
+i409321726 items_end_date <= i941409494 items_end_date
+i409321726 items_id <= i941409494 items_id
+i409321726 items_end_date, items_id <= i941409494 items_end_date, items_id
+i210798434 items_id <= i941409494 items_id
+i210798434 users_id <= i941409494 items_id
+i941409494 users_id <= i1879743023 comments_id
+i941409494 users_id == i1879743023 users_id
+i941409494 items_id <= i1879743023 comments_id
+i920605840 categories_id <= i262196338 items_id
+i2049737091 users_id <= i2594090645 items_id
+i2049737091 items_end_date <= i2594090645 items_end_date
+i2049737091 items_id <= i2594090645 items_id
+i2049737091 items_id, items_end_date <= i2594090645 items_id, items_end_date
+i920605840 items_initial_price <= i2594090645 items_initial_price
+i920605840 items_max_bid <= i2594090645 items_max_bid
+i920605840 items_end_date <= i2594090645 items_end_date
+i920605840 items_nb_of_bids == i2594090645 items_nb_of_bids
+i920605840 categories_id <= i2594090645 items_id
+i920605840 items_id <= i2594090645 items_id
+i920605840 items_name == i2594090645 items_name
+i920605840 items_id, items_nb_of_bids <= i2594090645 items_id, items_nb_of_bids
+i920605840 items_end_date, items_nb_of_bids <= i2594090645 items_end_date, items_nb_of_bids
+i920605840 items_initial_price, items_nb_of_bids <= i2594090645 items_initial_price, items_nb_of_bids
+i920605840 items_end_date, items_nb_of_bids, items_name, items_max_bid <= i2594090645 items_end_date, items_nb_of_bids, items_name, items_max_bid
+i920605840 items_max_bid, items_nb_of_bids <= i2594090645 items_max_bid, items_nb_of_bids
+i920605840 items_id, items_nb_of_bids, items_name, items_max_bid <= i2594090645 items_id, items_nb_of_bids, items_name, items_max_bid
+i920605840 items_name, items_nb_of_bids <= i2594090645 items_name, items_nb_of_bids
+i920605840 items_initial_price, items_nb_of_bids, items_name, items_max_bid <= i2594090645 items_initial_price, items_nb_of_bids, items_name, items_max_bid
+i920605840 items_id, items_nb_of_bids, items_end_date <= i2594090645 items_id, items_nb_of_bids, items_end_date
+i920605840 items_id, items_end_date, items_name <= i2594090645 items_id, items_end_date, items_name
+i920605840 items_end_date, items_nb_of_bids, items_initial_price, items_name <= i2594090645 items_end_date, items_nb_of_bids, items_initial_price, items_name
+i920605840 items_id, items_nb_of_bids, items_initial_price, items_name <= i2594090645 items_id, items_nb_of_bids, items_initial_price, items_name
+i920605840 items_id, items_initial_price, items_name <= i2594090645 items_id, items_initial_price, items_name
+i920605840 items_end_date, items_initial_price, items_name <= i2594090645 items_end_date, items_initial_price, items_name
+i920605840 items_id, items_max_bid, items_name <= i2594090645 items_id, items_max_bid, items_name
+i920605840 items_end_date, items_max_bid, items_name <= i2594090645 items_end_date, items_max_bid, items_name
+i920605840 items_initial_price, items_max_bid, items_name <= i2594090645 items_initial_price, items_max_bid, items_name
+i920605840 items_end_date, items_nb_of_bids, items_initial_price, items_max_bid <= i2594090645 items_end_date, items_nb_of_bids, items_initial_price, items_max_bid
+i920605840 items_id, items_nb_of_bids, items_initial_price, items_max_bid <= i2594090645 items_id, items_nb_of_bids, items_initial_price, items_max_bid
+i920605840 items_id, items_nb_of_bids, items_name <= i2594090645 items_id, items_nb_of_bids, items_name
+i920605840 items_end_date, items_nb_of_bids, items_name <= i2594090645 items_end_date, items_nb_of_bids, items_name
+i920605840 items_initial_price, items_nb_of_bids, items_name <= i2594090645 items_initial_price, items_nb_of_bids, items_name
+i920605840 items_max_bid, items_nb_of_bids, items_name <= i2594090645 items_max_bid, items_nb_of_bids, items_name
+i920605840 items_id, items_end_date, items_name, items_max_bid, items_initial_price <= i2594090645 items_id, items_end_date, items_name, items_max_bid, items_initial_price
+i920605840 items_id, items_nb_of_bids, items_end_date, items_name, items_max_bid <= i2594090645 items_id, items_nb_of_bids, items_end_date, items_name, items_max_bid
+i920605840 items_id, items_end_date, items_initial_price <= i2594090645 items_id, items_end_date, items_initial_price
+i920605840 items_id, items_nb_of_bids, items_initial_price, items_end_date <= i2594090645 items_id, items_nb_of_bids, items_initial_price, items_end_date
+i920605840 items_id, items_nb_of_bids, items_initial_price, items_max_bid, items_end_date, items_name <= i2594090645 items_id, items_nb_of_bids, items_initial_price, items_max_bid, items_end_date, items_name
+i920605840 items_id, items_nb_of_bids, items_initial_price <= i2594090645 items_id, items_nb_of_bids, items_initial_price
+i920605840 items_end_date, items_nb_of_bids, items_initial_price <= i2594090645 items_end_date, items_nb_of_bids, items_initial_price
+i920605840 items_id, items_nb_of_bids, items_initial_price, items_name, items_end_date <= i2594090645 items_id, items_nb_of_bids, items_initial_price, items_name, items_end_date
+i920605840 items_id, items_end_date, items_max_bid, items_initial_price <= i2594090645 items_id, items_end_date, items_max_bid, items_initial_price
+i920605840 items_id, items_nb_of_bids, items_initial_price, items_max_bid, items_end_date <= i2594090645 items_id, items_nb_of_bids, items_initial_price, items_max_bid, items_end_date
+i920605840 items_id, items_end_date, items_max_bid <= i2594090645 items_id, items_end_date, items_max_bid
+i920605840 items_id, items_nb_of_bids, items_end_date, items_name <= i2594090645 items_id, items_nb_of_bids, items_end_date, items_name
+i920605840 items_id, items_initial_price, items_max_bid <= i2594090645 items_id, items_initial_price, items_max_bid
+i920605840 items_end_date, items_initial_price, items_max_bid <= i2594090645 items_end_date, items_initial_price, items_max_bid
+i920605840 items_end_date, items_nb_of_bids, items_initial_price, items_max_bid, items_name <= i2594090645 items_end_date, items_nb_of_bids, items_initial_price, items_max_bid, items_name
+i920605840 items_id, items_nb_of_bids, items_initial_price, items_max_bid, items_name <= i2594090645 items_id, items_nb_of_bids, items_initial_price, items_max_bid, items_name
+i920605840 items_id, items_nb_of_bids, items_end_date, items_max_bid <= i2594090645 items_id, items_nb_of_bids, items_end_date, items_max_bid
+i920605840 items_id, items_end_date <= i2594090645 items_id, items_end_date
+i920605840 items_id, items_end_date, items_name, items_max_bid <= i2594090645 items_id, items_end_date, items_name, items_max_bid
+i920605840 items_id, items_nb_of_bids, items_max_bid <= i2594090645 items_id, items_nb_of_bids, items_max_bid
+i920605840 items_end_date, items_nb_of_bids, items_max_bid <= i2594090645 items_end_date, items_nb_of_bids, items_max_bid
+i920605840 items_id, items_initial_price <= i2594090645 items_id, items_initial_price
+i920605840 items_initial_price, items_nb_of_bids, items_max_bid <= i2594090645 items_initial_price, items_nb_of_bids, items_max_bid
+i920605840 items_end_date, items_initial_price <= i2594090645 items_end_date, items_initial_price
+i920605840 items_end_date, items_initial_price, items_name, items_max_bid <= i2594090645 items_end_date, items_initial_price, items_name, items_max_bid
+i920605840 items_id, items_initial_price, items_name, items_max_bid <= i2594090645 items_id, items_initial_price, items_name, items_max_bid
+i920605840 items_id, items_max_bid <= i2594090645 items_id, items_max_bid
+i920605840 items_end_date, items_max_bid <= i2594090645 items_end_date, items_max_bid
+i920605840 items_initial_price, items_max_bid <= i2594090645 items_initial_price, items_max_bid
+i920605840 items_id, items_end_date, items_name, items_initial_price <= i2594090645 items_id, items_end_date, items_name, items_initial_price
+i920605840 items_id, items_name <= i2594090645 items_id, items_name
+i920605840 items_end_date, items_name <= i2594090645 items_end_date, items_name
+i920605840 items_initial_price, items_name <= i2594090645 items_initial_price, items_name
+i920605840 items_max_bid, items_name <= i2594090645 items_max_bid, items_name
+i2049737091 users_id <= i2269844981 items_id
+i2049737091 items_end_date <= i2269844981 items_end_date
+i2049737091 items_id <= i2269844981 items_id
+i2049737091 items_id, items_end_date <= i2269844981 items_id, items_end_date
+i262196338 bids_qty == i210798434 bids_qty
+i262196338 bids_date == i210798434 bids_date
+i262196338 bids_id == i210798434 bids_id
+i262196338 items_id == i210798434 items_id
+i262196338 bids_bid == i210798434 bids_bid
+i262196338 items_id, bids_id, bids_qty == i210798434 items_id, bids_id, bids_qty
+i262196338 bids_bid, bids_id, bids_qty <= i210798434 bids_bid, bids_id, bids_qty
+i262196338 items_id, bids_date, bids_qty == i210798434 items_id, bids_date, bids_qty
+i262196338 bids_bid, bids_date, bids_qty <= i210798434 bids_bid, bids_date, bids_qty
+i262196338 bids_id, bids_date, bids_qty <= i210798434 bids_id, bids_date, bids_qty
+i262196338 items_id, bids_bid, bids_id <= i210798434 items_id, bids_bid, bids_id
+i262196338 items_id, bids_id, bids_qty, bids_date <= i210798434 items_id, bids_id, bids_qty, bids_date
+i262196338 bids_bid, bids_id, bids_qty, bids_date <= i210798434 bids_bid, bids_id, bids_qty, bids_date
+i262196338 items_id, bids_bid, bids_id, bids_qty <= i210798434 items_id, bids_bid, bids_id, bids_qty
+i262196338 items_id, bids_bid == i210798434 items_id, bids_bid
+i262196338 items_id, bids_id == i210798434 items_id, bids_id
+i262196338 bids_bid, bids_id <= i210798434 bids_bid, bids_id
+i262196338 items_id, bids_date == i210798434 items_id, bids_date
+i262196338 bids_bid, bids_date <= i210798434 bids_bid, bids_date
+i262196338 bids_id, bids_date <= i210798434 bids_id, bids_date
+i262196338 items_id, bids_qty == i210798434 items_id, bids_qty
+i262196338 bids_bid, bids_qty == i210798434 bids_bid, bids_qty
+i262196338 bids_id, bids_qty == i210798434 bids_id, bids_qty
+i262196338 bids_date, bids_qty == i210798434 bids_date, bids_qty
+i262196338 items_id, bids_bid, bids_date <= i210798434 items_id, bids_bid, bids_date
+i262196338 items_id, bids_id, bids_date <= i210798434 items_id, bids_id, bids_date
+i262196338 bids_bid, bids_id, bids_date <= i210798434 bids_bid, bids_id, bids_date
+i262196338 items_id, bids_bid, bids_date, bids_qty <= i210798434 items_id, bids_bid, bids_date, bids_qty
+i262196338 items_id, bids_bid, bids_date, bids_id, bids_qty <= i210798434 items_id, bids_bid, bids_date, bids_id, bids_qty
+i262196338 items_id, bids_bid, bids_date, bids_id <= i210798434 items_id, bids_bid, bids_date, bids_id
+i262196338 items_id, bids_bid, bids_qty == i210798434 items_id, bids_bid, bids_qty
+i210798434 items_id == i2049737091 items_id
+i210798434 bids_id == i2049737091 bids_id
+i210798434 users_id <= i2049737091 items_id
+i210798434 users_id == i2049737091 users_id
+i210798434 items_id, bids_id, users_id == i2049737091 items_id, bids_id, users_id
+i210798434 items_id, bids_id == i2049737091 items_id, bids_id
+i210798434 items_id, users_id == i2049737091 items_id, users_id
+i210798434 bids_id, users_id == i2049737091 bids_id, users_id
+i2087519603 categories_id <= i2269844981 items_id
+i2087519603 categories_id <= i2269844981 users_id
+i2087519603 items_id <= i2269844981 items_id
+i1879743023 users_id <= i2366332486 buynow_id
+i3116489164 users_id <= i210798434 items_id
+i3116489164 users_id == i210798434 users_id
+i3116489164 users_nickname == i210798434 users_nickname
+i3116489164 users_id, users_nickname == i210798434 users_id, users_nickname
+i1177375268 buynow_id <= i1557291277 comments_id
+i1177375268 items_id <= i1557291277 comments_id
+i941409494 users_id <= i2269844981 items_id
+i941409494 users_id == i2269844981 users_id
+i941409494 items_end_date == i2269844981 items_end_date
+i941409494 items_id == i2269844981 items_id
+i941409494 users_id, items_end_date == i2269844981 users_id, items_end_date
+i941409494 users_id, items_id <= i2269844981 users_id, items_id
+i941409494 items_end_date, items_id <= i2269844981 items_end_date, items_id
+i941409494 users_id, items_end_date, items_id <= i2269844981 users_id, items_end_date, items_id
+i2594090645 items_id <= i1557291277 comments_id
+i2594090645 items_id == i2269844981 items_id
+i2594090645 items_end_date == i2269844981 items_end_date
+i2594090645 items_id, items_end_date == i2269844981 items_id, items_end_date
+i210798434 users_id <= i262196338 items_id
+i210798434 bids_date, bids_bid, bids_qty <= i262196338 bids_date, bids_bid, bids_qty
+i210798434 bids_id, bids_bid, bids_qty <= i262196338 bids_id, bids_bid, bids_qty
+i210798434 items_id, bids_date, bids_bid, bids_qty <= i262196338 items_id, bids_date, bids_bid, bids_qty
+i210798434 items_id, bids_id, bids_bid, bids_qty <= i262196338 items_id, bids_id, bids_bid, bids_qty
+i210798434 bids_date, bids_id, bids_bid, bids_qty <= i262196338 bids_date, bids_id, bids_bid, bids_qty
+i210798434 items_id, bids_date, bids_id, bids_qty <= i262196338 items_id, bids_date, bids_id, bids_qty
+i210798434 items_id, bids_date, bids_bid, bids_id <= i262196338 items_id, bids_date, bids_bid, bids_id
+i210798434 items_id, bids_date, bids_bid <= i262196338 items_id, bids_date, bids_bid
+i210798434 items_id, bids_id, bids_bid <= i262196338 items_id, bids_id, bids_bid
+i210798434 bids_date, bids_id, bids_bid <= i262196338 bids_date, bids_id, bids_bid
+i210798434 items_id, bids_date, bids_id <= i262196338 items_id, bids_date, bids_id
+i210798434 items_id, bids_date, bids_bid, bids_id, bids_qty <= i262196338 items_id, bids_date, bids_bid, bids_id, bids_qty
+i210798434 bids_date, bids_id <= i262196338 bids_date, bids_id
+i210798434 bids_date, bids_bid <= i262196338 bids_date, bids_bid
+i210798434 bids_id, bids_bid <= i262196338 bids_id, bids_bid
+i210798434 bids_date, bids_id, bids_qty <= i262196338 bids_date, bids_id, bids_qty
+i1879743023 users_id <= i409321726 items_id
+i3116489164 users_id <= i409321726 items_id
+i3116489164 users_id == i2366332486 users_id
+i3116489164 users_id <= i2366332486 buynow_id
+i920605840 categories_id <= i3050485475 categories_id
+i2087519603 categories_id <= i409321726 users_id
+i2087519603 categories_id <= i409321726 items_id
+i1177375268 items_id <= i941409494 items_id
+i920605840 categories_id <= i2049737091 items_id
+i920605840 categories_id <= i2049737091 users_id
+i262196338 bids_qty <= i3116489164 users_rating
+i920605840 categories_id <= i1557291277 users_id
+i920605840 categories_id <= i1557291277 comments_id
+i920605840 items_id <= i1557291277 comments_id
+i2269844981 users_id <= i210798434 items_id
+i2269844981 users_id == i210798434 users_id
+i262196338 items_id, bids_id <= i409321726 items_id, bids_id
+i409321726 users_id <= i262196338 items_id
+i409321726 bids_id == i262196338 bids_id
+i409321726 items_id == i262196338 items_id
+i409321726 bids_id, items_id <= i262196338 bids_id, items_id
+i2366332486 buynow_qty <= i920605840 items_nb_of_bids
+i1879743023 users_id <= i1177375268 buynow_id
+i1879743023 users_id == i1177375268 items_id
+i920605840 items_end_date <= i941409494 items_end_date
+i920605840 categories_id <= i941409494 users_id
+i920605840 categories_id <= i941409494 items_id
+i920605840 items_id <= i941409494 items_id
+i920605840 items_id, items_end_date <= i941409494 items_id, items_end_date
+i1177375268 items_id <= i2049737091 items_id
+i2049737091 users_id <= i409321726 items_id
+i2049737091 items_id, bids_id, users_id <= i409321726 items_id, bids_id, users_id
+i2049737091 items_id, bids_id <= i409321726 items_id, bids_id
+i2049737091 items_id, bids_id, items_end_date <= i409321726 items_id, bids_id, items_end_date
+i2049737091 items_id, users_id <= i409321726 items_id, users_id
+i2049737091 bids_id, users_id <= i409321726 bids_id, users_id
+i2049737091 items_id, users_id, items_end_date <= i409321726 items_id, users_id, items_end_date
+i2049737091 bids_id, users_id, items_end_date <= i409321726 bids_id, users_id, items_end_date
+i2049737091 items_id, items_end_date <= i409321726 items_id, items_end_date
+i2049737091 bids_id, items_end_date <= i409321726 bids_id, items_end_date
+i2049737091 items_id, bids_id, items_end_date, users_id <= i409321726 items_id, bids_id, items_end_date, users_id
+i2269844981 users_id <= i1879743023 comments_id
+i2269844981 users_id == i1879743023 users_id
+i2269844981 items_id <= i1879743023 comments_id
+i1177375268 items_id <= i409321726 items_id
+i1879743023 users_id <= i2594090645 items_id
+i941409494 users_id <= i210798434 items_id
+i941409494 users_id == i210798434 users_id
+i1557291277 users_id <= i2366332486 buynow_id
+i941409494 users_id == i3116489164 users_id
+i262196338 items_id <= i2269844981 items_id
+i3050485475 categories_id <= i210798434 items_id
+i3050485475 categories_id <= i210798434 users_id
+i3050485475 categories_id <= i210798434 users_id
+i2594090645 items_quantity <= i3116489164 users_rating
+i2594090645 items_nb_of_bids <= i3116489164 users_rating
+i920605840 categories_id <= i1879743023 comments_id
+i920605840 categories_id <= i1879743023 users_id
+i920605840 items_id <= i1879743023 comments_id
+i2366332486 users_id <= i1879743023 comments_id
+i2366332486 users_id == i1879743023 users_id
+i2366332486 buynow_id <= i1879743023 comments_id
+i2049737091 users_id <= i2366332486 buynow_id
+i2049737091 items_id <= i2366332486 buynow_id
+i1177375268 items_id <= i262196338 items_id
+i941409494 users_id == i409321726 users_id
+i941409494 users_id <= i409321726 items_id
+i1177375268 buynow_id <= i1879743023 comments_id
+i1177375268 items_id <= i1879743023 comments_id
+i2269844981 users_id <= i2049737091 items_id
+i2269844981 users_id == i2049737091 users_id
+i1557291277 users_id <= i2049737091 items_id
+i1879743023 users_id <= i2269844981 items_id
+i2366332486 users_id <= i262196338 items_id
+i2366332486 buynow_qty <= i262196338 bids_qty
+i1879743023 users_id <= i941409494 items_id
+i409321726 users_id <= i1177375268 buynow_id
+i409321726 users_id == i1177375268 items_id
+i409321726 items_id <= i1177375268 buynow_id
+i1557291277 users_id <= i409321726 items_id
+i3116489164 users_id <= i2269844981 items_id
+i3116489164 users_id == i2269844981 users_id
+i2087519603 categories_id <= i2594090645 items_id
+i2087519603 items_id <= i2594090645 items_id
+i2366332486 users_id <= i2269844981 items_id
+i2366332486 users_id == i2269844981 users_id
+i2366332486 buynow_id == i2269844981 items_id
+i3116489164 users_id <= i2594090645 items_id
+i3050485475 categories_id <= i409321726 users_id
+i3050485475 categories_id <= i409321726 items_id
+i1879743023 comments_id == i1557291277 comments_id
+i1879743023 users_id == i1557291277 users_id
+i1879743023 users_id <= i1557291277 comments_id
+i2366332486 users_id <= i941409494 items_id
+i1879743023 users_id <= i262196338 items_id
+i2594090645 items_id == i1177375268 buynow_id
+i210798434 bids_qty <= i3116489164 users_rating
+i2269844981 users_id == i1557291277 users_id
+i2269844981 users_id <= i1557291277 comments_id
+i2269844981 items_id <= i1557291277 comments_id
+i2049737091 users_id == i1557291277 users_id
+i2049737091 users_id <= i1557291277 comments_id
+i2049737091 items_id <= i1557291277 comments_id
+i2087519603 categories_id <= i3050485475 categories_id
+i2049737091 users_id <= i1177375268 buynow_id
+i2049737091 users_id == i1177375268 items_id
+i2049737091 items_id <= i1177375268 buynow_id
+i920605840 categories_id <= i2366332486 users_id
+i920605840 categories_id <= i2366332486 buynow_id
+i920605840 items_id <= i2366332486 buynow_id
+i3116489164 users_id <= i2049737091 items_id
+i3116489164 users_id == i2049737091 users_id
+i920605840 categories_id <= i210798434 items_id
+i920605840 categories_id <= i210798434 users_id
+i3050485475 categories_id <= i941409494 users_id
+i3050485475 categories_id <= i941409494 items_id
+i1557291277 users_id <= i1177375268 buynow_id
+i1557291277 users_id == i1177375268 items_id
+i1557291277 users_id <= i941409494 items_id
+i262196338 items_id <= i1177375268 buynow_id
+i3050485475 categories_id <= i3116489164 users_id
+i2269844981 users_id <= i2594090645 items_id
+i1879743023 users_id <= i2049737091 items_id
+i2269844981 users_id <= i2366332486 buynow_id
+i2366332486 users_id <= i2594090645 items_id
+i2366332486 buynow_qty <= i2594090645 items_nb_of_bids
+i2366332486 buynow_qty <= i2594090645 items_quantity
+i210798434 items_id <= i1879743023 comments_id
+i210798434 users_nickname == i1879743023 users_nickname
+i210798434 users_id <= i1879743023 comments_id
+i210798434 users_id == i1879743023 users_id
+i210798434 users_id, users_nickname == i1879743023 users_id, users_nickname
+i3050485475 categories_id <= i262196338 items_id
+i1177375268 items_id <= i2366332486 buynow_id
+i1177375268 buynow_id, buynow_date <= i2366332486 buynow_id, buynow_date
+i2366332486 users_id <= i1177375268 buynow_id
+i2366332486 users_id == i1177375268 items_id
+i2366332486 buynow_id == i1177375268 buynow_id
+i2366332486 buynow_date == i1177375268 buynow_date
+i2366332486 buynow_date, buynow_id <= i1177375268 buynow_date, buynow_id
+i3116489164 users_id <= i1177375268 buynow_id
+i3116489164 users_id == i1177375268 items_id
+i920605840 categories_id <= i1177375268 buynow_id
+i920605840 categories_id <= i1177375268 items_id
+i920605840 items_id <= i1177375268 buynow_id
+i409321726 users_id <= i2269844981 items_id
+i409321726 users_id == i2269844981 users_id
+i409321726 items_end_date <= i2269844981 items_end_date
+i409321726 items_id <= i2269844981 items_id
+i409321726 items_end_date, items_id <= i2269844981 items_end_date, items_id
+i2366332486 users_id <= i409321726 items_id
+i920605840 categories_id == i2087519603 categories_id
+i920605840 items_id == i2087519603 items_id
+i920605840 categories_id, items_id <= i2087519603 categories_id, items_id
+i3116489164 users_id <= i1879743023 comments_id
+i3116489164 users_id == i1879743023 users_id
+i3116489164 users_nickname == i1879743023 users_nickname
+i3116489164 users_id, users_nickname == i1879743023 users_id, users_nickname
+i941409494 users_id <= i262196338 items_id
+i3050485475 categories_id <= i2594090645 items_id
+i941409494 users_id == i1557291277 users_id
+i941409494 users_id <= i1557291277 comments_id
+i941409494 items_id <= i1557291277 comments_id
+i262196338 bids_qty <= i2594090645 items_nb_of_bids
+i262196338 bids_qty <= i2594090645 items_quantity
+i262196338 items_id <= i2594090645 items_id
+i2087519603 categories_id <= i941409494 users_id
+i2087519603 categories_id <= i941409494 items_id
+i2087519603 items_id <= i941409494 items_id
+i2269844981 users_id <= i1177375268 buynow_id
+i2269844981 users_id == i1177375268 items_id
+i2269844981 items_id == i1177375268 buynow_id
+i3050485475 categories_id <= i1557291277 users_id
+i3050485475 categories_id <= i1557291277 comments_id
+i210798434 items_id <= i1557291277 comments_id
+i210798434 bids_qty <= i1557291277 comments_rating
+i210798434 users_id == i1557291277 users_id
+i210798434 users_id <= i1557291277 comments_id
+i2594090645 items_id, items_end_date <= i941409494 items_id, items_end_date
+i2049737091 users_id <= i210798434 items_id
+i2087519603 categories_id <= i1879743023 comments_id
+i2087519603 categories_id <= i1879743023 users_id
+i2087519603 items_id <= i1879743023 comments_id
+i2594090645 items_quantity <= i920605840 items_nb_of_bids
+i262196338 bids_qty <= i920605840 items_nb_of_bids
+i1557291277 comments_rating <= i3116489164 users_rating
+i920605840 items_end_date <= i2269844981 items_end_date
+i920605840 categories_id <= i2269844981 items_id
+i920605840 categories_id <= i2269844981 users_id
+i920605840 items_id <= i2269844981 items_id
+i920605840 items_id, items_end_date <= i2269844981 items_id, items_end_date
+i409321726 users_id == i1557291277 users_id
+i409321726 users_id <= i1557291277 comments_id
+i409321726 items_id <= i1557291277 comments_id
+i2366332486 users_id <= i2049737091 items_id
+i2366332486 users_id == i2049737091 users_id
+i1557291277 users_id <= i2594090645 items_id
+i409321726 users_id <= i1879743023 comments_id
+i409321726 users_id == i1879743023 users_id
+i409321726 items_id <= i1879743023 comments_id
+i262196338 bids_id == i2049737091 bids_id
+i262196338 items_id == i2049737091 items_id
+i262196338 items_id, bids_id == i2049737091 items_id, bids_id
+i2049737091 users_id <= i941409494 items_id
+i2049737091 items_end_date <= i941409494 items_end_date
+i2049737091 items_id <= i941409494 items_id
+i2049737091 items_id, items_end_date <= i941409494 items_id, items_end_date
+i210798434 items_id <= i2594090645 items_id
+i210798434 bids_qty <= i2594090645 items_nb_of_bids
+i210798434 bids_qty <= i2594090645 items_quantity
+i210798434 users_id <= i2594090645 items_id
+i3050485475 categories_id <= i2366332486 users_id
+i3050485475 categories_id <= i2366332486 buynow_id
+i2087519603 categories_id <= i2049737091 items_id
+i2087519603 categories_id <= i2049737091 users_id
+i210798434 items_id <= i2366332486 buynow_id
+i210798434 users_id <= i2366332486 buynow_id
+i2087519603 categories_id <= i3116489164 users_id
+i3116489164 users_id <= i262196338 items_id
+i1879743023 users_id <= i210798434 items_id
+i2269844981 users_id <= i941409494 items_id
+i2269844981 items_id, users_id <= i941409494 items_id, users_id
+i2269844981 items_id, items_end_date <= i941409494 items_id, items_end_date
+i2269844981 items_id, users_id, items_end_date <= i941409494 items_id, users_id, items_end_date
+i941409494 users_id <= i2594090645 items_id
+i941409494 items_end_date == i2594090645 items_end_date
+i941409494 items_id == i2594090645 items_id
+i941409494 items_end_date, items_id <= i2594090645 items_end_date, items_id
+i2087519603 categories_id <= i262196338 items_id
+
+i1177375268 20000
+i1177375268 buynow_id 20000 1
+i1177375268 buynow_date 19996 25
+i1177375268 items_id 2000 1
+i1557291277 100000
+i1557291277 users_id 2000 1
+i1557291277 comments_id 100000 1
+i1557291277 comments_comment 100000 248
+i1557291277 comments_date 99827 25
+i1557291277 comments_rating 11 2
+i1879743023 100000
+i1879743023 comments_id 100000 1
+i1879743023 users_id 2000 1
+i1879743023 users_nickname 2000 36
+i2049737091 200000
+i2049737091 items_id 19999 1
+i2049737091 bids_id 200000 1
+i2049737091 users_id 2000 1
+i2049737091 items_end_date 19991 25
+i2087519603 18037
+i2087519603 items_id 18037 1
+i2087519603 categories_id 450 1
+i210798434 200000
+i210798434 items_id 19999 1
+i210798434 bids_date 199367 25
+i210798434 bids_id 200000 1
+i210798434 users_id 2000 1
+i210798434 bids_bid 86315 18
+i210798434 bids_qty 5 1
+i210798434 users_nickname 2000 36
+i2269844981 20000
+i2269844981 items_id 20000 1
+i2269844981 users_id 2000 1
+i2269844981 items_end_date 19992 25
+i2366332486 20000
+i2366332486 users_id 2000 1
+i2366332486 buynow_date 19996 25
+i2366332486 buynow_id 20000 1
+i2366332486 buynow_qty 3 1
+i2594090645 20000
+i2594090645 items_id 20000 1
+i2594090645 items_buy_now 18170 18
+i2594090645 items_description 20000 425
+i2594090645 items_end_date 19992 25
+i2594090645 items_initial_price 18075 18
+i2594090645 items_max_bid 18129 19
+i2594090645 items_name 250 33
+i2594090645 items_nb_of_bids 101 3
+i2594090645 items_quantity 11 2
+i2594090645 items_reserve_price 18141 17
+i2594090645 items_start_date 19995 25
+i262196338 200000
+i262196338 items_id 19999 1
+i262196338 bids_bid 86315 18
+i262196338 bids_id 200000 1
+i262196338 bids_date 199367 25
+i262196338 bids_qty 5 1
+i3050485475 500
+i3050485475 categories_id 500 1
+i3050485475 categories_name 212 23
+i3116489164 2000
+i3116489164 users_id 2000 1
+i3116489164 users_balance 1982 18
+i3116489164 users_creation_date 2000 25
+i3116489164 users_email 2000 33
+i3116489164 users_firstname 1458 11
+i3116489164 users_lastname 467 13
+i3116489164 users_nickname 2000 36
+i3116489164 users_password 2000 15
+i3116489164 users_rating 251 3
+i409321726 200000
+i409321726 users_id 2000 1
+i409321726 items_end_date 19991 25
+i409321726 bids_id 200000 1
+i409321726 items_id 19999 1
+i920605840 18037
+i920605840 categories_id 450 1
+i920605840 items_id 18037 1
+i920605840 items_end_date 18031 25
+i920605840 items_initial_price 16457 18
+i920605840 items_max_bid 16504 19
+i920605840 items_name 250 33
+i920605840 items_nb_of_bids 101 3
+i941409494 20000
+i941409494 users_id 2000 1
+i941409494 items_end_date 19992 25
+i941409494 items_id 20000 1
