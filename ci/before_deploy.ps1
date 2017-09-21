@@ -11,6 +11,7 @@ Set-Location $STAGE
 $ZIP = "$SRC_DIR\$($Env:CRATE_NAME)-$($Env:APPVEYOR_REPO_TAG_NAME)-$($Env:TARGET).zip"
 
 Copy-Item "$SRC_DIR\target\$($Env:TARGET)\release\eson.exe" '.\'
+Copy-Item "$SRC_DIR\README.md","$SRC_DIR\LICENSE.md","$SRC_DIR\examples" '.\'
 
 7z a "$ZIP" *
 

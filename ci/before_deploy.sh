@@ -20,6 +20,7 @@ main() {
     cross rustc --bin eson --target $TARGET --release -- -C lto
 
     cp target/$TARGET/release/eson $stage/
+    cp -r README.md LICENSE.md $src/examples/ $stage/
 
     cd $stage
     tar czf $src/$CRATE_NAME-$TRAVIS_TAG-$TARGET.tar.gz *
