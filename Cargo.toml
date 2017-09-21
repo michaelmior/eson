@@ -1,8 +1,23 @@
 [package]
 authors = ["Michael Mior <mmior@uwaterloo.ca>"]
+description = "A normalization tool for denormalized databases"
+
+homepage = "https://github.com/michaelmior/eson"
+repository = "https://github.com/michaelmior/eson"
+readme = "./README.md"
+
+categories = ["command-line-utilities", "database"]
+keywords = ["database", "normalization", "NoSQL"]
+license = "GPL-3.0"
+
 build = "build.rs"
 name = "eson"
 version = "0.1.0"
+
+[badges]
+appveyor = { repository = "michaelmior/eson", branch = "master", service = "github" }
+travis-ci = { repository = "michaelmior/eson", branch = "master" }
+maintenance = { status = "experimental" }
 
 [build-dependencies]
 peg = "0.5.4"
