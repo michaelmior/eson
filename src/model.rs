@@ -456,19 +456,19 @@ impl Table {
   }
 
   /// Check if this table is in BCNF according to its functional dependencies
-  pub fn is_bcnf(&self, skip_keys: bool) -> bool {
-    self.violating_fd(skip_keys).is_none()
+  pub fn is_bcnf(&self, skip_keys: bool, fd_threshold: Option<f32>) -> bool {
+    self.violating_fd(skip_keys, fd_threshold).is_none()
   }
 
   /// Find a functional dependency which violates BCNF
-  pub fn violating_fd(&self, use_stats: bool) -> Option<&FD> {
+  pub fn violating_fd(&self, use_stats: bool, fd_threshold: Option<f32>) -> Option<&FD> {
     let mut violators = self.fds.values().filter(|fd|
       !fd.is_trivial() &&
       !self.is_superkey(&fd.lhs)
     );
 
     if use_stats {
-      violators.filter(|fd| fd.lhs.len() + fd.rhs.len() < self.fields.len()).max_by_key(|fd| {
+      let vfd = violators.filter(|fd| fd.lhs.len() + fd.rhs.len() < self.fields.len()).map(|fd| {
         // Below is taken from https://dx.doi.org/10.5441/002/edbt.2017.31
         let length_score = 0.5 * (1.0 / fd.lhs.len() as f32 +
                                   1.0 / (fd.rhs.len() as f32) / (self.fields.len() as f32 - 2.0));
@@ -484,8 +484,16 @@ impl Table {
 
         // TODO: Add duplication score
 
-        FloatOrd(length_score + value_score + position_score)
-      })
+        (fd, FloatOrd(length_score + value_score + position_score))
+      }).max_by_key(|&(_, score)| { score });
+      match vfd {
+        Some((fd, score)) => if fd_threshold.is_some() && score > FloatOrd(fd_threshold.unwrap()) {
+          Some(fd)
+        } else {
+          None
+        },
+        None => None
+      }
     } else {
       violators.next()
     }

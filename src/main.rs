@@ -17,7 +17,7 @@ use std::io;
 use std::io::prelude::*;
 use std::str::FromStr;
 
-use argparse::{ArgumentParser, Store, StoreFalse, StoreTrue};
+use argparse::{ArgumentParser, Store, StoreFalse, StoreOption, StoreTrue};
 use log::LogLevelFilter;
 
 #[macro_use]
@@ -51,6 +51,7 @@ struct Options {
   minimize: bool,
   retain_fks: bool,
   use_stats: bool,
+  fd_threshold: Option<f32>,
   log_level: String,
 }
 
@@ -63,6 +64,7 @@ fn main() {
     minimize: false,
     retain_fks: false,
     use_stats: false,
+    fd_threshold: None,
     log_level: "Off".to_string(),
   };
   {
@@ -92,7 +94,16 @@ fn main() {
     ap.refer(&mut options.use_stats)
       .add_option(&["-s", "--use-stats"], StoreTrue,
                     "Use statistics to guide normalization");
+    ap.refer(&mut options.fd_threshold)
+      .add_option(&["-t", "--fd-threshold"], StoreOption,
+                    "A threshold at which to discard FDs (requires --use-stats)");
     ap.parse_args_or_exit();
+  }
+
+  // Validate arguments
+  if options.fd_threshold.is_some() && !options.use_stats {
+    writeln!(io::stderr(), "Specifying --fd-threshold requires --use-stats").unwrap();
+    ::std::process::exit(1);
   }
 
   let log_level = LogLevelFilter::from_str(options.log_level.as_str())
@@ -191,7 +202,7 @@ fn main() {
     changed = false;
 
     if options.normalize {
-      changed = schema.normalize(options.use_stats) || changed;
+      changed = schema.normalize(options.use_stats, options.fd_threshold) || changed;
     }
 
     if options.subsume {

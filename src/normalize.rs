@@ -10,16 +10,16 @@ use model::{Field, Schema, Table};
 use symbols::{FieldName, TableName};
 
 pub trait Normalizable {
-  fn normalize(&mut self, use_stats: bool) -> bool;
+  fn normalize(&mut self, use_stats: bool, fd_threshold: Option<f32>) -> bool;
   fn subsume(&mut self) -> bool;
 }
 
-fn decomposed_tables(tables: &mut HashMap<TableName, Table>, table_name: TableName, use_stats: bool)
+fn decomposed_tables(tables: &mut HashMap<TableName, Table>, table_name: TableName, use_stats: bool, fd_threshold: Option<f32>)
                      -> (Table, Table) {
   let t = tables.get(&table_name).unwrap();
 
   // Find a violating FD
-  let vfd = t.violating_fd(use_stats).unwrap();
+  let vfd = t.violating_fd(use_stats, fd_threshold).unwrap();
 
   debug!("Decomposing {} because of {}", t, vfd);
 
@@ -85,7 +85,7 @@ fn decomposed_tables(tables: &mut HashMap<TableName, Table>, table_name: TableNa
 }
 
 impl Normalizable for Schema {
-  fn normalize(&mut self, use_stats: bool) -> bool {
+  fn normalize(&mut self, use_stats: bool, fd_threshold: Option<f32>) -> bool {
     let mut any_changed = false;
     let mut changed = true;
 
@@ -102,7 +102,7 @@ impl Normalizable for Schema {
         // Skip tables already in BCNF
         {
           let t = &self.tables[&table_name];
-          if t.is_bcnf(use_stats) {
+          if t.is_bcnf(use_stats, fd_threshold) {
             continue;
           }
         }
@@ -110,7 +110,7 @@ impl Normalizable for Schema {
         // Decompose the tables and update the map
         changed = true;
         any_changed = true;
-        let (t1, t2) = decomposed_tables(&mut self.tables, table_name.clone(), use_stats);
+        let (t1, t2) = decomposed_tables(&mut self.tables, table_name.clone(), use_stats, fd_threshold);
         debug!("Decomposed tables are {} and {}", t1, t2);
 
         let t1_name = t1.name.clone();
