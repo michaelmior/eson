@@ -72,9 +72,6 @@ fn main() {
     ap.set_description("NoSQL schema renormalization");
     ap.refer(&mut options.input)
       .add_argument("input", Store, "Example to run").required();
-    ap.refer(&mut options.log_level)
-      .add_option(&["-l", "--log-level"], Store,
-                    "The level of logging to use");
     ap.refer(&mut options.normalize)
       .add_option(&["--no-norm"], StoreFalse,
                     "Don't normalize");
@@ -97,6 +94,9 @@ fn main() {
     ap.refer(&mut options.fd_threshold)
       .add_option(&["-t", "--fd-threshold"], StoreOption,
                     "A threshold at which to discard FDs (requires --use-stats)");
+    ap.refer(&mut options.log_level)
+      .add_option(&["-l", "--log-level"], Store,
+                    "The level of logging to use");
     ap.parse_args_or_exit();
   }
 
