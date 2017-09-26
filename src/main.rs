@@ -52,6 +52,7 @@ struct Options {
   retain_fks: bool,
   use_stats: bool,
   fd_threshold: Option<f32>,
+  show_dependencies: bool,
   log_level: String,
 }
 
@@ -65,6 +66,7 @@ fn main() {
     retain_fks: false,
     use_stats: false,
     fd_threshold: None,
+    show_dependencies: false,
     log_level: "Off".to_string(),
   };
   {
@@ -94,6 +96,9 @@ fn main() {
     ap.refer(&mut options.fd_threshold)
       .add_option(&["-t", "--fd-threshold"], StoreOption,
                     "A threshold at which to discard FDs (requires --use-stats)");
+    ap.refer(&mut options.show_dependencies)
+      .add_option(&["-d", "--show-dependencies"], StoreTrue,
+                    "Display the remaining dependencies on completion");
     ap.refer(&mut options.log_level)
       .add_option(&["-l", "--log-level"], Store,
                     "The level of logging to use");
@@ -210,5 +215,11 @@ fn main() {
     }
   }
 
-  println!("{}", schema);
+  if options.show_dependencies {
+    println!("{}", schema);
+  } else {
+    for table in schema.tables.values() {
+      println!("{}", table);
+    }
+  }
 }
