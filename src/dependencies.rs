@@ -194,7 +194,7 @@ impl INDClosure for Schema {
 
             let mut new_left = ind1.left_fields.clone();
             let mut added_fields = ind2.left_fields.clone();
-            added_fields.retain(|f| !new_left.contains(&f));
+            added_fields.retain(|f| !new_left.contains(f));
             new_left.extend(added_fields);
 
             if new_left.iter().collect::<HashSet<_>>().is_subset(&all_fields.iter().collect::<HashSet<_>>()) {
@@ -203,7 +203,7 @@ impl INDClosure for Schema {
 
             let mut new_right = ind1.right_fields.clone();
             added_fields = ind2.right_fields.clone();
-            added_fields.retain(|f| !new_right.contains(&f));
+            added_fields.retain(|f| !new_right.contains(f));
             new_right.extend(added_fields);
 
             // We assume that dependencies which duplicate fields are not helpful
@@ -251,7 +251,7 @@ impl INDClosure for Schema {
         for ind1 in &ind_vec {
           // Check for a matching the RHS (implies a new IND via transitivity)
           let ind_key = &(ind1.right_table.clone(), ind1.right_fields.clone());
-          if let Some(other_inds) = grouped_inds.get(&ind_key) {
+          if let Some(other_inds) = grouped_inds.get(ind_key) {
             for ind2 in other_inds.iter() {
               if ind1.left_table == ind2.right_table {
                 continue;
@@ -279,7 +279,7 @@ impl INDClosure for Schema {
 
         // Delete old INDs
         for (tables, delete_indices) in &mut delete_inds {
-          let mut inds = self.inds.get_mut(tables.clone());
+          let inds = self.inds.get_mut(tables.clone());
           delete_indices.sort_by(|a, b| a.cmp(b).reverse());
           delete_indices.dedup();
           for delete_index in delete_indices {

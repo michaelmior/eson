@@ -127,7 +127,7 @@ fn main() {
 
   // Copy frequencies to the tables and fields
   for freq in frequencies {
-    let mut table = schema.tables.get_mut(&freq.0)
+    let table = schema.tables.get_mut(&freq.0)
       .expect(&format!("found stats for unknown table {}", freq.0));
     match freq.1 {
       Some(field_name) => {
@@ -148,7 +148,7 @@ fn main() {
       continue;
     }
 
-    let mut table = schema.tables.get_mut(&fd.0)
+    let table = schema.tables.get_mut(&fd.0)
       .expect(&format!("Missing table {} for FD", fd.0));
     table.add_fd(
       fd.1.iter().map(|s| s.parse().unwrap()).collect::<Vec<_>>(),
@@ -158,7 +158,7 @@ fn main() {
 
   // Adjust the primary keys using statistics if desired
   if options.use_stats {
-    for mut table in schema.tables.values_mut() {
+    for table in schema.tables.values_mut() {
       table.set_primary_key(true);
     }
   }

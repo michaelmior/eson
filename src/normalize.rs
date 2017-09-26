@@ -127,7 +127,7 @@ impl Normalizable for Schema {
         }
         ind_fields.sort();
 
-        assert!(t1.name != t2.name);
+        assert_ne!(t1.name, t2.name);
         let ind = IND { left_table: t1.name.clone(),
                         left_fields: ind_fields.clone(),
                         right_table: t2.name.clone(),
@@ -189,7 +189,7 @@ impl Normalizable for Schema {
           let left_table = &self.tables[&ind.left_table];
           let remove_fields = ind.left_fields.iter().filter(|f| {
             fd_fields.contains(*f) && left_table.fields.contains_key(*f)
-          }).map(|f| f.clone()).collect::<Vec<_>>();
+          }).cloned().collect::<Vec<_>>();
 
           // Check that we actually have fields to remove
           if remove_fields.is_empty() {
@@ -212,13 +212,13 @@ impl Normalizable for Schema {
         let mut remove_name = None;
 
         {
-          let mut table = self.tables.get_mut(&table_name).unwrap();
+          let table = self.tables.get_mut(&table_name).unwrap();
           for field in remove_fields {
             table.fields.remove(&field);
           }
           table.prune_fds();
 
-          if table.fields.len() == 0 {
+          if table.fields.is_empty() {
             remove_name = Some(table.name.clone());
           }
         }
@@ -303,8 +303,8 @@ impl Normalizable for Schema {
               new_table.fields.insert(name.clone(), field.clone());
             }
             for fd in left_table.fds.values() {
-              new_table.add_fd(fd.lhs.iter().map(|f| f.clone()).collect::<Vec<_>>(),
-                               fd.rhs.iter().map(|f| f.clone()).collect::<Vec<_>>());
+              new_table.add_fd(fd.lhs.iter().cloned().collect::<Vec<_>>(),
+                               fd.rhs.iter().cloned().collect::<Vec<_>>());
             }
 
             // Add fields from the right table, renaming if needed
@@ -312,7 +312,7 @@ impl Normalizable for Schema {
 
             // Add the new names for each of the keys
             for (i, &(_, field)) in right_keys.iter().enumerate() {
-              new_right_names.insert(&field, left_keys[i].1.clone());
+              new_right_names.insert(field, left_keys[i].1.clone());
             }
 
             for field in right_table.fields.values() {

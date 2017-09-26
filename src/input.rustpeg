@@ -21,12 +21,10 @@ table -> String
 
 field_define -> Field
   = key:"*"? name:identifier {
-      let is_key = match key { Some(_) => true, None => false };
-
       let parsed_name = name.parse().expect(&format!("Invalid field name {}", name));
       Field {
         name: parsed_name,
-        key: is_key,
+        key: key.is_some(),
         cardinality: None,
         max_length: None
       }
@@ -69,6 +67,7 @@ inc_dep -> Vec<(String, Vec<String>, String, Vec<String>)>
         Some(fields) => fields,
         None => left_fields.clone()
       };
+
       let mut inds: Vec<_> = Vec::new();
       if dir == "==" {
         inds.push((right_table.clone(), right_fields.clone(), left_table.clone(), left_fields.clone()));

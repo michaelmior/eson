@@ -76,24 +76,22 @@ impl Schema {
       let dst_table = &self.tables[dst];
       for ind_group in self.inds.values() {
         for ind in ind_group {
-          if ind.left_table == *src {
-            if ind.left_fields.iter().any(|f| dst_table.fields.contains_key(f)) {
-              let new_ind = IND { left_table: dst.clone(),
-                                  left_fields: ind.left_fields.clone(),
-                                  right_table: ind.right_table.clone(),
-                                  right_fields: ind.right_fields.clone() };
-              new_inds.push(new_ind);
-            }
+          if ind.left_table == *src &&
+             ind.left_fields.iter().any(|f| dst_table.fields.contains_key(f)) {
+            let new_ind = IND { left_table: dst.clone(),
+                                left_fields: ind.left_fields.clone(),
+                                right_table: ind.right_table.clone(),
+                                right_fields: ind.right_fields.clone() };
+            new_inds.push(new_ind);
           }
 
-          if ind.right_table == *src {
-            if ind.right_fields.iter().any(|f| dst_table.fields.contains_key(f)) {
-              let new_ind = IND { left_table: ind.left_table.clone(),
-                                  left_fields: ind.left_fields.clone(),
-                                  right_table: dst.clone(),
-                                  right_fields: ind.right_fields.clone() };
-              new_inds.push(new_ind);
-            }
+          if ind.right_table == *src &&
+             ind.right_fields.iter().any(|f| dst_table.fields.contains_key(f)) {
+            let new_ind = IND { left_table: ind.left_table.clone(),
+                                left_fields: ind.left_fields.clone(),
+                                right_table: dst.clone(),
+                                right_fields: ind.right_fields.clone() };
+            new_inds.push(new_ind);
           }
         }
       }
@@ -145,7 +143,7 @@ impl Schema {
   /// Remove INDs which do not represent foreign keys
   pub fn retain_fk_inds(&mut self) {
     for (&(_, ref right_table), ref mut inds) in self.inds.iter_mut() {
-      let ref right_table = self.tables[right_table];
+      let right_table = &self.tables[right_table];
       inds.retain(|ind|
         match right_table.fds.get(&ind.left_fields) {
           Some(fd) => ind.right_fields.clone().into_iter()
@@ -344,7 +342,7 @@ impl Table {
       (lhs.iter().map(|f| f.name.clone()).collect::<Vec<_>>(),
        rhs.iter().map(|f| f.name.clone()).collect::<Vec<_>>())
     };
-    if lhs_names.len() > 0 && rhs_names.len() > 0 {
+    if !lhs_names.is_empty() && !rhs_names.is_empty() {
       self.add_fd(lhs_names, rhs_names);
     }
   }
@@ -391,7 +389,7 @@ impl Table {
           let position_score = 0.5 * (1.0 / (left + 1.0) + 1.0 / (between + 1.0));
 
           FloatOrd(length_score + value_score + position_score)
-        }).expect(&format!("No primary key found for {}", self)).clone()
+        }).expect(&format!("No primary key found for {}", self))
       } else {
         pks.next().expect(&format!("No primary key found for {}", self))
       }
@@ -408,7 +406,7 @@ impl Table {
     lhs.dedup();
 
     // Merge this FD with others having the same LHS
-    let key = &lhs.iter().map(|f| f.clone()).collect::<Vec<_>>();
+    let key = &lhs.to_vec();
     if self.fds.contains_key(key) {
       let old_fd = self.fds.remove(key).unwrap();
       rhs.extend(old_fd.rhs.into_iter());
