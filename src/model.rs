@@ -422,6 +422,7 @@ impl Table {
   }
 
   /// Check if this table contains a given FD
+  #[allow(dead_code)]
   pub fn contains_fd(&self, fd: &FD) -> bool {
     let mut key = fd.lhs.clone().into_iter().collect::<Vec<_>>();
     key.sort();
