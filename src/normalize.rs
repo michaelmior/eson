@@ -387,7 +387,7 @@ mod test {
     let mut schema = schema! {t};
 
     schema.validate();
-    schema.normalize(false);
+    schema.normalize(false, None);
     schema.validate();
 
     let t1 = schema.tables.get(&TableName::from("foo_base")).unwrap();
@@ -410,7 +410,7 @@ mod test {
     let mut schema = schema! {t};
 
     schema.validate();
-    schema.normalize(false);
+    schema.normalize(false, None);
     schema.validate();
 
     let t1 = schema.tables.get(&TableName::from("foo_base")).unwrap();

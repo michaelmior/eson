@@ -488,7 +488,7 @@ impl Table {
         (fd, FloatOrd(length_score + value_score + position_score))
       }).max_by_key(|&(_, score)| { score });
       match vfd {
-        Some((fd, score)) => if fd_threshold.is_some() && score > FloatOrd(fd_threshold.unwrap()) {
+        Some((fd, score)) => if fd_threshold.is_none() || score > FloatOrd(fd_threshold.unwrap()) {
           Some(fd)
         } else {
           None
@@ -578,7 +578,7 @@ mod tests {
       field!("bar")
     });
     add_fd!(t, vec!["foo"], vec!["bar"]);
-    assert!(t.is_bcnf(false))
+    assert!(t.is_bcnf(false, None))
   }
 
   #[test]
@@ -592,7 +592,7 @@ mod tests {
       lhs: field_set!["bar"],
       rhs: field_set!["foo"]
     };
-    assert_eq!(t.violating_fd(false).unwrap(), &fd)
+    assert_eq!(t.violating_fd(false, None).unwrap(), &fd)
   }
 
   #[test]
@@ -602,7 +602,7 @@ mod tests {
       field!("bar")
     });
     add_fd!(t, vec!["foo"], vec!["bar"]);
-    assert!(t.violating_fd(false).is_none())
+    assert!(t.violating_fd(false, None).is_none())
   }
 
   #[test]
@@ -616,7 +616,7 @@ mod tests {
     add_fd!(t, vec!["bar", "baz"], vec!["quux"]);
     add_fd!(t, vec!["bar"], vec!["baz", "quux"]);
 
-    assert_eq!(t.violating_fd(true).unwrap().lhs.len(), 1);
+    assert_eq!(t.violating_fd(true, None).unwrap().lhs.len(), 1);
   }
 
   #[test]
@@ -630,7 +630,7 @@ mod tests {
     add_fd!(t, vec!["baz"], vec!["bar", "quux"]);
     add_fd!(t, vec!["bar"], vec!["baz", "quux"]);
 
-    let lhs = &t.violating_fd(true).unwrap().lhs;
+    let lhs = &t.violating_fd(true, None).unwrap().lhs;
     assert_eq!(*lhs.iter().next().unwrap(), FieldName::from("baz"));
   }
 
@@ -649,7 +649,7 @@ mod tests {
     add_fd!(t, vec!["bar"], vec!["baz", "quux"]);
     add_fd!(t, vec!["qux"], vec!["corge", "garply"]);
 
-    let lhs = &t.violating_fd(true).unwrap().lhs;
+    let lhs = &t.violating_fd(true, None).unwrap().lhs;
     assert_eq!(*lhs.iter().next().unwrap(), FieldName::from("bar"));
   }
 
@@ -692,7 +692,7 @@ mod tests {
     });
     add_fd!(t, vec!["foo"], vec!["bar"]);
     add_fd!(t, vec!["bar"], vec!["baz"]);
-    assert!(!t.is_bcnf(false))
+    assert!(!t.is_bcnf(false, None))
   }
 
   #[test]
