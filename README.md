@@ -6,6 +6,11 @@
 `eson` is a work in progress tool to extract a normalized schema from a denormalized relational schema.
 The hope is that it can be useful for understanding and managing schemas of NoSQL applications.
 
+## Installation
+
+If you are a Rust user, you can install eson with `cargo install eson`.
+Otherwise, you can download a Linux, Windows, or Mac binary from the [latest release](https://github.com/michaelmior/eson/releases/latest).
+
 ## Input format
 
 Example input files are available in the `examples` directory.
