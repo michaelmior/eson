@@ -307,6 +307,16 @@ mod tests {
   use super::*;
 
   #[test]
+  fn fd_fmt() {
+    let fd = FD {
+      lhs: field_set!["foo"],
+      rhs: field_set!["bar"]
+    };
+
+    assert_eq!("foo -> bar", format!("{}", fd));
+  }
+
+  #[test]
   fn fd_trivial() {
     let fd = FD {
       lhs: field_set!["foo", "bar"],
@@ -345,6 +355,26 @@ mod tests {
       rhs: field_set!["bar", "baz"]
     }));
     assert!(!fds.closure());
+  }
+
+  #[test]
+  fn ind_fmt() {
+    let ind = IND {
+      left_table: TableName::from("foo"), left_fields: field_vec!["bar"],
+      right_table: TableName::from("baz"), right_fields: field_vec!["quux"]
+    };
+
+    assert_eq!("foo(bar) <= baz(quux)", format!("{}", ind));
+  }
+
+  #[test]
+  fn ind_fmt_same_rhs() {
+    let ind = IND {
+      left_table: TableName::from("foo"), left_fields: field_vec!["bar"],
+      right_table: TableName::from("baz"), right_fields: field_vec!["bar"]
+    };
+
+    assert_eq!("foo(bar) <= baz(...)", format!("{}", ind));
   }
 
   #[test]
