@@ -33,7 +33,7 @@ mod input {
 
 use dependencies::{FDClosure, INDClosure};
 use model::Schema;
-use normalize::Normalizable;
+use normalize::Normalizer;
 
 fn read_file(name: &str) -> Result<String, io::Error> {
   let mut input_file = File::open(name)?;
@@ -201,17 +201,22 @@ fn main() {
   schema.copy_fds();
   schema.ind_closure();
 
+  let normalizer = Normalizer {
+    use_stats: options.use_stats,
+    fd_threshold: options.fd_threshold
+  };
+
   let mut changed = true;
   while changed {
     info!("Looping");
     changed = false;
 
     if options.normalize {
-      changed = schema.normalize(options.use_stats, options.fd_threshold) || changed;
+      changed = normalizer.normalize(&mut schema) || changed;
     }
 
     if options.subsume {
-      changed = schema.subsume() || changed;
+      changed = normalizer.subsume(&mut schema) || changed;
     }
   }
 
