@@ -66,7 +66,7 @@ branches:
   only:
     # Release tags
     - /^v\d+\.\d+\.\d+.*$/
-    - master
+    - main
 
 notifications:
   - provider: Email
