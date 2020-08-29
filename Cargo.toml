@@ -24,7 +24,7 @@ defaultmap = "0.4.0"
 float-ord = "0.1.2"
 group-by = "1.0.0"
 itertools = "0.6.1"
-ordermap = "0.2.11"
+ordermap = "0.4.2"
 peg = "0.6.3"
 permutation = "0.2.5"
 string-intern = { version ="0.1.7", default-features = false }
