@@ -1,4 +1,4 @@
-use log::LogLevel::Info;
+use log::Level::Info;
 use std::collections::{HashMap, HashSet};
 use std::fmt;
 
