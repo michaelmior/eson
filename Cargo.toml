@@ -27,7 +27,7 @@ itertools = "0.6.1"
 ordermap = "0.2.11"
 peg = "0.6.3"
 permutation = "0.2.5"
-simple-logging = "1.0.1"
+simple-logging = "2.0.2"
 string-intern = { version ="0.1.7", default-features = false }
 log = "0.3"
 
