@@ -27,9 +27,7 @@ mod model;
 mod normalize;
 mod symbols;
 
-mod input {
-  include!(concat!(env!("OUT_DIR"), "/input.rs"));
-}
+mod input;
 
 use dependencies::{FDClosure, INDClosure};
 use model::Schema;
@@ -117,7 +115,7 @@ fn main() {
 
   info!("Loading schema {}", options.input);
   let input_string = read_file(&options.input).unwrap();
-  let (table_vec, fd_vec, ind_vec, frequencies) = input::input(&input_string).unwrap();
+  let (table_vec, fd_vec, ind_vec, frequencies) = input::input::input(&input_string).unwrap();
 
   let mut schema = Schema { ..Default::default() };
   // Build a HashMap of parsed Tables
