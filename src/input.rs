@@ -2,7 +2,7 @@ extern crate peg;
 
 use std::str;
 
-use ordermap::OrderMap;
+use indexmap::IndexMap;
 
 use super::model::{Field, Table};
 
@@ -41,7 +41,7 @@ peg::parser!{
     rule create() -> Table
       = table:table() space()?
         "(" space()? fields:field_defines() space()? ")" {
-          let mut field_map = OrderMap::new();
+          let mut field_map = IndexMap::new();
           for field in fields {
             field_map.insert(field.name.clone(), field);
           }

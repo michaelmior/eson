@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use ordermap::OrderMap;
+use indexmap::IndexMap;
 
 #[cfg(test)]
 use dependencies::FD;
@@ -39,7 +39,7 @@ impl Normalizer {
       } else {
         v
       })
-    ).collect::<OrderMap<FieldName, Field>>();
+    ).collect::<IndexMap<FieldName, Field>>();
     let mut t1 = Table {
       name: (t.name.to_string().clone() + "_base").parse().unwrap(),
       fields: t1_fields,
@@ -69,7 +69,7 @@ impl Normalizer {
       } else {
         v
       })
-    ).collect::<OrderMap<FieldName, Field>>();
+    ).collect::<IndexMap<FieldName, Field>>();
     let mut t2 = Table {
       name: (t.name.to_string().clone() + "_ext").parse().unwrap(),
       fields: t2_fields,

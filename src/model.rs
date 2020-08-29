@@ -5,7 +5,7 @@ use std::usize;
 
 use defaultmap::DefaultHashMap;
 use float_ord::FloatOrd;
-use ordermap::OrderMap;
+use indexmap::IndexMap;
 
 use dependencies::{FD, FDClosure, IND};
 use symbols::{FieldName, TableName};
@@ -287,7 +287,7 @@ pub struct Table {
   pub name: TableName,
 
   /// All `Field`s in the table keyed by the name
-  pub fields: OrderMap<FieldName, Field>,
+  pub fields: IndexMap<FieldName, Field>,
 
   /// Functional dependencies keyed by their left-hand side
   pub fds: HashMap<Vec<FieldName>, FD>,
@@ -300,7 +300,7 @@ impl Default for Table {
   fn default() -> Table {
     Table {
       name: TableName::from(""),
-      fields: OrderMap::new(),
+      fields: IndexMap::new(),
       fds: HashMap::new(),
       row_count: None
     }
@@ -350,7 +350,7 @@ impl Table {
   /// Calculate field positions for scoring
   fn get_field_positions(&self, fields: &HashSet<FieldName>) -> (f32, f32) {
     let mut indexes = fields.iter().map(|f| {
-      self.fields.get_pair_index(f).unwrap().0
+      self.fields.get_full(f).unwrap().0
     }).collect::<Vec<_>>();
     indexes.sort();
 

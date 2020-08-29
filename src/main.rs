@@ -7,7 +7,7 @@ extern crate float_ord;
 extern crate itertools;
 #[macro_use]
 extern crate log;
-extern crate ordermap;
+extern crate indexmap;
 extern crate permutation;
 extern crate string_intern;
 
