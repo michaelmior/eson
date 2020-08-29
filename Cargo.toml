@@ -20,7 +20,7 @@ travis-ci = { repository = "michaelmior/eson", branch = "main" }
 maintenance = { status = "experimental" }
 
 [build-dependencies]
-peg = "0.5.4"
+peg = "0.6.3"
 
 [dependencies]
 argparse = "0.2.1"
