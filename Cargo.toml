@@ -27,9 +27,8 @@ itertools = "0.6.1"
 ordermap = "0.2.11"
 peg = "0.6.3"
 permutation = "0.2.5"
-simple-logging = "1.0.1"
 string-intern = { version ="0.1.7", default-features = false }
-log = "0.3"
+log = "0.4"
 
 [dev-dependencies]
 collect-mac = "0.1.0"

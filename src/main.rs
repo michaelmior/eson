@@ -9,7 +9,6 @@ extern crate itertools;
 extern crate log;
 extern crate ordermap;
 extern crate permutation;
-extern crate simple_logging;
 extern crate string_intern;
 
 use std::fs::File;
@@ -18,20 +17,24 @@ use std::io::prelude::*;
 use std::str::FromStr;
 
 use argparse::{ArgumentParser, Store, StoreFalse, StoreOption, StoreTrue};
-use log::LogLevelFilter;
+use log::LevelFilter;
 
 #[macro_use]
 mod macros;
 mod dependencies;
 mod model;
 mod normalize;
+mod simple_logger;
 mod symbols;
 
 mod input;
 
 use dependencies::{FDClosure, INDClosure};
 use model::Schema;
+use simple_logger::SimpleLogger;
 use normalize::Normalizer;
+
+static LOGGER: SimpleLogger = SimpleLogger;
 
 fn read_file(name: &str) -> Result<String, io::Error> {
   let mut input_file = File::open(name)?;
@@ -109,9 +112,9 @@ fn main() {
     ::std::process::exit(1);
   }
 
-  let log_level = LogLevelFilter::from_str(options.log_level.as_str())
+  let log_level = LevelFilter::from_str(options.log_level.as_str())
     .expect("invalid logging level");
-  simple_logging::log_to_stderr(log_level).ok();
+  log::set_logger(&LOGGER).map(|()| log::set_max_level(log_level)).ok();
 
   info!("Loading schema {}", options.input);
   let input_string = read_file(&options.input).unwrap();
