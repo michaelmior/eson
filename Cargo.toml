@@ -10,7 +10,6 @@ categories = ["command-line-utilities", "database"]
 keywords = ["database", "normalization", "NoSQL"]
 license = "GPL-3.0"
 
-build = "build.rs"
 name = "eson"
 version = "0.1.0"
 
@@ -19,9 +18,6 @@ appveyor = { repository = "michaelmior/eson", branch = "main", service = "github
 travis-ci = { repository = "michaelmior/eson", branch = "main" }
 maintenance = { status = "experimental" }
 
-[build-dependencies]
-peg = "0.5.4"
-
 [dependencies]
 argparse = "0.2.1"
 defaultmap = "0.3.0"
@@ -29,6 +25,7 @@ float-ord = "0.1.2"
 group-by = "1.0.0"
 itertools = "0.6.1"
 ordermap = "0.2.11"
+peg = "0.6.3"
 permutation = "0.2.5"
 simple-logging = "1.0.1"
 string-intern = { version ="0.1.7", default-features = false }
