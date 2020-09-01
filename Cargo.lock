@@ -39,7 +39,7 @@ dependencies = [
  "defaultmap 0.4.0 (registry+https://github.com/rust-lang/crates.io-index)",
  "float-ord 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "group-by 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)",
- "indexmap 1.5.1 (registry+https://github.com/rust-lang/crates.io-index)",
+ "indexmap 1.5.2 (registry+https://github.com/rust-lang/crates.io-index)",
  "itertools 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)",
  "log 0.4.11 (registry+https://github.com/rust-lang/crates.io-index)",
  "peg 0.6.3 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -67,7 +67,7 @@ dependencies = [
 
 [[package]]
 name = "indexmap"
-version = "1.5.1"
+version = "1.5.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 dependencies = [
  "autocfg 1.0.1 (registry+https://github.com/rust-lang/crates.io-index)",
@@ -163,7 +163,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 "checksum float-ord 0.1.2 (registry+https://github.com/rust-lang/crates.io-index)" = "f8c46c5465a9fdc239da87353fcc2717e81ca5a643fd82e9be4de96b09f635cc"
 "checksum group-by 1.0.0 (registry+https://github.com/rust-lang/crates.io-index)" = "a51b9aaecf002680797bcec029a721d9efdddeb6b1651045ad6690912cc02784"
 "checksum hashbrown 0.8.2 (registry+https://github.com/rust-lang/crates.io-index)" = "e91b62f79061a0bc2e046024cb7ba44b08419ed238ecbd9adbd787434b9e8c25"
-"checksum indexmap 1.5.1 (registry+https://github.com/rust-lang/crates.io-index)" = "86b45e59b16c76b11bf9738fd5d38879d3bd28ad292d7b313608becb17ae2df9"
+"checksum indexmap 1.5.2 (registry+https://github.com/rust-lang/crates.io-index)" = "4e47a3566dd4fd4eec714ae6ceabdee0caec795be835c223d92c2d40f1e8cf1c"
 "checksum itertools 0.6.1 (registry+https://github.com/rust-lang/crates.io-index)" = "e58359414720377f59889192f1ec0e726049ce5735bc21fdb0c4c8ae638305bb"
 "checksum lazy_static 0.2.8 (registry+https://github.com/rust-lang/crates.io-index)" = "3b37545ab726dd833ec6420aaba8231c5b320814b9029ad585555d2a03e94fbf"
 "checksum log 0.4.11 (registry+https://github.com/rust-lang/crates.io-index)" = "4fabed175da42fed1fa0746b0ea71f412aa9d35e76e95e59b192c64b9dc2bf8b"
