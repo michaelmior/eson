@@ -1,0 +1,7 @@
+# Auto detect text files and perform LF normalization
+*        text=auto
+
+*.rs     text diff=rust
+*.md     text diff=markdown
+*.py     text diff=python executable
+*.sh     text eol=lf executable
