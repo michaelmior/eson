@@ -19,7 +19,7 @@ travis-ci = { repository = "michaelmior/eson", branch = "main" }
 maintenance = { status = "experimental" }
 
 [dependencies]
-argparse = "0.2.1"
+argparse = "0.2.2"
 defaultmap = "0.5.0"
 float-ord = "0.2.0"
 group-by = "1.0.0"
