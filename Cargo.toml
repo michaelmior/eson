@@ -28,7 +28,7 @@ peg = "0.6.3"
 permutation = "0.2.5"
 string-intern = { version ="0.1.7", default-features = false }
 log = "0.4"
-indexmap = "1.6.0"
+indexmap = "1.6.2"
 
 [dev-dependencies]
 collect-mac = "0.1.0"
