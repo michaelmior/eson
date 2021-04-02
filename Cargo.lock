@@ -55,9 +55,9 @@ dependencies = [
 
 [[package]]
 name = "float-ord"
-version = "0.2.0"
+version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7bad48618fdb549078c333a7a8528acb57af271d0433bdecd523eb620628364e"
+checksum = "c1ff6201db265fe6a462c126a473d4c07cc9cb84d185fb67c913dd0ee01e7517"
 
 [[package]]
 name = "group-by"
