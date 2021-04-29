@@ -1,0 +1,15 @@
+version: 2
+updates:
+- package-ecosystem: cargo
+  directory: "/"
+  schedule:
+    interval: daily
+    time: "10:00"
+  open-pull-requests-limit: 10
+  ignore:
+  - dependency-name: float-ord
+    versions:
+    - 0.3.0
+  - dependency-name: indexmap
+    versions:
+    - 1.6.1
