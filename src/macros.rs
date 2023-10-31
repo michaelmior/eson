@@ -4,10 +4,10 @@ macro_rules! assert_has_key(
     let key_fields = $table.key_fields();
     for field_name in $field_names {
       assert!(key_fields.contains(&field_name),
-        format!("key {} missing from {}", field_name, $table.name));
+        "key {} missing from {}", field_name, $table.name);
     }
     assert!(key_fields.len() == $field_names.len(),
-      format!("{} has additional keys", $table.name));
+      "{} has additional keys", $table.name);
   }};
 );
 
@@ -34,7 +34,7 @@ macro_rules! assert_fields(
   ($table:expr, $field_names:expr, false) => {{
     for field_name in $field_names {
       assert!(!$table.fields.contains_key(&field_name),
-        format!("{} found in {}", field_name, $table.name));
+        "{} found in {}", field_name, $table.name);
     }
   }};
 );
