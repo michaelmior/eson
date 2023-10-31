@@ -25,6 +25,7 @@ allow_unsafe = true
 build.allow_apis = [
     "process",
 ]
+allow_unsafe = true
 
 [pkg.log]
 allow_unsafe = true
@@ -38,4 +39,7 @@ allow_apis = [
 ]
 
 [pkg.itertools]
+allow_unsafe = true
+
+[pkg.unicode-ident]
 allow_unsafe = true
