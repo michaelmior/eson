@@ -29,12 +29,6 @@ build.allow_apis = [
 [pkg.log]
 allow_unsafe = true
 
-[pkg.autocfg]
-from.build.allow_apis = [
-    "fs",
-    "process",
-]
-
 [pkg.indexmap]
 allow_unsafe = true
 
