@@ -29,10 +29,10 @@ mod symbols;
 
 mod input;
 
-use dependencies::{FDClosure, INDClosure};
-use model::Schema;
-use simple_logger::SimpleLogger;
-use normalize::Normalizer;
+use crate::dependencies::{FDClosure, INDClosure};
+use crate::model::Schema;
+use crate::simple_logger::SimpleLogger;
+use crate::normalize::Normalizer;
 
 static LOGGER: SimpleLogger = SimpleLogger;
 

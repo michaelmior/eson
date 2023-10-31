@@ -7,8 +7,8 @@ use defaultmap::DefaultHashMap;
 use float_ord::FloatOrd;
 use indexmap::IndexMap;
 
-use dependencies::{FD, FDClosure, IND};
-use symbols::{FieldName, TableName};
+use crate::dependencies::{FD, FDClosure, IND};
+use crate::symbols::{FieldName, TableName};
 
 /// A schema encapsulating tables and their dependencies
 #[derive(Default)]

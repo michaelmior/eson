@@ -8,9 +8,9 @@ extern crate permutation;
 use itertools::Itertools;
 
 #[cfg(test)]
-use model::{Field, Table};
-use model::Schema;
-use symbols::{FieldName, TableName};
+use crate::model::{Field, Table};
+use crate::model::Schema;
+use crate::symbols::{FieldName, TableName};
 
 #[derive(Debug, PartialEq, Eq)]
 pub struct FD {

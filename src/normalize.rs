@@ -3,11 +3,11 @@ use std::collections::{HashMap, HashSet};
 use indexmap::IndexMap;
 
 #[cfg(test)]
-use dependencies::FD;
+use crate::dependencies::FD;
 
-use dependencies::IND;
-use model::{Field, Schema, Table};
-use symbols::{FieldName, TableName};
+use crate::dependencies::IND;
+use crate::model::{Field, Schema, Table};
+use crate::symbols::{FieldName, TableName};
 
 pub struct Normalizer {
   pub use_stats: bool,
