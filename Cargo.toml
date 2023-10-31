@@ -14,8 +14,6 @@ name = "eson"
 version = "0.1.0"
 
 [badges]
-appveyor = { repository = "michaelmior/eson", branch = "main", service = "github" }
-travis-ci = { repository = "michaelmior/eson", branch = "main" }
 maintenance = { status = "experimental" }
 
 [dependencies]
