@@ -1,0 +1,44 @@
+[common]
+version = 2
+import_std = [
+    "fs",
+    "net",
+    "process",
+]
+
+[sandbox]
+kind = "Disabled"
+
+[pkg.peg-macros]
+allow_proc_macro = true
+
+[pkg.lazy_static]
+allow_unsafe = true
+
+[pkg.float-ord]
+allow_unsafe = true
+
+[pkg.hashbrown]
+allow_unsafe = true
+
+[pkg.proc-macro2]
+build.allow_apis = [
+    "process",
+]
+
+[pkg.log]
+allow_unsafe = true
+
+[pkg.autocfg]
+from.build.allow_apis = [
+    "fs",
+    "process",
+]
+
+[pkg.indexmap]
+allow_unsafe = true
+
+[pkg.eson]
+allow_apis = [
+    "fs",
+]
