@@ -6,8 +6,7 @@ use indexmap::IndexMap;
 
 use super::model::{Field, Table};
 
-
-peg::parser!{
+peg::parser! {
   pub grammar input() for str {
     rule space()
       = quiet!{[' '| '\t' | '\r' | '\n']+}
