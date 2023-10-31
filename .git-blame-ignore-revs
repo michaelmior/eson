@@ -1,0 +1,3 @@
+# .git-blame-ignore-revs
+# Reformat using `cargo fmt`
+a02987f31df9b235486c5a50296c2f0b84709661
