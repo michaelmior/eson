@@ -43,3 +43,15 @@ allow_unsafe = true
 
 [pkg.unicode-ident]
 allow_unsafe = true
+
+[pkg.derive_more-impl]
+allow_proc_macro = true
+
+[pkg.dyn-clone]
+allow_unsafe = true
+
+[pkg.syn]
+allow_unsafe = true
+
+[pkg.either]
+allow_unsafe = true
