@@ -23,6 +23,7 @@ allow_unsafe = true
 
 [pkg.proc-macro2]
 build.allow_apis = [
+    "fs",
     "process",
 ]
 allow_unsafe = true
