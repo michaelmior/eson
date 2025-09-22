@@ -22,7 +22,7 @@ defaultmap = "0.7.0"
 float-ord = "0.3.2"
 group-by = "1.0.0"
 itertools = "0.11.0"
-peg = "0.8.2"
+peg = "0.8.5"
 permutation = "0.4.1"
 string-intern = { version ="0.1.7", default-features = false }
 log = "0.4"
